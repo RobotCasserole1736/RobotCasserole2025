@@ -7,7 +7,7 @@ from drivetrain.drivetrainPhysical import (
     MAX_ROTATE_SPEED_RAD_PER_SEC,
 )
 #from drivetrain.controlStrategies.autoDrive import AutoDrive
-from jormungandr.choreoTrajectory import ChoreoTrajectoryState
+from choreo.trajectory import SwerveSample
 from utils.calibration import Calibration
 from utils.signalLogging import addLog
 from utils.mathUtils import limit
@@ -78,7 +78,7 @@ class HolonomicDriveController:
         self.yCtrl.setPID(self.transP.get(), self.transI.get(), self.transD.get())
         self.tCtrl.setPID(self.rotP.get(), self.rotI.get(), self.rotD.get())
 
-    def update(self, trajCmd: ChoreoTrajectoryState, curEstPose):
+    def update(self, trajCmd: SwerveSample, curEstPose):
         """Main periodic update, call this whenever you need new commands
 
         Args:
@@ -90,10 +90,8 @@ class HolonomicDriveController:
             the robot to follow that will get it to the desired pose
         """
         # Feed-Forward - calculate how fast we should be going at this point in the trajectory
-        xFF = trajCmd.velocityX
-        yFF = trajCmd.velocityY
-        tFF = trajCmd.angularVelocity
-        cmdPose = trajCmd.getPose()
+        xFF, yFF, tFF = trajCmd.get_chassis_speeds()
+        cmdPose = trajCmd.get_pose()
         return self.update2(xFF,yFF,tFF,cmdPose,curEstPose)
 
     def update2(self, xFF, yFF, tFF, cmdPose:Pose2d, curEstPose:Pose2d):

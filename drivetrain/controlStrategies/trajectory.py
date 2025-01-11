@@ -3,7 +3,7 @@ from drivetrain.drivetrainCommand import DrivetrainCommand
 from drivetrain.controlStrategies.holonomicDriveController import (
     HolonomicDriveController,
 )
-from jormungandr.choreo import ChoreoTrajectoryState
+from choreo.trajectory import SwerveSample
 from utils.singleton import Singleton
 
 
@@ -12,7 +12,7 @@ class Trajectory(metaclass=Singleton):
         self.trajHDC = HolonomicDriveController("Trajectory")
         self.curTrajCmd = None
 
-    def setCmd(self, cmd: ChoreoTrajectoryState | None):
+    def setCmd(self, cmd: SwerveSample | None):
         """Send commands to the robot for motion as a part of following a trajectory
 
         Args:

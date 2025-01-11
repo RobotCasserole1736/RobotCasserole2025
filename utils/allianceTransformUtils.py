@@ -1,7 +1,7 @@
 from typing import overload
 import wpilib
 from wpimath.geometry import Pose2d, Rotation2d, Transform2d, Translation2d
-from jormungandr.choreoTrajectory import ChoreoTrajectoryState
+from choreo.trajectory import SwerveSample
 from utils.constants import FIELD_X_M
 
 """
@@ -51,7 +51,7 @@ def transform(valIn: Pose2d) -> Pose2d:
 
 
 @overload
-def transform(valIn: ChoreoTrajectoryState) -> ChoreoTrajectoryState:
+def transform(valIn: SwerveSample) -> SwerveSample:
     pass
 
 
@@ -85,7 +85,7 @@ def transform(valIn):
         else:
             return valIn
 
-    elif isinstance(valIn, ChoreoTrajectoryState):
+    elif isinstance(valIn, SwerveSample):
         if onRed():
             return valIn.flipped()
         else:
