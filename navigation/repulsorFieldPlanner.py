@@ -30,15 +30,13 @@ TRANSIENT_OBS_DECAY_PER_LOOP = 0.01
 # Transient obstacles decay and disappear over time. They are things like other robots, or maybe gamepieces we don't want to drive through.
 # Fixed obstacles are things like field elements or walls with fixed, known positions. They are always present and do not decay over time.
 
-# Fixed Obstacles - Six posts in the middle of the field from 2024
-FIELD_OBSTACLES_2024 = [
-    PointObstacle(location=Translation2d(5.56, 2.74)),
-    PointObstacle(location=Translation2d(3.45, 4.07)),
-    PointObstacle(location=Translation2d(5.56, 5.35)),
-    PointObstacle(location=Translation2d(11.0, 2.74)),
-    PointObstacle(location=Translation2d(13.27, 4.07)),
-    PointObstacle(location=Translation2d(11.0, 5.35)),
+# Fixed Obstacles - Reef, etc. 
+FIELD_OBSTACLES_2025 = [
+    PointObstacle(location=Translation2d(4.5747,4.0363),strength=1, radius=1.18745),
+    PointObstacle(location=Translation2d(13.0907,4.0363),strength=1, radius=1.18745),
+    PointObstacle(location=Translation2d(8.7630,4.0259),strength=1, radius=0.75),
     PointObstacle(location=Translation2d(0, 0))
+
 ]
 
 # Fixed Obstacles - Outer walls of the field 
@@ -100,7 +98,7 @@ class RepulsorFieldPlanner:
     def __init__(self):
         # Set up the list of obstacles which are present on the field always
         self.fixedObstacles:list[ForceGenerator] = []
-        self.fixedObstacles.extend(FIELD_OBSTACLES_2024)
+        self.fixedObstacles.extend(FIELD_OBSTACLES_2025)
         self.fixedObstacles.extend(WALLS)
 
         # Init the obstacle lists which go away over time
