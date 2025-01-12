@@ -8,7 +8,6 @@ from Autonomous.modes.driveOut import DriveOut
 
 from utils.singleton import Singleton
 from utils.allianceTransformUtils import onRed
-from utils.allianceTransformUtils import transform
 
 class AutoSequencer(metaclass=Singleton):
     """Top-level implementation of the AutoSequencer"""
@@ -58,7 +57,7 @@ class AutoSequencer(metaclass=Singleton):
             self.topLevelCmdGroup = delayMode.getCmdGroup().andThen(
                 mainMode.getCmdGroup()
             )
-            self.startPose = transform(mainMode.getInitialDrivetrainPose())
+            self.startPose = mainMode.getInitialDrivetrainPose()
             print(
                 f"[Auto] New Modes Selected: {DriverStation.getAlliance()} {delayMode.getName()}, {mainMode.getName()}"
             )

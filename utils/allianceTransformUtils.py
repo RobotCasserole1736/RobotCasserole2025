@@ -32,23 +32,23 @@ def transformX(xIn):
 
 # Other types are flipped in the transform function
 
-
 # The following typehints remove vscode errors by telling the linter
 # exactly how the transform() function handles different types
 @overload
-def transform(valIn: Rotation2d) -> Rotation2d:
+def transform(valIn: None) -> None:
     pass
 
+@overload
+def transform(valIn: Rotation2d) -> Rotation2d:
+    pass
 
 @overload
 def transform(valIn: Translation2d) -> Translation2d:
     pass
 
-
 @overload
 def transform(valIn: Pose2d) -> Pose2d:
     pass
-
 
 @overload
 def transform(valIn: SwerveSample) -> SwerveSample:
@@ -57,7 +57,10 @@ def transform(valIn: SwerveSample) -> SwerveSample:
 
 # Actual implementation of the transform function
 def transform(valIn):
-    if isinstance(valIn, Rotation2d):
+    if(valIn is None):
+        return None
+    
+    elif isinstance(valIn, Rotation2d):
         if onRed():
             return Rotation2d.fromDegrees(180) - valIn
         else:

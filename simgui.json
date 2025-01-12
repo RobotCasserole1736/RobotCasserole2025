@@ -66,7 +66,8 @@
           "style": "Box/Image",
           "weight": 2.0
         },
-        "bottom": 1476,
+        "bottom": 1638,
+        "builtin": "2025 Reefscape",
         "curObstaclesAlmostGone": {
           "arrows": false,
           "color": [
@@ -138,12 +139,12 @@
           "weight": 8.0,
           "width": 0.20000000298023224
         },
-        "height": 8.210550308227539,
-        "left": 150,
-        "right": 2961,
-        "top": 79,
+        "height": 8.051901817321777,
+        "left": 534,
+        "right": 3466,
+        "top": 291,
         "units": "meters",
-        "width": 16.541748046875,
+        "width": 17.54825210571289,
         "window": {
           "visible": true
         }

@@ -1,7 +1,6 @@
 import os
 import choreo
 import choreo.trajectory
-from choreo.trajectory import SwerveSample
 from wpilib import Timer
 from drivetrain.controlStrategies.trajectory import Trajectory
 from drivetrain.drivetrainControl import DrivetrainControl
@@ -27,7 +26,6 @@ class DrivePathCommand(Command):
             )
         )
 
-        #self.path = choreo.json.loads(absPath)
         self.path = choreo.load_swerve_trajectory(absPath)
         self.done = False
         self.startTime = (
@@ -47,9 +45,11 @@ class DrivePathCommand(Command):
         curTime = Timer.getFPGATimestamp() - self.startTime
         curState = self.path.sample_at(curTime)
 
-        #curState = transform(curState)
-
-        self.trajCtrl.setCmd(curState)
+        if(curState is not None):
+            curState = transform(curState)
+            self.trajCtrl.setCmd(curState)
+        else: 
+            self.trajCtrl.setCmd(None)
 
         if curTime >= self.duration:
             self.trajCtrl.setCmd(None)

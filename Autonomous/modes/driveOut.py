@@ -1,6 +1,6 @@
 from Autonomous.commands.drivePathCommand import DrivePathCommand
 from AutoSequencerV2.mode import Mode
-
+from utils.allianceTransformUtils import transform
 
 # Just drives out of the starting zone. That's all.
 class DriveOut(Mode):
@@ -19,4 +19,4 @@ class DriveOut(Mode):
 
     def getInitialDrivetrainPose(self):
         # Use the path command to specify the starting pose, using getInitialPose()
-        return self.pathCmd.path.get_initial_pose()
+        return transform(self.pathCmd.path.get_initial_pose())
