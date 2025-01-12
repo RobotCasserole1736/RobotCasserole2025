@@ -23,7 +23,7 @@ class DrivePathCommand(Command):
                 "..",
                 "deploy",
                 "choreo",
-                pathFile + ".traj",
+                pathFile,
             )
         )
 

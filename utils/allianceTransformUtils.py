@@ -92,4 +92,4 @@ def transform(valIn):
             return valIn
 
     else:
-        raise TypeError("transform function received unknown type")
+        raise TypeError(f"transform function received unknown type:{type(valIn).__name__}")
