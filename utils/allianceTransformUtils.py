@@ -2,7 +2,7 @@ from typing import overload
 import wpilib
 from wpimath.geometry import Pose2d, Rotation2d, Transform2d, Translation2d
 from choreo.trajectory import SwerveSample
-from utils.constants import FIELD_X_M
+from utils.constants import FIELD_X_M, FIELD_Y_M
 
 """
  Utilities to help transform from blue alliance to red if needed
@@ -26,6 +26,13 @@ def transformX(xIn):
         return FIELD_X_M - xIn
     else:
         return xIn
+    
+# Base transform for X axis to flip to the other side of the field.
+def transformY(yIn):
+    if onRed():
+        return FIELD_Y_M - yIn
+    else:
+        return yIn
 
 
 # Note that Y axis does not need any flipping
@@ -68,7 +75,7 @@ def transform(valIn):
 
     elif isinstance(valIn, Translation2d):
         if onRed():
-            return Translation2d(transformX(valIn.X()), valIn.Y())
+            return Translation2d(transformX(valIn.X()), transformY(valIn.Y()))
         else:
             return valIn
 

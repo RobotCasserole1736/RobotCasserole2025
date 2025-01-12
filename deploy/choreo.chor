@@ -1,5 +1,5 @@
 {
- "name":"test",
+ "name":"",
  "version":1,
  "type":"Swerve",
  "variables":{
@@ -28,8 +28,8 @@
    }
   },
   "mass":{
-   "exp":"135 lbs",
-   "val":61.23496995
+   "exp":"150 lbs",
+   "val":68.0388555
   },
   "inertia":{
    "exp":"6 kg m ^ 2",
