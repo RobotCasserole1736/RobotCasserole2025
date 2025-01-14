@@ -88,7 +88,7 @@ class DriverInterface:
 
             #if both auto drives are pressed, get their values
             if self.autoDriveNumbertoReefPressed and self.autoDriveABPressed:
-                self.autoDriveNumbertoReef = round(self.ctrl.getPOV() / 60) + 1 
+                self.autoDriveNumbertoReef = round((self.ctrl.getPOV() - 25) / 60) + 1 
                 
                 #must be A or B. If true, it's A. If False, it's B. 
                 self.autoDriveAB = self.ctrl.getLeftBumper()
