@@ -124,25 +124,39 @@ BR = 3
 # Camera Mount Offsets
 # These are relative to the robot origin
 # which is in the center of the chassis on the ground
-ROBOT_TO_LEFT_CAM = Transform3d(
+ROBOT_TO_LEFTFRONT_CAM = Transform3d(
     Translation3d(
-        inchesToMeters(3.7), inchesToMeters(13.8), inchesToMeters(7.4)  # X  # Y  # Z
+        inchesToMeters(0), inchesToMeters(0), inchesToMeters(0)  # X  # Y  # Z
     ),
-    Rotation3d.fromDegrees(0, -30, 90.0),  # Roll  # Pitch  # Yaw
+    Rotation3d.fromDegrees(0, 0, 0),  # Roll  # Pitch  # Yaw
 )
 
-ROBOT_TO_RIGHT_CAM = Transform3d(
+ROBOT_TO_RIGHTFRONT_CAM = Transform3d(
     Translation3d(
-        inchesToMeters(3.7), inchesToMeters(-13.8), inchesToMeters(7.4)  # X  # Y  # Z
+        inchesToMeters(0), inchesToMeters(0), inchesToMeters(0)  # X  # Y  # Z
     ),
-    Rotation3d.fromDegrees(0, -30, -90.0),  # Roll  # Pitch  # Yaw
+    Rotation3d.fromDegrees(0, 0, 0),  # Roll  # Pitch  # Yaw
+)
+
+ROBOT_TO_LEFTBACK_CAM = Transform3d(
+    Translation3d(
+        inchesToMeters(0), inchesToMeters(0), inchesToMeters(0)  # X  # Y  # Z
+    ),
+    Rotation3d.fromDegrees(0, 0, 0),  # Roll  # Pitch  # Yaw
+)
+
+ROBOT_TO_RIGHTBACK_CAM = Transform3d(
+    Translation3d(
+        inchesToMeters(0), inchesToMeters(0), inchesToMeters(0)  # X  # Y  # Z
+    ),
+    Rotation3d.fromDegrees(0, 0, 0),  # Roll  # Pitch  # Yaw
 )
 
 ROBOT_TO_FRONT_CAM = Transform3d(
     Translation3d(
-        inchesToMeters(14.5), inchesToMeters(2.75), inchesToMeters(8)  # X  # Y  # Z
+        inchesToMeters(0), inchesToMeters(0), inchesToMeters(0)  # X  # Y  # Z
     ),
-    Rotation3d.fromDegrees(0.0, 3.0, 0.0),  # Roll  # Pitch  # Yaw
+    Rotation3d.fromDegrees(0.0, 0, 0.0),  # Roll  # Pitch  # Yaw
 )
 
 
