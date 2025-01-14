@@ -25,6 +25,14 @@
         "visible": true
       }
     },
+    "RoboRIO": {
+      "6V Rail": {
+        "open": true
+      },
+      "RoboRIO Input": {
+        "open": true
+      }
+    },
     "Timing": {
       "window": {
         "visible": false
@@ -182,6 +190,12 @@
     }
   },
   "NetworkTables Info": {
+    "Clients": {
+      "open": true
+    },
+    "Connections": {
+      "open": true
+    },
     "JSClient_82876304@1": {
       "Publishers": {
         "open": true
@@ -189,6 +203,9 @@
       "Subscribers": {
         "open": true
       },
+      "open": true
+    },
+    "Server": {
       "open": true
     },
     "visible": true
