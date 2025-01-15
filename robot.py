@@ -144,7 +144,7 @@ class MyRobot(wpilib.TimedRobot):
                 obs = PointObstacle(location=(ct+tf), strength=0.5)
                 self.autodrive.rfp.addObstacleObservation(obs)
 
-        self.autodrive.setRequest(self.dInt.getNavToPickup(), self.dInt.getNavToSpeaker())
+        self.autodrive.setRequest(self.dInt.getAutoDrive())
 
         # No trajectory in Teleop
         Trajectory().setCmd(None)

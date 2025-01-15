@@ -28,8 +28,7 @@ class DriverInterface:
         self.velTSlewRateLimiter = SlewRateLimiter(rateLimit=MAX_ROTATE_ACCEL_RAD_PER_SEC_2)
 
         # Navigation commands
-        self.autoDriveToSpeaker = False
-        self.autoDriveToPickup = False
+        self.autoDrive = False
         self.createDebugObstacle = False
 
         # Utility - reset to zero-angle at the current pose
@@ -78,8 +77,7 @@ class DriverInterface:
 
             self.gyroResetCmd = self.ctrl.getAButton()
 
-            self.autoDriveToSpeaker = self.ctrl.getBButton()
-            self.autoDriveToPickup = self.ctrl.getXButton()
+            self.autoDrive = self.ctrl.getBButton()
             self.createDebugObstacle = self.ctrl.getYButtonPressed()
 
             self.connectedFault.setNoFault()
@@ -90,8 +88,7 @@ class DriverInterface:
             self.velYCmd = 0.0
             self.velTCmd = 0.0
             self.gyroResetCmd = False
-            self.autoDriveToSpeaker = False
-            self.autoDriveToPickup = False
+            self.autoDrive = False
             self.createDebugObstacle = False
             self.connectedFault.setFaulted()
 
@@ -105,11 +102,8 @@ class DriverInterface:
         retval.velT = self.velTCmd
         return retval
 
-    def getNavToSpeaker(self) -> bool:
-        return self.autoDriveToSpeaker
-    
-    def getNavToPickup(self) -> bool:
-        return self.autoDriveToPickup
+    def getAutoDrive(self) -> bool:
+        return self.autoDrive
 
     def getGyroResetCmd(self) -> bool:
         return self.gyroResetCmd

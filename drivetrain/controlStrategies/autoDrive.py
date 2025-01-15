@@ -7,7 +7,7 @@ from navigation.obstacleDetector import ObstacleDetector
 from utils.signalLogging import addLog
 from utils.singleton import Singleton
 from navigation.repulsorFieldPlanner import RepulsorFieldPlanner
-from navigation.navConstants import GOAL_PICKUP, GOAL_SPEAKER
+from navigation.navConstants import GOAL_PICKUP, GOAL_SPEAKER, goalListAngle, goalListTot
 from drivetrain.drivetrainPhysical import MAX_DT_LINEAR_SPEED_MPS
 from utils.allianceTransformUtils import transform
 import math
@@ -19,8 +19,7 @@ MAX_PATHPLAN_SPEED_MPS = 0.75 * MAX_DT_LINEAR_SPEED_MPS
 
 class AutoDrive(metaclass=Singleton):
     def __init__(self):
-        self._toSpeaker = False
-        self._toPickup = False
+        self._autoDrive = False
         self.rfp = RepulsorFieldPlanner()
         self._trajCtrl = HolonomicDriveController("AutoDrive")
         self._telemTraj = []
@@ -28,24 +27,22 @@ class AutoDrive(metaclass=Singleton):
         self._olCmd = DrivetrainCommand()
         self._prevCmd:DrivetrainCommand|None = None
         self._plannerDur:float = 0.0
-        self.autoSpeakerPrevEnabled = False #This name might be a wee bit confusing. It just keeps track if we were in auto targeting the speaker last refresh.
-        self.autoPickupPrevEnabled = False #This name might be a wee bit confusing. It just keeps track if we were in auto targeting the speaker last refresh.
+        self.autoPrevEnabled = False #This name might be a wee bit confusing. It just keeps track if we were in auto targeting the speaker last refresh.
         self.stuckTracker = 0 
         self.prevPose = Pose2d()
+        self.possibleRotList = []
+        self.possibleLenList = []
 
         addLog("AutoDrive Proc Time", lambda:(self._plannerDur * 1000.0), "ms")
 
 
-    def setRequest(self, toSpeaker, toPickup) -> None:
-        self._toSpeaker = toSpeaker
-        self._toPickup = toPickup
+    def setRequest(self, autoDrive) -> None:
+        self._autoDrive = autoDrive
         #The following if statement is just logic to enable self.autoPrevEnabled when the driver enables an auto.
-        if self.autoSpeakerPrevEnabled != self._toSpeaker or self.autoPickupPrevEnabled != self._toPickup:
+        if self.autoPrevEnabled != self._autoDrive:
             self.stuckTracker = 0
-        self.autoPickupPrevEnabled = self._toPickup
-        self.autoSpeakerPrevEnabled = self._toSpeaker
+        self.autoPrevEnabled = self._autoDrive
         
-
     def updateTelemetry(self) -> None:        
         self._telemTraj = self.rfp.getLookaheadTraj()
 
@@ -60,8 +57,10 @@ class AutoDrive(metaclass=Singleton):
 
     def update(self, cmdIn: DrivetrainCommand, curPose: Pose2d) -> DrivetrainCommand:
         
-
         startTime = Timer.getFPGATimestamp()
+
+        self.possibleRotList.clear()
+        self.possibleLenList.clear()
 
         retCmd = cmdIn # default - no auto driving
 
@@ -71,15 +70,22 @@ class AutoDrive(metaclass=Singleton):
         self.rfp._decayObservations()
 
         # Handle command changes
-        if(self._toPickup):
-            self.rfp.setGoal(transform(GOAL_PICKUP))
-        elif(self._toSpeaker):
-            self.rfp.setGoal(transform(GOAL_SPEAKER))
-        elif(not self._toSpeaker and not self._toPickup):
+        if(self._autoDrive):
+            curRot = curPose.rotation()
+            for goalOption in goalListAngle:
+                if curRot.degrees() > goalOption.degrees():
+                    self.possibleRotList.append(curRot.__sub__(goalOption))
+                else:
+                    self.possibleRotList.append(goalOption.__sub__(curRot))
+            #bestGoal should return the best goal side. It should be an integer. 
+            bestGoal = self.possibleRotList.index(min(self.possibleRotList)) + 1
+            target = curPose.nearest(goalListTot[bestGoal])
+            self.rfp.setGoal(target)
+        else:
             self.rfp.setGoal(None)
 
         # If being asked to auto-align, use the command from the dynamic path planner
-        if(self._toPickup or self._toSpeaker):
+        if(self._autoDrive):
             if self.stuckTracker < 10: #Only run if the robot isn't stuck
                 #This checks how much we moved, and if we moved less than one cm it increments the counter by one.
                 if math.sqrt(((curPose.X() - self.prevPose.X()) ** 2) + ((curPose.Y() - self.prevPose.Y()) ** 2)) < .01:
