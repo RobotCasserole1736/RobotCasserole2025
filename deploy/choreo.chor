@@ -1,5 +1,5 @@
 {
- "name":"",
+ "name":"choreo",
  "version":1,
  "type":"Swerve",
  "variables":{
@@ -28,8 +28,8 @@
    }
   },
   "mass":{
-   "exp":"150 lbs",
-   "val":68.0388555
+   "exp":"90 lbs",
+   "val":40.8233133
   },
   "inertia":{
    "exp":"6 kg m ^ 2",
