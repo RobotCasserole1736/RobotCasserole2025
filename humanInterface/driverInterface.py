@@ -28,11 +28,8 @@ class DriverInterface:
         self.velTSlewRateLimiter = SlewRateLimiter(rateLimit=MAX_ROTATE_ACCEL_RAD_PER_SEC_2)
 
         # Navigation commands
-        self.autoDriveABPressed = False
-        self.autoDriveAB = 1
-        self.autoDriveNumbertoReefPressed = False
-        self.autoDriveNumbertoReef = 1
-
+        self.autoDriveToSpeaker = False
+        self.autoDriveToPickup = False
         self.createDebugObstacle = False
 
         # Utility - reset to zero-angle at the current pose
@@ -81,21 +78,8 @@ class DriverInterface:
 
             self.gyroResetCmd = self.ctrl.getAButton()
 
-            self.autoDriveNumbertoReefPressed = False if self.ctrl.getPOV() == -1 else True
-
-            #true if either left bumper or right bumper are pressed
-            self.autoDriveABPressed = self.ctrl.getLeftBumper() or self.ctrl.getRightBumper()
-
-            #if both auto drives are pressed, get their values
-            if self.autoDriveNumbertoReefPressed and self.autoDriveABPressed:
-                self.autoDriveNumbertoReef = round((self.ctrl.getPOV() - 25) / 60) + 1 
-                
-                #must be A or B. If true, it's A. If False, it's B. 
-                self.autoDriveAB = self.ctrl.getLeftBumper()
-            else:
-                self.autoDriveNumbertoReef = -1
-                self.autoDriveAB = False
-
+            self.autoDriveToSpeaker = self.ctrl.getBButton()
+            self.autoDriveToPickup = self.ctrl.getXButton()
             self.createDebugObstacle = self.ctrl.getYButtonPressed()
 
             self.connectedFault.setNoFault()
@@ -106,8 +90,8 @@ class DriverInterface:
             self.velYCmd = 0.0
             self.velTCmd = 0.0
             self.gyroResetCmd = False
-            self.autoDriveABPressed = False
-            self.autoDriveNumberPressed = False
+            self.autoDriveToSpeaker = False
+            self.autoDriveToPickup = False
             self.createDebugObstacle = False
             self.connectedFault.setFaulted()
 
@@ -121,16 +105,11 @@ class DriverInterface:
         retval.velT = self.velTCmd
         return retval
 
-    def getNavToReefVal(self) -> int:
-        return self.autoDriveNumbertoReef
+    def getNavToSpeaker(self) -> bool:
+        return self.autoDriveToSpeaker
     
-    def getNavSide(self) -> str:
-        if self.autoDriveABPressed and self.autoDriveAB:
-            return "A"
-        elif self.autoDriveABPressed and not self.autoDriveAB:
-            return "B"
-        else:
-            return "C"
+    def getNavToPickup(self) -> bool:
+        return self.autoDriveToPickup
 
     def getGyroResetCmd(self) -> bool:
         return self.gyroResetCmd

@@ -7,7 +7,7 @@ from navigation.obstacleDetector import ObstacleDetector
 from utils.signalLogging import addLog
 from utils.singleton import Singleton
 from navigation.repulsorFieldPlanner import RepulsorFieldPlanner
-from navigation.navConstants import GOAL_1A, GOAL_1B, GOAL_2A, GOAL_2B, GOAL_3A, GOAL_3B, GOAL_4A, GOAL_4B, GOAL_5A, GOAL_5B, GOAL_6A, GOAL_6B
+from navigation.navConstants import GOAL_PICKUP, GOAL_SPEAKER
 from drivetrain.drivetrainPhysical import MAX_DT_LINEAR_SPEED_MPS
 from utils.allianceTransformUtils import transform
 import math
@@ -31,21 +31,17 @@ class AutoDrive(metaclass=Singleton):
         self.autoSpeakerPrevEnabled = False #This name might be a wee bit confusing. It just keeps track if we were in auto targeting the speaker last refresh.
         self.autoPickupPrevEnabled = False #This name might be a wee bit confusing. It just keeps track if we were in auto targeting the speaker last refresh.
         self.stuckTracker = 0 
-        self._aOrB = "C"
-        self._reefSide = -1
         self.prevPose = Pose2d()
 
         addLog("AutoDrive Proc Time", lambda:(self._plannerDur * 1000.0), "ms")
 
 
-    def setRequest(self, aOrB, reefSide) -> None:
-        self._aOrB = aOrB
-        self._reefSide = reefSide
+    def setRequest(self, toSpeaker, toPickup) -> None:
+        self._toSpeaker = toSpeaker
+        self._toPickup = toPickup
         #The following if statement is just logic to enable self.autoPrevEnabled when the driver enables an auto.
-        #if self.autoSpeakerPrevEnabled == self._toSpeaker or self.autoPickupPrevEnabled != self._toPickup:
-        #    self.stuckTracker = 0
-        #We didn't want to deal with stuck code right now
-        self.stuckTracker = 0
+        if self.autoSpeakerPrevEnabled != self._toSpeaker or self.autoPickupPrevEnabled != self._toPickup:
+            self.stuckTracker = 0
         self.autoPickupPrevEnabled = self._toPickup
         self.autoSpeakerPrevEnabled = self._toSpeaker
         
@@ -75,41 +71,15 @@ class AutoDrive(metaclass=Singleton):
         self.rfp._decayObservations()
 
         # Handle command changes
-        if(self._aOrB == "A"):
-            if self._reefSide == 1:
-                self.rfp.setGoal(transform(GOAL_1A))
-            elif self._reefSide == 2: 
-                self.rfp.setGoal(transform(GOAL_2A))
-            elif self._reefSide == 3: 
-                self.rfp.setGoal(transform(GOAL_3A))
-            elif self._reefSide == 4: 
-                self.rfp.setGoal(transform(GOAL_4A))
-            elif self._reefSide == 5: 
-                self.rfp.setGoal(transform(GOAL_5A))
-            elif self._reefSide == 6: 
-                self.rfp.setGoal(transform(GOAL_6A))
-            else:
-                self.rfp.setGoal(None)
-        elif (self._aOrB == "B"):
-            if self._reefSide == 1:
-                self.rfp.setGoal(transform(GOAL_1B))
-            elif self._reefSide == 2: 
-                self.rfp.setGoal(transform(GOAL_2B))
-            elif self._reefSide == 3: 
-                self.rfp.setGoal(transform(GOAL_3B))
-            elif self._reefSide == 4: 
-                self.rfp.setGoal(transform(GOAL_4B))
-            elif self._reefSide == 5: 
-                self.rfp.setGoal(transform(GOAL_5B))
-            elif self._reefSide == 6: 
-                self.rfp.setGoal(transform(GOAL_6B))
-            else:
-                self.rfp.setGoal(None)
-        else:
+        if(self._toPickup):
+            self.rfp.setGoal(transform(GOAL_PICKUP))
+        elif(self._toSpeaker):
+            self.rfp.setGoal(transform(GOAL_SPEAKER))
+        elif(not self._toSpeaker and not self._toPickup):
             self.rfp.setGoal(None)
 
-        # If being asked to auto-align somewhere, use the command from the dynamic path planner
-        if(self._aOrB != "C" and self._reefSide != -1):
+        # If being asked to auto-align, use the command from the dynamic path planner
+        if(self._toPickup or self._toSpeaker):
             if self.stuckTracker < 10: #Only run if the robot isn't stuck
                 #This checks how much we moved, and if we moved less than one cm it increments the counter by one.
                 if math.sqrt(((curPose.X() - self.prevPose.X()) ** 2) + ((curPose.Y() - self.prevPose.Y()) ** 2)) < .01:
