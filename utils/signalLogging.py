@@ -50,27 +50,27 @@ class SignalWrangler(metaclass=Singleton):
 
     def newLogVal(self, name:str, valGetter:Callable[[],float], units:str|None):
 
-            # Set up NT publishing
-            sigTopic = self.table.getDoubleTopic(name)
-            sigPub = sigTopic.publish(
-                nt.PubSubOptions(sendAll=True, keepDuplicates=True)
+        # Set up NT publishing
+        sigTopic = self.table.getDoubleTopic(name)
+        sigPub = sigTopic.publish(
+            nt.PubSubOptions(sendAll=True, keepDuplicates=True)
+        )
+        sigPub.setDefault(0)
+
+        if(units is not None):
+            sigTopic.setProperty("units", str(units))
+
+        # Set up log file publishing if enabled
+        if self.log is not None:
+            sigLog = wpilog.DoubleLogEntry(
+                log=self.log, name=sigNameToNT4TopicName(name)
             )
-            sigPub.setDefault(0)
+        else:
+            sigLog = None
 
-            if(units is not None):
-                sigTopic.setProperty("units", str(units))
-
-            # Set up log file publishing if enabled
-            if self.log is not None:
-                sigLog = wpilog.DoubleLogEntry(
-                    log=self.log, name=sigNameToNT4TopicName(name)
-                )
-            else:
-                sigLog = None
-
-            self.loggedValList.append(
-                _LoggedVal(valGetter,sigPub, sigLog)
-            )
+        self.loggedValList.append(
+            _LoggedVal(valGetter,sigPub, sigLog)
+        )
 
 
 
@@ -79,26 +79,25 @@ class SignalWrangler(metaclass=Singleton):
 # Public API
 ###########################################
 
-_singletonInst = SignalWrangler() # cache a reference
 def logUpdate():
     """
     Periodic call to sample and broadcast all logged values. Should happen once per 
     20ms loop.
     """
-    _singletonInst.update()
+    SignalWrangler().update()
 
-def addLog(alias: str, value_getter: Callable[[], float], units=None) -> None:
+def addLog(alias: str, valueGetter: Callable[[], float], units=None) -> None:
     """
-    Register some value to be loggd
+    Register some value to be logged
 
     Parameters:
     - alias: The name used to identify the log.
-    - value_getter: A function that returns the current value of the log. Lambda is acceptable here.
+    - valueGetter: A function that returns the current value of the log. Lambda is acceptable here.
     """
-    _singletonInst.newLogVal(alias, value_getter, units)
+    SignalWrangler().newLogVal(alias, valueGetter, units)
 
-def log(alias: str, value_getter, units=None) -> None:
-    addLog(alias, value_getter, units)
+def log(alias: str, valueGetter, units=None) -> None:
+    addLog(alias, valueGetter, units)
 
 def sigNameToNT4TopicName(name):
     return f"/{BASE_TABLE}/{name}"
