@@ -24,4 +24,8 @@ GOAL_6A = Pose2d(5.109,2.612,Rotation2d.fromDegrees(120.0))
 GOAL_6B = Pose2d(5.460,2.706,Rotation2d.fromDegrees(120.0))
 
 goalListAngle = [GOAL_1A.rotation(), GOAL_2A.rotation(),GOAL_3A.rotation(), GOAL_4A.rotation(), GOAL_5A.rotation(), GOAL_6A.rotation()]
-goalListTot = [[GOAL_1A, GOAL_1B], [GOAL_2A, GOAL_2B], [GOAL_3A, GOAL_3B], [GOAL_4A, GOAL_4B], [GOAL_5A, GOAL_5B], [GOAL_6A, GOAL_6B]]
+
+goalListTot = [GOAL_1A, GOAL_1B, GOAL_2A, GOAL_2B, GOAL_3A, GOAL_3B, GOAL_4A, GOAL_4B, GOAL_5A, GOAL_5B, GOAL_6A, GOAL_6B]
+
+# This is a version when we use rotation, which I'm giving up on for now. 
+# goalListTot = [[GOAL_1A, GOAL_1B], [GOAL_2A, GOAL_2B], [GOAL_3A, GOAL_3B], [GOAL_4A, GOAL_4B], [GOAL_5A, GOAL_5B], [GOAL_6A, GOAL_6B]]

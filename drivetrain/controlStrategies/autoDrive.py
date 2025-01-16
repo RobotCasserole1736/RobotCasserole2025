@@ -30,8 +30,7 @@ class AutoDrive(metaclass=Singleton):
         self.autoPrevEnabled = False #This name might be a wee bit confusing. It just keeps track if we were in auto targeting the speaker last refresh.
         self.stuckTracker = 0 
         self.prevPose = Pose2d()
-        self.possibleRotList = []
-        self.possibleLenList = []
+        self.LenList = []
 
         addLog("AutoDrive Proc Time", lambda:(self._plannerDur * 1000.0), "ms")
 
@@ -59,8 +58,7 @@ class AutoDrive(metaclass=Singleton):
         
         startTime = Timer.getFPGATimestamp()
 
-        self.possibleRotList.clear()
-        self.possibleLenList.clear()
+        self.LenList.clear()
 
         retCmd = cmdIn # default - no auto driving
 
@@ -70,19 +68,58 @@ class AutoDrive(metaclass=Singleton):
         self.rfp._decayObservations()
 
         # Handle command changes
+        """
+        #This is a version that checks rotation first, then goes to the nearest coral spot of the two. I don't like
         if(self._autoDrive):
             curRot = curPose.rotation()
             for goalOption in goalListAngle:
-                if curRot.degrees() > goalOption.degrees():
-                    self.possibleRotList.append(curRot.__sub__(goalOption))
-                else:
-                    self.possibleRotList.append(goalOption.__sub__(curRot))
+                self.possibleRotList.append(abs(curRot.degrees().__sub__(goalOption.degrees())))
             #bestGoal should return the best goal side. It should be an integer. 
-            bestGoal = self.possibleRotList.index(min(self.possibleRotList)) + 1
+            bestGoal = self.possibleRotList.index(min(self.possibleRotList))
             target = curPose.nearest(goalListTot[bestGoal])
+            self.rfp.setGoal(transform(target))
+        else:
+            self.rfp.setGoal(None)
+        """
+        """
+        #version 3 - just based on only distance. I kind of like this one
+        if (self._autoDrive):
+            pose = curPose.nearest(goalListTot)
+            self.rfp.setGoal(pose)
+        else:
+            self.rfp.setGoal(transform(None))
+        """
+
+        #version 2 - this is based on distance, then rotation if the distances are too close
+        if (self._autoDrive):
+            for goalOption in goalListTot:
+                self.LenList.append(goalOption.translation().distance(curPose.translation()))
+
+            #find the nearest one
+            primeTargetIndex = self.LenList.index(min(self.LenList))
+            primeTarget = goalListTot[primeTargetIndex]
+            #pop the nearest in order to find the second nearest
+            self.LenList.pop(primeTargetIndex)
+            #second nearest
+            secondTargetIndex = self.LenList.index(min(self.LenList))
+            secondTarget = goalListTot[secondTargetIndex]
+            #if they're close enough, look at rotation 
+            if (abs(secondTarget.translation().distance(curPose.translation()) - primeTarget.translation().distance(curPose.translation())) <= 1.0):
+                #checking rotation
+                #dif in degrees
+                curRot = curPose.rotation().degrees()
+                primeTargetDiff = abs(primeTarget.rotation().degrees() - curRot)
+                secondTargetDiff = abs(secondTarget.rotation().degrees() - curRot)
+                if primeTargetDiff <= secondTargetDiff:
+                    target = primeTarget
+                else:
+                    target = secondTarget
+            else:
+                target = primeTarget
             self.rfp.setGoal(target)
         else:
             self.rfp.setGoal(None)
+
 
         # If being asked to auto-align, use the command from the dynamic path planner
         if(self._autoDrive):
@@ -117,8 +154,8 @@ class AutoDrive(metaclass=Singleton):
 
         #Set our curPos as the new old pose
         self.prevPose = curPose
-        #assume that we are either stuck or done if the counter reaches above 10. (sometimes it will get to like 4 when we are accelerating or taking a sharp turn)
-        if self.stuckTracker >= 10:
+        #assume that we are either stuck or done if the counter reaches above 15. (sometimes it will get to like 4 when we are accelerating or taking a sharp turn)
+        if self.stuckTracker >= 15:
             retCmd = cmdIn #set the returned cmd to the cmd that we were originally given.
             self._prevCmd = None
 
