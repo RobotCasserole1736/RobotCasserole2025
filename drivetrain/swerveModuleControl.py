@@ -199,8 +199,8 @@ class SwerveModuleControl:
         # Send voltage and speed commands to the wheel motor
         motorDesSpd = dtLinearToMotorRot(self.optimizedDesiredState.speed)
         motorDesAccel = (motorDesSpd - self._prevMotorDesSpeed) / 0.02
-        motorVoltageFF = self.wheelMotorFF.calculate(motorDesSpd, motorDesAccel)
-        self.wheelMotor.setVelCmd(motorDesSpd, motorVoltageFF)
+        motorVoltageFF = self.wheelMotorFF.calculate(self.actualState.speed, motorDesSpd) #This is the problem child of the new non-backwards compatable Robotpy update. actualstate.speed is "prev" and motorDesSpd is "cur"
+        self.wheelMotor.setVelCmd(motorDesSpd, motorVoltageFF)                            
 
         self._prevMotorDesSpeed = motorDesSpd  # save for next loop
 
