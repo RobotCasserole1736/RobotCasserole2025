@@ -1,5 +1,7 @@
 import math
 
+import choreo
+import choreo.trajectory
 import wpilib
 from wpimath.trajectory import Trajectory
 from wpimath.geometry import Pose2d, Pose3d, Transform2d, Rotation2d, Translation2d
@@ -114,9 +116,9 @@ class DrivetrainPoseTelemetry:
             # For visual appearance and avoiding sending too much over NT,
             # make sure we only send a sampled subset of the positions
             sampTime = 0
-            while sampTime < trajIn.getTotalTime():
+            while sampTime < trajIn.get_total_time():
                 stateList.append(
-                    self._choreoToWPIState(transform(trajIn.sample(sampTime)))
+                    self._choreoToWPIState(transform(trajIn.sample_at(sampTime)))
                 )
                 sampTime += 0.5
 
@@ -129,10 +131,13 @@ class DrivetrainPoseTelemetry:
 
     # PathPlanner has a built in "to-wpilib" representation, but it doesn't
     # account for holonomic heading. Fix that.
-    def _choreoToWPIState(self, inVal):
+    def _choreoToWPIState(self, inVal:choreo.trajectory.SwerveSample):
+        velx = inVal.get_chassis_speeds().vx
+        vely = inVal.get_chassis_speeds().vy
+        velNet = math.sqrt(math.pow(velx, 2) + math.pow(vely, 2))
         return Trajectory.State(
             acceleration=0,
-            pose=inVal.getPose(),
+            pose=inVal.get_pose(),
             t=inVal.timestamp,
-            velocity=math.hypot(inVal.velocityX, inVal.velocityY),
+            velocity= velNet
         )

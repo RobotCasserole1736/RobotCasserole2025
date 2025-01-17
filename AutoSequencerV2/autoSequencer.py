@@ -6,9 +6,9 @@ from AutoSequencerV2.builtInModes.waitMode import WaitMode
 from AutoSequencerV2.sequentialCommandGroup import SequentialCommandGroup
 from Autonomous.modes.driveOut import DriveOut
 
+from Autonomous.modes.driveTest1 import driveTest1
 from utils.singleton import Singleton
 from utils.allianceTransformUtils import onRed
-from utils.allianceTransformUtils import transform
 
 class AutoSequencer(metaclass=Singleton):
     """Top-level implementation of the AutoSequencer"""
@@ -25,8 +25,8 @@ class AutoSequencer(metaclass=Singleton):
         self.mainModeList = ModeList("Main")
         self.mainModeList.addMode(DoNothingMode())
         #right now, DriveOut is all commented out, so we don't need to add it to the list. 
-        #self.mainModeList.addMode(DriveOut())
-
+        self.mainModeList.addMode(DriveOut())
+        self.mainModeList.addMode(driveTest1())
         self.topLevelCmdGroup = SequentialCommandGroup()
         self.startPose = Pose2d()
 
@@ -58,7 +58,7 @@ class AutoSequencer(metaclass=Singleton):
             self.topLevelCmdGroup = delayMode.getCmdGroup().andThen(
                 mainMode.getCmdGroup()
             )
-            self.startPose = transform(mainMode.getInitialDrivetrainPose())
+            self.startPose = mainMode.getInitialDrivetrainPose()
             print(
                 f"[Auto] New Modes Selected: {DriverStation.getAlliance()} {delayMode.getName()}, {mainMode.getName()}"
             )
