@@ -69,7 +69,7 @@ def transform(valIn):
     
     elif isinstance(valIn, Rotation2d):
         if onRed():
-            return Rotation2d.fromDegrees(180) - valIn
+            return Rotation2d.fromDegrees(180) + valIn
         else:
             return valIn
 

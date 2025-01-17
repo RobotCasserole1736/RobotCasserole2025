@@ -31,6 +31,7 @@ class AutoDrive(metaclass=Singleton):
         self.stuckTracker = 0 
         self.prevPose = Pose2d()
         self.LenList = []
+        self.goalListTotwTransform = []
 
         addLog("AutoDrive Proc Time", lambda:(self._plannerDur * 1000.0), "ms")
 
@@ -60,6 +61,8 @@ class AutoDrive(metaclass=Singleton):
 
         self.LenList.clear()
 
+        self.goalListTotwTransform.clear()
+
         retCmd = cmdIn # default - no auto driving
 
         for obs in self._obsDet.getObstacles(curPose):
@@ -82,29 +85,36 @@ class AutoDrive(metaclass=Singleton):
             self.rfp.setGoal(None)
         """
         """
+        
         #version 3 - just based on only distance. I kind of like this one
         if (self._autoDrive):
-            pose = curPose.nearest(goalListTot)
+            for goal in goalListTot:
+                self.goalListTotwTransform.append(transform(goal))
+            pose = curPose.nearest(self.goalListTotwTransform)
             self.rfp.setGoal(pose)
         else:
             self.rfp.setGoal(transform(None))
         """
-
         #version 2 - this is based on distance, then rotation if the distances are too close
+        #but it's not really working. 
+
         if (self._autoDrive):
             for goalOption in goalListTot:
-                self.LenList.append(goalOption.translation().distance(curPose.translation()))
+                goalWTransform = transform(goalOption.translation())
+                self.LenList.append(goalWTransform.distance(curPose.translation()))
 
             #find the nearest one
             primeTargetIndex = self.LenList.index(min(self.LenList))
-            primeTarget = goalListTot[primeTargetIndex]
+            primeTarget = transform(goalListTot[primeTargetIndex])
             #pop the nearest in order to find the second nearest
             self.LenList.pop(primeTargetIndex)
             #second nearest
             secondTargetIndex = self.LenList.index(min(self.LenList))
-            secondTarget = goalListTot[secondTargetIndex]
+            secondTarget = transform(goalListTot[secondTargetIndex])
             #if they're close enough, look at rotation 
-            if (abs(secondTarget.translation().distance(curPose.translation()) - primeTarget.translation().distance(curPose.translation())) <= 1.0):
+            closeEnough = abs(secondTarget.translation().distance(curPose.translation()) - primeTarget.translation().distance(curPose.translation())) <= 1.0
+            difAngle = abs(secondTarget.rotation().degrees() - primeTarget.rotation().degrees()) >= 10
+            if (closeEnough and difAngle):
                 #checking rotation
                 #dif in degrees
                 curRot = curPose.rotation().degrees()
@@ -119,7 +129,13 @@ class AutoDrive(metaclass=Singleton):
             self.rfp.setGoal(target)
         else:
             self.rfp.setGoal(None)
-
+        """
+        if self._autoDrive:
+            target = transform(goalListTot[10])
+            self.rfp.setGoal(target)
+        else:
+            self.rfp.setGoal(None)
+        """
 
         # If being asked to auto-align, use the command from the dynamic path planner
         if(self._autoDrive):
