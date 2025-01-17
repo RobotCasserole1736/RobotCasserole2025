@@ -5,3 +5,4 @@ simgui.json
 simgui-ds.json
 .coverage
 .simulationLogs
+*.orig
