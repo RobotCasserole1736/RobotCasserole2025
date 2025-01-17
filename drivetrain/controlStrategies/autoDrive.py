@@ -7,7 +7,7 @@ from navigation.obstacleDetector import ObstacleDetector
 from utils.signalLogging import addLog
 from utils.singleton import Singleton
 from navigation.repulsorFieldPlanner import RepulsorFieldPlanner
-from navigation.navConstants import GOAL_PICKUP, GOAL_SPEAKER, goalListAngle, goalListTot
+from navigation.navConstants import GOAL_PICKUP, GOAL_SPEAKER, goalListTot
 from drivetrain.drivetrainPhysical import MAX_DT_LINEAR_SPEED_MPS
 from utils.allianceTransformUtils import transform
 import math
