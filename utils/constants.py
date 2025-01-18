@@ -29,8 +29,8 @@ ELEV_TOF_CANID = 12
 # change ELEV CANID later
 # Unused_CANID = 13
 # Unused_CANID = 14
-# Unused_CANID = 15
-# Unused_CANID = 16
+ALGAE_INT_CANID = 15
+ALGAE_WRIST_CANID= 16
 
 
 
