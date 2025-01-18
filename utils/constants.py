@@ -27,8 +27,8 @@ ELEV_RM_CANID = 10
 ELEV_LM_CANID = 11
 ELEV_TOF_CANID = 12
 # change ELEV CANID later
-# Unused_CANID = 13
-# Unused_CANID = 14
+CORAL_L_CANID = 13
+CORAL_R_CANID = 14
 # Unused_CANID = 15
 # Unused_CANID = 16
 
