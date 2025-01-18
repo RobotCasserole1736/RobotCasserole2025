@@ -99,7 +99,7 @@
             "label": "PyFRC: Run Test Suite",
             "type": "shell",
             "windows": {
-                "command": "py -3 -m robotpy test"
+                "command": "py -3 -m robotpy test -- -k test_practice"
             },
             "linux": {
                 "command": "robotpy test"
