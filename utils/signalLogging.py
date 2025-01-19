@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from typing import Callable
 import wpilib
 import ntcore as nt
@@ -9,17 +8,30 @@ from utils.singleton import Singleton
 
 BASE_TABLE = "SmartDashboard"
 
-@dataclass
-class _LoggedVal():
+class Logger():
     """
     Container for holding a data source (a callable in our code)
     and all the places the data might go - NetworkTables for live publishing,
     or a file for later review. If writing files is not possible (USB drive not in?)
     the file publisher should be None
     """
-    valGetter:Callable[[], float]
+    valGetter:Callable[[], float]|None
     ntPublisher:nt.DoublePublisher
     filePublisher:wpilog.DoubleLogEntry|None
+
+    __slots__ = 'valGetter', 'ntPublisher', 'filePublisher'
+
+    def __init__(self,
+                 valGetter:Callable[[], float]|None,
+                 ntPublisher:nt.DoublePublisher,
+                 filePublisher:wpilog.DoubleLogEntry|None):
+        self.valGetter = valGetter
+        self.ntPublisher = ntPublisher
+        self.filePublisher = filePublisher
+
+    def logNow(self, val):
+        curTime = nt._now()  # pylint: disable=W0212
+        SignalWrangler.updateALoggerValue(self, val, curTime)
 
 # Wrangler for coordinating the set of all signals
 class SignalWrangler(metaclass=Singleton):
@@ -28,7 +40,7 @@ class SignalWrangler(metaclass=Singleton):
     def __init__(self):
         # Default to publishing things under Shuffleboard, which makes things more available
         self.table = nt.NetworkTableInstance.getDefault().getTable(BASE_TABLE)
-        self.loggedValList:list[_LoggedVal] = []
+        self.loggedValList:list[Logger] = []
         self.time = int(0)
         self.log = None
     
@@ -39,16 +51,22 @@ class SignalWrangler(metaclass=Singleton):
             )  # We have a lot of things in NT that don't need to be logged
             self.log = wpilib.DataLogManager.getLog()
 
+
+    @classmethod
+    def updateALoggerValue(cls, lv:Logger, val, curTime):
+        lv.ntPublisher.set(val, curTime)
+        if (lv.filePublisher is not None):
+            lv.filePublisher.append(val, curTime)
+
     def update(self):
         curTime = nt._now()  # pylint: disable=W0212
         for lv in self.loggedValList:
-            val = lv.valGetter()
-            lv.ntPublisher.set(val, curTime)
-            if(lv.filePublisher is not None):
-                lv.filePublisher.append(val, curTime)
+            if lv.valGetter is not None:
+                val = lv.valGetter()
+                self.updateALoggerValue(lv, val, curTime)
 
 
-    def newLogVal(self, name:str, valGetter:Callable[[],float], units:str|None):
+    def newLoggerSetup(self, name:str, valGetter:Callable[[],float], units:str|None)->Logger:
 
         # Set up NT publishing
         sigTopic = self.table.getDoubleTopic(name)
@@ -68,9 +86,16 @@ class SignalWrangler(metaclass=Singleton):
         else:
             sigLog = None
 
+        logger = Logger(valGetter,sigPub, sigLog)
+        return logger
+
+    def newLogger(self, name:str, valGetter:Callable[[],float], units:str|None)->Logger:
+        logger = self.newLoggerSetup(name, valGetter, units)
+
         self.loggedValList.append(
-            _LoggedVal(valGetter,sigPub, sigLog)
+            logger
         )
+        return logger
 
 
 
@@ -86,18 +111,23 @@ def logUpdate():
     """
     SignalWrangler().update()
 
-def addLog(alias: str, valueGetter: Callable[[], float], units=None) -> None:
+def addLog(alias: str, valueGetter: Callable[[], float], units:str|None=None) -> None:
     """
-    Register some value to be logged
+    Register a callable getter to be logged at alias
 
     Parameters:
-    - alias: The name used to identify the log.
+    - alias: The name (str) used to identify the log.
     - valueGetter: A function that returns the current value of the log. Lambda is acceptable here.
+    - units: The units (str) of the value_getter
     """
-    SignalWrangler().newLogVal(alias, valueGetter, units)
+    SignalWrangler().newLogger(alias, valueGetter, units)
 
-def log(alias: str, valueGetter, units=None) -> None:
+def log(alias: str, valueGetter, units:str|None=None) -> None:
     addLog(alias, valueGetter, units)
+
+def getNowLogger(alias: str, units:str|None=None) -> Logger:
+    logger = SignalWrangler().newLoggerSetup(alias, None, units)
+    return logger
 
 def sigNameToNT4TopicName(name):
     return f"/{BASE_TABLE}/{name}"
