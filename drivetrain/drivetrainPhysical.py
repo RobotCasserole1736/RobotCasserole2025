@@ -27,12 +27,6 @@ BUMPER_THICKNESS_M = inchesToMeters(2.5)
 # more than the "weigh-in" weight
 ROBOT_MASS_KG = lbsToKg(140)
 
-# Model the robot's moment of intertia as a square slab
-# slightly bigger than wheelbase with axis through center
-ROBOT_MOI_KGM2 = (
-    1.0 / 12.0 * ROBOT_MASS_KG * math.pow((WHEEL_BASE_HALF_WIDTH_M * 2.2), 2) * 2
-)
-
 # SDS MK4i Swerve Module Ratios
 # See https://www.swervedrivespecialties.com/products/mk4i-swerve-module?variant=39598777172081
 # WHEEL_GEAR_RATIO_L1 = 8.41
