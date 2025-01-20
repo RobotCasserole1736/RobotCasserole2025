@@ -17,6 +17,8 @@ class AlgaeWristState(Enum):
     STOW = 6
     REEF = 7
 
+#The most important question - why is this two separate things?? I think they should be combined
+#the same button-type thing will be pressed to bring the algae manipulator up to angle, then start spinning it
 class AlgaeWristControl(metaclass=Singleton):
 
     def __init__(self):
