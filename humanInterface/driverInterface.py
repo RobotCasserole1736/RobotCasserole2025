@@ -34,6 +34,9 @@ class DriverInterface:
         # Utility - reset to zero-angle at the current pose
         self.gyroResetCmd = False
 
+        self.volClimbCmdUp = 0.0
+        self.volClimbCmdDown = 0.0
+
         # Logging
         #addLog("DI FwdRev Cmd", lambda: self.velXCmd, "mps")
         #addLog("DI Strafe Cmd", lambda: self.velYCmd, "mps")
@@ -82,11 +85,17 @@ class DriverInterface:
 
             self.connectedFault.setNoFault()
 
+            self.volClimbCmdUp = applyDeadband(self.ctrl.getRightTriggerAxis(),0.1) * -12.0
+            self.volClimbCmdDown = applyDeadband(self.ctrl.getLeftTriggerAxis(),0.1) * 12.0
+            #plus, we will need stuff to do with the POV to tell whether we're in climb mode... I'll incorporate that later
+
         else:
             # If the joystick is unplugged, pick safe-state commands and raise a fault
             self.velXCmd = 0.0
             self.velYCmd = 0.0
             self.velTCmd = 0.0
+            self.volClimbCmdUp = 0.0
+            self.volClimbCmdDown = 0.0
             self.gyroResetCmd = False
             self.autoDrive = False
             self.createDebugObstacle = False
@@ -110,3 +119,15 @@ class DriverInterface:
 
     def getCreateObstacle(self) -> bool:
         return self.createDebugObstacle
+    
+    def getClimbVol(self):
+        #need an if climber mode
+        if not self.volClimbCmdDown == 0.0 and self.volClimbCmdUp == 0.0:
+            #if the climb down is the only command
+            return self.volClimbCmdDown
+        elif self.volClimbCmdDown == 0.0 and not self.volClimbCmdUp == 0.0:
+            #if the climb up is the only command
+            return self.volClimbCmdUp
+        else:
+            #if both are commanded
+            return 0.0

@@ -1,5 +1,6 @@
 import sys
 import wpilib
+from climbControl.climberControl import ClimberControl
 from dashboard import Dashboard
 from drivetrain.controlStrategies.autoDrive import AutoDrive
 from drivetrain.controlStrategies.trajectory import Trajectory
@@ -37,6 +38,8 @@ class MyRobot(wpilib.TimedRobot):
 
         self.driveTrain = DrivetrainControl()
         self.autodrive = AutoDrive()
+
+        self.climbControl = ClimberControl()
 
         self.stt = SegmentTimeTracker()      
 
@@ -145,6 +148,8 @@ class MyRobot(wpilib.TimedRobot):
                 self.autodrive.rfp.addObstacleObservation(obs)
 
         self.autodrive.setRequest(self.dInt.getAutoDrive())
+
+        self.climbControl.setClimbVol(self.dInt.getClimbVol())
 
         # No trajectory in Teleop
         Trajectory().setCmd(None)

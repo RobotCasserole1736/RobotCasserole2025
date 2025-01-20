@@ -29,8 +29,7 @@ DT_BL_WHEEL_CANID = 9
 # Unused_CANID = 13
 # Unused_CANID = 14
 # Unused_CANID = 15
-# Unused_CANID = 16
-
+CLIMB_CANID = 16
 
 
 
