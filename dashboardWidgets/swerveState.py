@@ -68,28 +68,28 @@ class SwerveState(WidgetConfig):
         self.nominalHeight = 20
         self.nominalWidth = 20
         self.isVisible = True
-        self.topicsFL = _ModuleTopicSet("FL", 0)
-        self.topicsFR = _ModuleTopicSet("FR", 1)
+        self.topicsFR = _ModuleTopicSet("FR", 0)
+        self.topicsBR = _ModuleTopicSet("BR", 1)
         self.topicsBL = _ModuleTopicSet("BL", 2)
-        self.topicsBR = _ModuleTopicSet("BR", 3)
+        self.topicsFL = _ModuleTopicSet("FL", 3)
 
     def getJSDeclaration(self):
         return f"var widget{self.idx} = new SwerveState('widget{self.idx}', '{self.name}')\n"
 
     def getTopicSubscriptionStrings(self):
         retStr = ""
-        retStr += self.topicsFL.getSubscriptionStrings()
         retStr += self.topicsFR.getSubscriptionStrings()
-        retStr += self.topicsBL.getSubscriptionStrings()
         retStr += self.topicsBR.getSubscriptionStrings()
+        retStr += self.topicsBL.getSubscriptionStrings()
+        retStr += self.topicsFL.getSubscriptionStrings()
         return retStr
 
     def getJSSetData(self):
         retStr = ""
-        retStr += self.topicsFL.getJSSetData(self.idx)
         retStr += self.topicsFR.getJSSetData(self.idx)
-        retStr += self.topicsBL.getJSSetData(self.idx)
         retStr += self.topicsBR.getJSSetData(self.idx)
+        retStr += self.topicsBL.getJSSetData(self.idx)
+        retStr += self.topicsFL.getJSSetData(self.idx)
         return retStr
 
     def getJSUpdate(self):

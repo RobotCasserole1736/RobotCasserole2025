@@ -38,20 +38,20 @@ class DrivetrainControl(metaclass=Singleton):
     def __init__(self):
         self.modules = []
         self.modules.append(
-            SwerveModuleControl("FL", DT_FL_WHEEL_CANID, DT_FL_AZMTH_CANID, DT_FL_AZMTH_ENC_PORT, 
-                                FL_ENCODER_MOUNT_OFFSET_RAD, True, True)
-        )
-        self.modules.append(
             SwerveModuleControl("FR", DT_FR_WHEEL_CANID, DT_FR_AZMTH_CANID, DT_FR_AZMTH_ENC_PORT, 
                                 FR_ENCODER_MOUNT_OFFSET_RAD, True, True)
+        )
+        self.modules.append(
+            SwerveModuleControl("BR", DT_BR_WHEEL_CANID, DT_BR_AZMTH_CANID, DT_BR_AZMTH_ENC_PORT, 
+                                BR_ENCODER_MOUNT_OFFSET_RAD, False, True)
         )
         self.modules.append(
             SwerveModuleControl("BL", DT_BL_WHEEL_CANID, DT_BL_AZMTH_CANID, DT_BL_AZMTH_ENC_PORT, 
                                 BL_ENCODER_MOUNT_OFFSET_RAD, False, True)
         )
         self.modules.append(
-            SwerveModuleControl("BR", DT_BR_WHEEL_CANID, DT_BR_AZMTH_CANID, DT_BR_AZMTH_ENC_PORT, 
-                                BR_ENCODER_MOUNT_OFFSET_RAD, False, True)
+            SwerveModuleControl("FL", DT_FL_WHEEL_CANID, DT_FL_AZMTH_CANID, DT_FL_AZMTH_ENC_PORT, 
+                                FL_ENCODER_MOUNT_OFFSET_RAD, True, True)
         )
 
         self.desChSpd = ChassisSpeeds()

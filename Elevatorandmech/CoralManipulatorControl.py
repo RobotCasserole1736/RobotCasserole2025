@@ -2,7 +2,8 @@ import wpilib
 import wpimath 
 from utils.singleton import Singleton
 from enum import Enum 
-import utils.constants
+from utils.constants import CORAL_L_CANID, CORAL_R_CANID
+
  
 from wrappers.wrapperedSparkMax import WrapperedSparkMax
 
@@ -16,8 +17,8 @@ class CoralManipulatorControl(metaclass=Singleton):
 
     def __init__(self):
         self.coralCurState = CoralManState.DISABLED
-        self.coralMotorL = WrapperedSparkMax(13, "CoralMotorL", True, 10)
-        self.coralMotorR = WrapperedSparkMax(14, "CoralMotorR", True, 10)
+        self.coralMotorL = WrapperedSparkMax(CORAL_L_CANID, "CoralMotorL", True, 10)
+        self.coralMotorR = WrapperedSparkMax(CORAL_R_CANID, "CoralMotorR", True, 10)
         self.gamepieceSensorF = None #uhhh this one depends on what/how we do so its just gonna be empty inside for now.
         self.gamepieceSensorR = None #uhhh this one depends on what/how we do so its just gonna be empty inside for now.        
         self.curMotorVoltage = 0.0
