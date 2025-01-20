@@ -1,7 +1,7 @@
 import math
 from wpilib import DigitalInput, DutyCycle
 from utils.faults import Fault
-from utils.signalLogging import addLog
+#from utils.signalLogging import addLog
 from utils.calibration import Calibration
 from utils.units import wrapAngleRad
 
@@ -20,9 +20,9 @@ class WrapperedPulseWidthEncoder:
         name,
         mountOffsetRad,
         dirInverted,
-        minPulse,
-        maxPulse,
-        minAcceptableFreq,
+        minPulseSec,
+        maxPulseSec,
+        minAcceptableFreqHz,
     ):
         self.dutyCycle = DutyCycle(DigitalInput(port))
         self.name = f"Encoder_{name}"
@@ -34,9 +34,9 @@ class WrapperedPulseWidthEncoder:
         self.curAngleRad = 0
         self.dirInverted = dirInverted
 
-        self.minPulseTimeSec = minPulse
-        self.maxPulseTimeSec = maxPulse
-        self.minAcceptableFreq = minAcceptableFreq
+        self.minPulseTimeSec = minPulseSec
+        self.maxPulseTimeSec = maxPulseSec
+        self.minAcceptableFreqHz = minAcceptableFreqHz
 
         self.freq = 0
         self.pulseTime = 0
@@ -49,7 +49,7 @@ class WrapperedPulseWidthEncoder:
         """Return the raw angle reading from the sensor in radians"""
         self.freq = self.dutyCycle.getFrequency()
         self.faulted = (
-            self.freq < self.minAcceptableFreq
+            self.freq < self.minAcceptableFreqHz
         )  # abnormal frequency, we must be faulted
         self.disconFault.set(self.faulted)
 

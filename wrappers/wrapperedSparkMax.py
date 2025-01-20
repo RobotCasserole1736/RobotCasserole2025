@@ -1,9 +1,10 @@
-from rev import SparkMax, SparkBase, SparkMaxConfig, REVLibError, ClosedLoopSlot, SparkBaseConfig, ClosedLoopConfig, SparkClosedLoopController
+import time
+from rev import SparkMax, SparkBase, SparkMaxConfig, REVLibError, ClosedLoopSlot, SparkBaseConfig
+from rev import SparkClosedLoopController
 from wpilib import TimedRobot
 from utils.signalLogging import addLog
 from utils.units import rev2Rad, rad2Rev, radPerSec2RPM, RPM2RadPerSec
 from utils.faults import Fault
-import time
 
 
 ## Wrappered Spark Max
@@ -23,6 +24,7 @@ class WrapperedSparkMax:
         self.disconFault = Fault(f"Spark Max {name} ID {canID} disconnected")
         self.simActPos = 0
 
+        # pylint: disable= R0801
         self.desPos = 0
         self.desVel = 0
         self.desVolt = 0

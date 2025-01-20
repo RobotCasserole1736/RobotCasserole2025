@@ -7,6 +7,7 @@ from utils.units import lbsToKg
 from utils.units import deg2Rad
 from utils.units import in2m
 from utils.robotIdentification import RobotIdentification, RobotTypes
+from wrappers.wrapperedSRXMagEncoder import WrapperedSRXMagEncoder
 
 """
 Defines the physical dimensions and characteristics of the drivetrain
@@ -104,6 +105,16 @@ MAX_ROTATE_ACCEL_RAD_PER_SEC_2 = (
 # 5 - Redeploy code, verify that the  encoder readings are correct as each module is manually rotated
 
 
+# Perhaps we invert the swerve module azimuth motor
+INVERT_AZMTH_MOTOR = True
+INVERT_AZMTH_ENCODER = False
+
+# Perhaps we invert the swerve module wheel motor drive direction
+FL_INVERT_WHEEL_MOTOR = True
+FR_INVERT_WHEEL_MOTOR = True
+BL_INVERT_WHEEL_MOTOR = False
+BR_INVERT_WHEEL_MOTOR = False
+
 if RobotIdentification().getRobotType() == RobotTypes.Main:
     FR_ENCODER_MOUNT_OFFSET_RAD = 0.8412
     FL_ENCODER_MOUNT_OFFSET_RAD = 0.2412
@@ -120,6 +131,15 @@ FL = 0
 FR = 1
 BL = 2
 BR = 3
+
+# Function make a swerve module azimuth encoder reader object
+def wrapperedSwerveDriveAzmthEncoder(azmthEncoderPortIdx, moduleName, azmthOffsetRad, inverted):
+    return WrapperedSRXMagEncoder(
+        port=azmthEncoderPortIdx,
+        name=moduleName,
+        mountOffsetRad=azmthOffsetRad,
+        dirInverted=inverted
+    )
 
 # Camera Mount Offsets
 # These are relative to the robot origin

@@ -8,16 +8,15 @@ from wpimath.geometry import Rotation2d
 from wpimath.filter import SlewRateLimiter
 from wpilib import TimedRobot
 
-
-from drivetrain.swerveModuleGainSet import SwerveModuleGainSet
-from wrappers.wrapperedSparkMax import WrapperedSparkMax
-from wrappers.wrapperedSRXMagEncoder import WrapperedSRXMagEncoder
-from dashboardWidgets.swerveState import getAzmthDesTopicName, getAzmthActTopicName
-from dashboardWidgets.swerveState import getSpeedDesTopicName, getSpeedActTopicName
-from utils.signalLogging import addLog
 from drivetrain.drivetrainPhysical import dtMotorRotToLinear
 from drivetrain.drivetrainPhysical import dtLinearToMotorRot
 from drivetrain.drivetrainPhysical import MAX_FWD_REV_SPEED_MPS
+from drivetrain.drivetrainPhysical import wrapperedSwerveDriveAzmthEncoder
+from drivetrain.swerveModuleGainSet import SwerveModuleGainSet
+from wrappers.wrapperedSparkMax import WrapperedSparkMax
+from dashboardWidgets.swerveState import getAzmthDesTopicName, getAzmthActTopicName
+from dashboardWidgets.swerveState import getSpeedDesTopicName, getSpeedActTopicName
+from utils.signalLogging import addLog
 
 
 class SwerveModuleControl:
@@ -49,8 +48,9 @@ class SwerveModuleControl:
         azmthMotorCanID:int,
         azmthEncoderPortIdx:int,
         azmthOffset:float,
-        invertWheel:bool,
-        invertAzmth:bool
+        invertWheelMotor:bool,
+        invertAzmthMotor:bool,
+        invertAzmthEncoder:bool
     ):
         """Instantiate one swerve drive module
 
@@ -60,8 +60,9 @@ class SwerveModuleControl:
             azmthMotorCanID (int): CAN Id for the azimuth motor for this module
             azmthEncoderPortIdx (int): RIO Port for the azimuth absolute encoder for this module
             azmthOffset (float): Mounting offset of the azimuth encoder in Radians.
-            invertWheel (bool): Inverts the drive direction of the wheel - needed since left/right sides are mirrored
-            invertAzmth (bool): Inverts the steering direction of the wheel - needed if motor is mounted upside
+            invertWheelMotor (bool): Inverts the drive direction of the wheel motor
+            invertAzmthMotor (bool): Inverts the steering direction of the azimuth motor
+            invertAzmthEncoder (bool): Inverts the direction of the steering azimuth encoder
         """
         self.wheelMotor = WrapperedSparkMax(
             wheelMotorCanID, moduleName + "_wheel", False
@@ -73,12 +74,12 @@ class SwerveModuleControl:
         # Note the azimuth encoder inversion should be fixed, based on the physical design of the encoder itself,
         # plus the swerve module physical construction. It might need to be tweaked here though if we change 
         # module brands or sensor brands.
-        self.azmthEnc = WrapperedSRXMagEncoder(
-            azmthEncoderPortIdx, moduleName + "_azmthEnc", azmthOffset, False
+        self.azmthEnc = wrapperedSwerveDriveAzmthEncoder(
+            azmthEncoderPortIdx, moduleName + "_azmthEnc", azmthOffset, invertAzmthEncoder
         )
 
-        self.wheelMotor.setInverted(invertWheel)
-        self.azmthMotor.setInverted(invertAzmth)
+        self.wheelMotor.setInverted(invertWheelMotor)
+        self.azmthMotor.setInverted(invertAzmthMotor)
 
         self.wheelMotorFF = SimpleMotorFeedforwardMeters(0, 0, 0)
 
@@ -199,8 +200,11 @@ class SwerveModuleControl:
         # Send voltage and speed commands to the wheel motor
         motorDesSpd = dtLinearToMotorRot(self.optimizedDesiredState.speed)
         motorDesAccel = (motorDesSpd - self._prevMotorDesSpeed) / 0.02
-        motorVoltageFF = self.wheelMotorFF.calculate(self.actualState.speed, motorDesSpd) #This is the problem child of the new non-backwards compatable Robotpy update. actualstate.speed is "prev" and motorDesSpd is "cur"
-        self.wheelMotor.setVelCmd(motorDesSpd, motorVoltageFF)                            
+
+        # This is the problem child of the new non-backwards compatable Robotpy update. actualstate.speed is
+        # "prev" and motorDesSpd is "cur"
+        motorVoltageFF = self.wheelMotorFF.calculate(self.actualState.speed, motorDesSpd)
+        self.wheelMotor.setVelCmd(motorDesSpd, motorVoltageFF)
 
         self._prevMotorDesSpeed = motorDesSpd  # save for next loop
 
