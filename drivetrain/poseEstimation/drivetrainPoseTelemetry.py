@@ -8,7 +8,7 @@ from wpimath.geometry import Pose2d, Pose3d, Transform2d, Rotation2d, Translatio
 from ntcore import NetworkTableInstance
 
 from utils.allianceTransformUtils import transform
-from drivetrain.drivetrainPhysical import ROBOT_TO_FRONT_CAM, ROBOT_TO_LEFT_CAM, ROBOT_TO_RIGHT_CAM, robotToModuleTranslations
+from drivetrain.drivetrainPhysical import ROBOT_TO_FRONT_CAM, ROBOT_TO_LEFTFRONT_CAM, ROBOT_TO_RIGHTFRONT_CAM, ROBOT_TO_RIGHTBACK_CAM, ROBOT_TO_LEFTBACK_CAM, robotToModuleTranslations
 from wrappers.wrapperedPoseEstPhotonCamera import CameraPoseObservation
 
 
@@ -30,14 +30,24 @@ class DrivetrainPoseTelemetry:
 
         self.desPose = Pose2d()
 
-        self.leftCamPosePublisher = (
+        self.leftFrontCamPosePublisher = (
             NetworkTableInstance.getDefault()
-            .getStructTopic("/LeftCamPose", Pose3d)
+            .getStructTopic("/LeftFrontCamPose", Pose3d)
             .publish()
         )
-        self.rightCamPosePublisher = (
+        self.rightFrontCamPosePublisher = (
             NetworkTableInstance.getDefault()
-            .getStructTopic("/RightCamPose", Pose3d)
+            .getStructTopic("/RightFrontCamPose", Pose3d)
+            .publish()
+        )
+        self.leftBackCamPosePublisher = (
+            NetworkTableInstance.getDefault()
+            .getStructTopic("/LeftBackCamPose", Pose3d)
+            .publish()
+        )
+        self.rightBackCamPosePublisher = (
+            NetworkTableInstance.getDefault()
+            .getStructTopic("/RightBackCamPose", Pose3d)
             .publish()
         )
         self.frontCamPosePublisher = (
@@ -88,8 +98,12 @@ class DrivetrainPoseTelemetry:
         self.field.getObject("visionObservations").setPoses(self.visionPoses)
         self.visionPoses = []
 
-        self.leftCamPosePublisher.set(Pose3d(estPose).transformBy(ROBOT_TO_LEFT_CAM))
-        self.rightCamPosePublisher.set(Pose3d(estPose).transformBy(ROBOT_TO_RIGHT_CAM))
+        self.leftFrontCamPosePublisher.set(Pose3d(estPose).transformBy(ROBOT_TO_LEFTFRONT_CAM))
+        self.rightFrontCamPosePublisher.set(Pose3d(estPose).transformBy(ROBOT_TO_RIGHTFRONT_CAM))
+        self.leftBackCamPosePublisher.set(Pose3d(estPose).transformBy(ROBOT_TO_LEFTBACK_CAM))
+        self.rightBackCamPosePublisher.set(Pose3d(estPose).transformBy(ROBOT_TO_RIGHTBACK_CAM))
+
+
         self.frontCamPosePublisher.set(Pose3d(estPose).transformBy(ROBOT_TO_FRONT_CAM))
 
     def setCurAutoTrajectory(self, trajIn):
