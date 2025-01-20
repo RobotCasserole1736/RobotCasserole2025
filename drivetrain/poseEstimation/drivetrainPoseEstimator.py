@@ -1,9 +1,9 @@
 import random
-
-from wpilib import ADIS16470_IMU
+from typing import Tuple
 import wpilib
 from wpimath.estimator import SwerveDrive4PoseEstimator
 from wpimath.geometry import Pose2d, Rotation2d, Twist2d
+from wpimath.kinematics import SwerveModulePosition, SwerveModuleState
 from drivetrain.drivetrainPhysical import (
     kinematics,
     ROBOT_TO_LEFT_CAM,
@@ -13,7 +13,7 @@ from drivetrain.poseEstimation.drivetrainPoseTelemetry import DrivetrainPoseTele
 from utils.faults import Fault
 from utils.signalLogging import addLog
 from wrappers.wrapperedPoseEstPhotonCamera import WrapperedPoseEstPhotonCamera
-from wpimath.kinematics import SwerveModulePosition, SwerveModuleState
+from wrappers.wrapperedGyro import wrapperedGyro
 
 # Convienent abreviations for the types that we'll be passing around here.
 # This is primarily driven by wpilib's conventions:
@@ -23,20 +23,20 @@ from wpimath.kinematics import SwerveModulePosition, SwerveModuleState
 # Wheel position is preferred for odometry, since errors in velocity don't accumulate over time
 # This is especially important with Rev motors which filter their velocity by a huge amount
 # but the position is fairly accurate. 
-posTuple_t = tuple[SwerveModulePosition,SwerveModulePosition,SwerveModulePosition,SwerveModulePosition]
-stateTuple_t = tuple[SwerveModuleState,SwerveModuleState,SwerveModuleState,SwerveModuleState]
+PosTupleType = Tuple[SwerveModulePosition,SwerveModulePosition,SwerveModulePosition,SwerveModulePosition]
+StateTupleType = Tuple[SwerveModuleState,SwerveModuleState,SwerveModuleState,SwerveModuleState]
 
 class DrivetrainPoseEstimator:
     """Wrapper class for all sensors and logic responsible for estimating where the robot is on the field"""
 
-    def __init__(self, initialModulePositions:posTuple_t):
+    def __init__(self, initialModulePositions:PosTupleType):
 
         # Represents our current best-guess as to our location on the field.
         self._curEstPose = Pose2d()
 
         # Gyroscope - measures our rotational velocity.
         # Fairly accurate and trustworthy, but not a full pose estimate
-        self._gyro = ADIS16470_IMU()
+        self._gyro = wrapperedGyro()
         self._gyroDisconFault = Fault("Gyroscope not sending data")
         self._curRawGyroAngle = Rotation2d()
 
@@ -82,7 +82,7 @@ class DrivetrainPoseEstimator:
             self._curRawGyroAngle, self._lastModulePositions, knownPose
         )
 
-    def update(self, curModulePositions:posTuple_t, curModuleSpeeds:stateTuple_t):
+    def update(self, curModulePositions:PosTupleType, curModuleSpeeds:StateTupleType):
         """Periodic update, call this every 20ms.
 
         Args:
@@ -99,7 +99,8 @@ class DrivetrainPoseEstimator:
                 observations = cam.getPoseEstimates()
                 for observation in observations:
                     self._poseEst.addVisionMeasurement(
-                        observation.estFieldPose, observation.time, (observation.xyStdDev, observation.xyStdDev, observation.rotStdDev)
+                        observation.estFieldPose, observation.time,
+                        (observation.xyStdDev, observation.xyStdDev, observation.rotStdDev)
                     )
                     self._camTargetsVisible = True
                 self._telemetry.addVisionObservations(observations)
@@ -148,4 +149,4 @@ class DrivetrainPoseEstimator:
 
     # Local helper to wrap the real hardware angle into a Rotation2d
     def _getGyroAngle(self)->Rotation2d:
-        return Rotation2d().fromDegrees(self._gyro.getAngle(self._gyro.getYawAxis()))
+        return self._gyro.getGyroAngleRotation2d()
