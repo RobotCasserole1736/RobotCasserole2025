@@ -1,16 +1,13 @@
 import wpilib
 import wpimath 
+from utils import faults
+from utils.calibration import Calibration
+from utils.constants import ALGAE_INT_CANID, ALGAE_WRIST_CANID, ALGAE_GAMEPIECE_CANID
 from utils.singleton import Singleton
 from enum import Enum
-import utils.constants
+from utils.units import m2in
 from wrappers.wrapperedSparkMax import WrapperedSparkMax
-
-class AlgaeIntakeState(Enum):
-   DISABLED = 0
-   INTAKE = 1
-   EJECT = 2
-   HOLDING = 3
-
+from playingwithfusion import TimeOfFlight
 class AlgaeWristState(Enum):
     DISABLED = 4
     INTAKEOFFGROUND = 5
@@ -20,13 +17,16 @@ class AlgaeWristState(Enum):
 #The most important question - why is this two separate things?? I think they should be combined
 #the same button-type thing will be pressed to bring the algae manipulator up to angle, then start spinning it
 class AlgaeWristControl(metaclass=Singleton):
-
     def __init__(self):
         #one important assumption we're making right now is that we don't need limits on the algae manipulator based on elevator height
         
         self.WristCurState = AlgaeWristState.DISABLED
-        self.wristMotor = WrapperedSparkMax(16, "CoralWristMotor", True, 10)
+        self.wristMotor = WrapperedSparkMax(ALGAE_WRIST_CANID, "AlgaeWristMotor", True, 10)
         self.curMotorVoltage = 0.0
+        self.STOW_POS_DEG = -53.0 #CHANGE
+        self.INTAKE_POS_POS = 112 #CHANGE
+        self.REEF_POS_DEG = 0.0 #CHANGE
+        self.ABSOLUTE_OFFSET = 0
 
         #set the degree details for your goals. For stow, intake off gorund, etc. 
         #Also, the absolute offset will be a constant that you can set here or just have in constants 
@@ -35,79 +35,81 @@ class AlgaeWristControl(metaclass=Singleton):
         
         #this is where you will figure out where you're trying to go. See tunerAngleControl.py for a simple answer
         #this could work if it's light enough. But you might have to go to something more like singerAngleControl.py
-        self.algaeCurState = AlgaeIntakeState.HOLDING
+        pass
+        
         
      
     def setGoal(self):
         #here is where you will want to set which angle you're trying to go to. See 2024 tunerAngleControl.py
         pass
          
-         
 class AlgeaIntakeControl(metaclass=Singleton):
 
     def __init__(self):
         #initialize all of your variables, spark maxes, etc. 
-        self.algaeCurState = AlgaeIntakeState.DISABLED
-        self.algaeMotor = WrapperedSparkMax(15, "CoralIntakeMotor", True, 10)
+        self.intakeCommandState = False
+        self.ejectCommandState = False
 
-        #also, you want voltages set for each of your states. Ex. how many volts do you want algae eject to be at? 
-        #for this, look at lines 63-65 of gamepieceHandling.py in our 2024 code. 
+        
+        self.algaeMotor = WrapperedSparkMax(ALGAE_INT_CANID, "AlgaeIntakeMotor", True)
 
-        #add the sensor. Is it a time of flight, what can ID, etc. 
-        self.gamepieceSensor = None # game piece sensor empty for now
+        self.intakeVoltageCal = Calibration("IntakeVoltage", 12, "V")
+        self.ejectVoltageCal = Calibration("EjectVoltage", 12, "V")
+        self.holdVoltageCal = Calibration("HoldVoltage", 12, "V")
 
-        #also, if we are using a sensor in the corner to detect algae, add thresholds for that. See gamepiecehandling.py 2024, lines 73-77
-        #ask Abby and she'll explain better
+        self.tofSensor = TimeOfFlight(ALGAE_GAMEPIECE_CANID)
+        self.tofSensor.setRangingMode(TimeOfFlight.RangingMode.kShort, 24)
+        self.tofSensor.setRangeOfInterest(6, 6, 10, 10)  # fov for sensor # game piece sensor empty for now
+        # LOOK AT THIS LATER YOU SOFTWARE PEOPLE YOU BETTER LOOK AT THIS
 
-        #and add a fault for if the TOF is disconnected. 
+        self.gamePiecePresentCal = Calibration("AlgaePresentThresh", 24, "in")
+
+
+        self.disconTOFFault = faults.Fault("Singer TOF Sensor is Disconnected")
 
     def update(self):
-
+        
+        gamepieceDistSensorMeas = m2in(self.tofSensor.getRange() / 1000.0)
+        self.disconTOFFault.set(self.tofSensor.getFirmwareVersion() == 0)
         #update TOF (is it faulted? Is there a gamepiece being seen (see checkGamePiece function)?)
-        self.hasGamePiece = self.checkForAlgae() #Check if we are holding a piece of coral. this way it will automaticly switch to holding mode
-        #if there's a game piece being seen, set the hold voltage. 
-        if self.hasGamePiece:
-            #call the hold function
-        # elif the cur state is AlgaeIntakeState.INTAKE
-            #call the intake function
-        #etc etc
-            pass
+        if(self.disconTOFFault.isActive):
+            # Gamepiece Sensor Faulted - assume we don't have a gamepiece
+            self.hasGamePiece = False
+        else:
+            if gamepieceDistSensorMeas < self.gamePiecePresentCal.get():
+                self.hasGamePiece = True
+            else: 
+                self.hasGamePiece = False
+
+        if  self.intakeCommandState:
+            self.updateIntake(True)
+        elif self.ejectCommandState:
+            self.updateEject(True)
+        elif self.hasGamePiece:
+            self.updateHold(True)
+
+        else:
+            self.algaeMotor.setVoltage(0)
 
     def setInput(self, intakeBool, ejectBool):
-        #this will take in your inputs from the outside world and learn what state we are currently in
-        #as an enum, which I'm not sure is the right way to do it. I'd rather have multiple booleans. it'd make calculations easier
-        if intakeBool:
-            self.algaeCurState = AlgaeIntakeState.INTAKE
-        elif ejectBool:
-            self.algaeCurState = AlgaeIntakeState.EJECT
-        else:
-            self.algaeCurState = AlgaeIntakeState.DISABLED
-    
-    def checkForAlgae(self):
-        #this can be a function we use in this file to see if we think there is a game piece, based of TOF
-        #if the time of flight is not faulted, check if the measurement (will be in update) is between our max and min calibrations for if there's an algae.
-        #  if so, then return true (that we have an algae) If not, return false.
-        if self.gamepieceSensor:
-            return True
-        else:
-            return False 
-    
+        self.intakeCommandState = intakeBool
+        self.ejectCommandState = ejectBool
+
     def updateIntake(self, run):
-        #run is a boolean. It's either true or false
-        #if run, then set algae motor voltage to the intake one
-        #self.algaeMotor.setVoltage(___) if ___ is the voltage calibration you made earlier
-        #otherwise, set it to 0
-        pass
+        if run:
+            self.algaeMotor.setVoltage(self.intakeVoltageCal.get())
+        else: 
+            self.algaeMotor.setVoltage(0)
+    
 
     def updateEject(self, run):
-        #run is a boolean
-        #if run, the set algae motor voltage to the eject one
-        #see updateIntake comments
-        pass
-   
-    def updateHold(self, run):
-        #run is boolean
-        #see updateIntake comments
-        pass
+        if run:
+            self.algaeMotor.setVoltage(self.ejectVoltageCal.get())
+        else:
+            self.algaeMotor.setVoltage(0)
 
-    #we also might want a getHasAlgae function to use later in other areas. 
+    def updateHold(self, run):
+        if run:
+            self.algaeMotor.setVoltage(self.holdVoltageCal.get())
+        else:
+            self.algaeMotor.setVoltage(0)
