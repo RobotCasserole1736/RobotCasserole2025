@@ -34,8 +34,13 @@ class DriverInterface:
         # Utility - reset to zero-angle at the current pose
         self.gyroResetCmd = False
 
+        #voltage to send to climber
         self.volClimbCmdUp = 0.0
         self.volClimbCmdDown = 0.0
+
+        #whether we're in climb mode or not
+        self.enableClimbMode = False
+        self.disableClimbMode = False
 
         # Logging
         #addLog("DI FwdRev Cmd", lambda: self.velXCmd, "mps")
@@ -87,7 +92,12 @@ class DriverInterface:
 
             self.volClimbCmdUp = applyDeadband(self.ctrl.getRightTriggerAxis(),0.1) * -12.0
             self.volClimbCmdDown = applyDeadband(self.ctrl.getLeftTriggerAxis(),0.1) * 12.0
-            #plus, we will need stuff to do with the POV to tell whether we're in climb mode... I'll incorporate that later
+
+            self.enableClimbMode = (225 <= self.ctrl.getPOV() <= 315)
+            self.disableClimbMode = (45 <= self.ctrl.getPOV() <= 135)
+
+            if self.disableClimbMode:
+                self.enableClimbMode = False
 
         else:
             # If the joystick is unplugged, pick safe-state commands and raise a fault
@@ -100,9 +110,6 @@ class DriverInterface:
             self.autoDrive = False
             self.createDebugObstacle = False
             self.connectedFault.setFaulted()
-
-
-
 
     def getCmd(self) -> DrivetrainCommand:
         retval = DrivetrainCommand()
@@ -121,13 +128,15 @@ class DriverInterface:
         return self.createDebugObstacle
     
     def getClimbVol(self):
-        #need an if climber mode
-        if not self.volClimbCmdDown == 0.0 and self.volClimbCmdUp == 0.0:
-            #if the climb down is the only command
-            return self.volClimbCmdDown
-        elif self.volClimbCmdDown == 0.0 and not self.volClimbCmdUp == 0.0:
-            #if the climb up is the only command
-            return self.volClimbCmdUp
+        if self.enableClimbMode:
+            if not self.volClimbCmdDown == 0.0 and self.volClimbCmdUp == 0.0:
+                #if the climb down is the only command
+                return self.volClimbCmdDown
+            elif self.volClimbCmdDown == 0.0 and not self.volClimbCmdUp == 0.0:
+                #if the climb up is the only command
+                return self.volClimbCmdUp
+            else:
+                #if both are commanded
+                return 0.0
         else:
-            #if both are commanded
             return 0.0

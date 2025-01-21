@@ -82,6 +82,8 @@ class MyRobot(wpilib.TimedRobot):
         self.ledCtrl.update()
         self.stt.mark("LED Ctrl")
 
+        self.climbControl.update()
+        
         logUpdate()
         self.stt.end()
 
