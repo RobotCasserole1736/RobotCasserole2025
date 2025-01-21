@@ -169,7 +169,15 @@ class MyRobot(wpilib.TimedRobot):
     #########################################################
     ## Cleanup
     def endCompetition(self):
-        self.rioMonitor.stopThreads()
+
+        # Sometimes `robopy test pyfrc_test.py` will invoke endCompetition() without completing robotInit(),
+        # this will create a confusing exception here because we can reach self.rioMonitor.stopThreads()
+        # when self.rioMonitor does not exist.
+        # To prevent the exception and confusion, we only call self.rioMonitor.stopThreads() when exists.
+        rioMonitorExists = getattr(self, "rioMonitor", None)
+        if rioMonitorExists is not None:
+            self.rioMonitor.stopThreads()
+
         destroyAllSingletonInstances()
         super().endCompetition()
 
