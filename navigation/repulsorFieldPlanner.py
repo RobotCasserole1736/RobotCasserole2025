@@ -250,9 +250,12 @@ class RepulsorFieldPlanner:
             return True
         else:
             err = (self.goal - pose)
-            transClose = err.translation().norm() < GOAL_MARGIN_M
-            rotClose = abs(err.rotation().degrees()) < GOAL_MARGIN_DEG
-            return transClose and rotClose
+            transErr = err.translation().norm() 
+            rotErrDeg = abs(err.rotation().degrees())
+            if(transErr < GOAL_MARGIN_M):
+                if(rotErrDeg < GOAL_MARGIN_DEG):
+                    return True
+        return False
 
     def _getForceAtTrans(self, trans:Translation2d)->Force:
         """
