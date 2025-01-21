@@ -7,7 +7,6 @@ from utils.signalLogging import addLog
 from wpimath import applyDeadband
 from wpimath.filter import SlewRateLimiter
 from wpilib import XboxController
-from Elevatorandmech.coralManipulatorControl import CoralManipulatorControl
 
 class DriverInterface:
     """Class to gather input from the driver of the robot"""
@@ -35,7 +34,9 @@ class DriverInterface:
         # Utility - reset to zero-angle at the current pose
         self.gyroResetCmd = False
 
-        self.coralMan = CoralManipulatorControl()
+        #whether we're in climb mode or not
+        self.enableClimbMode = False
+        self.disableClimbMode = False
 
         # Logging
         #addLog("DI FwdRev Cmd", lambda: self.velXCmd, "mps")
@@ -83,13 +84,11 @@ class DriverInterface:
             self.autoDrive = self.ctrl.getBButton()
             self.createDebugObstacle = self.ctrl.getYButtonPressed()
 
-            self.POVAngle = self.ctrl.getPOV(0)
-            self.disableCoral = 175 < self.POVAngle < 185 
-            self.enableCoral = 355 < self.POVAngle < 360 or 0< self.POVAngle < 5
-            if self.disableCoral:
-                self.coralMan.setDisabled()
-            elif self.enableCoral:
-                self.coralMan.setEnabled()
+            self.enableClimbMode = (225 <= self.ctrl.getPOV() <= 315)
+            self.disableClimbMode = (45 <= self.ctrl.getPOV() <= 135)
+
+            if self.disableClimbMode:
+                self.enableClimbMode = False
             
             self.connectedFault.setNoFault()
 
@@ -102,8 +101,6 @@ class DriverInterface:
             self.autoDrive = False
             self.createDebugObstacle = False
             self.connectedFault.setFaulted()
-
-
 
 
     def getCmd(self) -> DrivetrainCommand:
@@ -121,3 +118,6 @@ class DriverInterface:
 
     def getCreateObstacle(self) -> bool:
         return self.createDebugObstacle
+    
+    def getCoralMode(self) -> bool:
+        return self.disableClimbMode

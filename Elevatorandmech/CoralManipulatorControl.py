@@ -60,17 +60,17 @@ class CoralManipulatorControl(metaclass=Singleton):
 
     def enableEject(self):
         self.coralCurState = CoralManState.EJECTING
-        pass 
-    
-    def setDisabled(self):
-        self.coralCurState = CoralManState.DISABLED
+        pass
 
     def checkGamePiece(self):
         return self.gamepieceSensorF.get()
     
-    def setEnabled(self):
+    def setEnabled(self, coralMode):
         """Recommended over '.enableIntake' for leaving disabled mode because this checks if the robot is holding a gamepeice before assuming that we want to intake"""
-        if  self.checkGamePiece():
-            self.coralCurState = CoralManState.HOLDING 
+        if coralMode:
+            if  self.checkGamePiece():
+                self.coralCurState = CoralManState.HOLDING 
+            else:
+                self.coralCurState = CoralManState.INTAKING
         else:
-            self.coralCurState = CoralManState.INTAKING
+            self.coralCurState = CoralManState.DISABLED
