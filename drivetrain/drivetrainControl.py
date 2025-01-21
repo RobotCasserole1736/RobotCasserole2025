@@ -94,6 +94,7 @@ class DrivetrainControl(metaclass=Singleton):
 
         # Set the desired pose for telemetry purposes
         self.poseEst._telemetry.setDesiredPose(self.curCmd.desPose)
+        self.poseEst._telemetry.setAutoDriveGoalPose(AutoDrive().getGoal())
 
         # Given the current desired chassis speeds, convert to module states
         desModStates = kinematics.toSwerveModuleStates(self.desChSpd)

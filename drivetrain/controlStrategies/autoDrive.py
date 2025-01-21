@@ -27,7 +27,7 @@ class AutoDrive(metaclass=Singleton):
         self._olCmd = DrivetrainCommand()
         self._prevCmd:DrivetrainCommand|None = None
         self._plannerDur:float = 0.0
-        self.autoPrevEnabled = False #This name might be a wee bit confusing. It just keeps track if we were in auto targeting the speaker last refresh.
+        self._autoPrevEnabled = False #This name might be a wee bit confusing. It just keeps track if we were in auto targeting the speaker last refresh.
         self.stuckTracker = 0 
         self.prevPose = Pose2d()
         self.LenList = []
@@ -35,13 +35,13 @@ class AutoDrive(metaclass=Singleton):
 
         addLog("AutoDrive Proc Time", lambda:(self._plannerDur * 1000.0), "ms")
 
+    def getGoal(self) -> Pose2d | None:
+        return self.rfp.goal
 
     def setRequest(self, autoDrive) -> None:
+        self._autoPrevEnabled = self._autoDrive
         self._autoDrive = autoDrive
-        #The following if statement is just logic to enable self.autoPrevEnabled when the driver enables an auto.
-        if self.autoPrevEnabled != self._autoDrive:
-            self.stuckTracker = 0
-        self.autoPrevEnabled = self._autoDrive
+
         
     def updateTelemetry(self) -> None:        
         self._telemTraj = self.rfp.getLookaheadTraj()
@@ -98,7 +98,11 @@ class AutoDrive(metaclass=Singleton):
         #version 2 - this is based on distance, then rotation if the distances are too close
         #but it's not really working. 
 
-        if (self._autoDrive):
+        if(not self._autoDrive):
+            # Driving not requested, set no goal
+            self.rfp.setGoal(None)
+        elif(self._autoDrive and not self._autoPrevEnabled):
+            # First loop of auto drive, calc a new goal based on current position
             for goalOption in goalListTot:
                 goalWTransform = transform(goalOption.translation())
                 self.LenList.append(goalWTransform.distance(curPose.translation()))
@@ -127,8 +131,6 @@ class AutoDrive(metaclass=Singleton):
             else:
                 target = primeTarget
             self.rfp.setGoal(target)
-        else:
-            self.rfp.setGoal(None)
         """
         if self._autoDrive:
             target = transform(goalListTot[10])
