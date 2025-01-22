@@ -7,7 +7,9 @@ from utils.constants import ELEV_LM_CANID, ELEV_RM_CANID, ELEV_TOF_CANID
 from utils.singleton import Singleton
 from wrappers.wrapperedSparkMax import WrapperedSparkMax
 from rev import SparkBase, SparkBaseConfig, SparkMax, SparkLowLevel, SparkMaxConfig
-from Elevatorandmech.Profiler import ProfiledAxis
+from wpimath.trajectory import TrapezoidProfile
+from wpilib import Timer
+#from Elevatorandmech.Profiler import ProfiledAxis
 
 # need to figure out a way to import
 class ElevatorControl():
@@ -22,6 +24,8 @@ class ElevatorControl():
         
         self.motorVelCmd = 0.0
 
+        self.profiler = TrapezoidProfile(TrapezoidProfile.Constraints(self.maxV.get(),self.maxA.get()))
+        
         self.heightAbsSen = TimeOfFlight(ELEV_TOF_CANID)
         self.heightAbsSen.setRangingMode(TimeOfFlight.RangingMode.kShort, 24)
         self.heightAbsSen.setRangeOfInterest(6, 6, 10, 10)  # fov for sensor
@@ -50,11 +54,21 @@ class ElevatorControl():
         # to make sure the relative sensors inside the encoders accurately reflect
         # the actual position of the mechanism
         self.relEncOffsetM = 0.0
+        # Create a motion profile with the given maximum velocity and maximum
+        # acceleration constraints for the next setpoint.
+        self.profile = TrapezoidProfile(TrapezoidProfile.Constraints(1.75, 0.75))
+
+        self.goal = TrapezoidProfile.State()
+        self.setpoint = TrapezoidProfile.State()
 
         self.profiledPos = 0.0
         self.curUnprofiledPosCmd = 0.0
     def _RmotorRadToHeight(self, RmotorRad):
         return RmotorRad * 1/ELEV_GEARBOX_GEAR_RATIO * (ELEV_SPOOL_RADIUS_M) - self.relEncOffsetM
+    def _heightToMotorRad(self, elevLin):
+        return ((elevLin + self.relEncOffsetM)*1/(ELEV_SPOOL_RADIUS_M) * ELEV_GEARBOX_GEAR_RATIO)
+    def _heightVeltoMotorVel(self, elevLinVel);
+        return (elevLinVel *1/(ELEV_SPOOL_RADIUS_M) * ELEV_GEARBOX_GEAR_RATIO)
     def getHeightM(self):
         return self._RmotorRadToHeight(self.Rmotor.getMotorPositionRad())
     #def update(self):  
@@ -71,6 +85,12 @@ class ElevatorControl():
             self.Rmotor.setVoltage(0.0)
             self.profiledPos = actualPos
         else:
+            curState = self.profiler.State()
+            desState = TrapezoidProfile.State(0,0)
+            self.profiler.calculate(0.02,curState,desState)
+
+            self.profiledPos = curState.position
+
             motorPosCmd = self._heightToMotorRad(curState.position)
             self.motorVelCmd = self._heightVeltoMotorVel(curState.velocity)
 
