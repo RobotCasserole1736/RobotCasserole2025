@@ -38,6 +38,10 @@ class DriverInterface:
         self.enableClimbMode = False
         self.disableClimbMode = False
 
+        self.disableCoralSystem = False #I set up the disable/enable coral variables like this to make preserving auto input easier.
+        self.enableCoralSystem = False
+        self.overrideCoralSystemToEject = False
+
         # Logging
         #addLog("DI FwdRev Cmd", lambda: self.velXCmd, "mps")
         #addLog("DI Strafe Cmd", lambda: self.velYCmd, "mps")
@@ -84,8 +88,15 @@ class DriverInterface:
             self.autoDrive = self.ctrl.getBButton()
             self.createDebugObstacle = self.ctrl.getYButtonPressed()
 
-            self.enableClimbMode = (225 <= self.ctrl.getPOV() <= 315)
-            self.disableClimbMode = (45 <= self.ctrl.getPOV() <= 135)
+            self.enableClimbMode = (225 < self.ctrl.getPOV() < 315)
+            self.disableClimbMode = (45 < self.ctrl.getPOV() < 135)
+
+            
+
+            if (0 <= self.ctrl.getPOV() < 45) or (225 <= self.ctrl.getPOV() <= 0):
+                self.enableCoral = True
+            elif (135 < self.ctrl.getPOV() < 225):
+                self.disableCoral = True 
 
             if self.disableClimbMode:
                 self.enableClimbMode = False
@@ -101,6 +112,8 @@ class DriverInterface:
             self.autoDrive = False
             self.createDebugObstacle = False
             self.connectedFault.setFaulted()
+            self.enableCoral = False 
+            self.disableCoral = True #I'm assuming that if a controller isn't connected then we want to disable the coral.
 
 
     def getCmd(self) -> DrivetrainCommand:
@@ -119,5 +132,11 @@ class DriverInterface:
     def getCreateObstacle(self) -> bool:
         return self.createDebugObstacle
     
-    def getCoralMode(self) -> bool:
+    def getClimbMode(self) -> bool:
         return self.disableClimbMode
+    
+    def getEnableCoralCommand(self) -> bool:
+        return self.enableCoralSystem
+    
+    def getDisableCoralCommand(self) -> bool: 
+        return self.disableCoralSystem
