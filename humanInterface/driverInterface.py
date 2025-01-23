@@ -91,12 +91,10 @@ class DriverInterface:
             self.enableClimbMode = (225 < self.ctrl.getPOV() < 315)
             self.disableClimbMode = (45 < self.ctrl.getPOV() < 135)
 
-            
+            self.enableCoral = (0 <= self.ctrl.getPOV() < 45) or (225 <= self.ctrl.getPOV() <= 0)
+            self.disableCoral = (135 < self.ctrl.getPOV() < 225) 
 
-            if (0 <= self.ctrl.getPOV() < 45) or (225 <= self.ctrl.getPOV() <= 0):
-                self.enableCoral = True
-            elif (135 < self.ctrl.getPOV() < 225):
-                self.disableCoral = True 
+            self.overrideCoralSystemToEject = self.ctrl.getRightBumperButton()
 
             if self.disableClimbMode:
                 self.enableClimbMode = False
@@ -140,3 +138,6 @@ class DriverInterface:
     
     def getDisableCoralCommand(self) -> bool: 
         return self.disableCoralSystem
+    
+    def getCoralEjectOverride(self) -> bool:
+        return self.overrideCoralSystemToEject
