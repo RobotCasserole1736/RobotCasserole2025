@@ -99,15 +99,15 @@ MAX_ROTATE_ACCEL_RAD_PER_SEC_2 = (
 
 
 if RobotIdentification().getRobotType() == RobotTypes.Main:
-    FR_ENCODER_MOUNT_OFFSET_RAD = 0.8412
-    FL_ENCODER_MOUNT_OFFSET_RAD = 0.2412
-    BR_ENCODER_MOUNT_OFFSET_RAD = 1.259
-    BL_ENCODER_MOUNT_OFFSET_RAD = 1.777
+    FR_ENCODER_MOUNT_OFFSET_RAD = 21.05
+    FL_ENCODER_MOUNT_OFFSET_RAD = -90.11
+    BR_ENCODER_MOUNT_OFFSET_RAD = 0.0
+    BL_ENCODER_MOUNT_OFFSET_RAD = 1.40
 else:
-    FR_ENCODER_MOUNT_OFFSET_RAD = 0.8412
-    FL_ENCODER_MOUNT_OFFSET_RAD = 0.2412
-    BR_ENCODER_MOUNT_OFFSET_RAD = 1.259
-    BL_ENCODER_MOUNT_OFFSET_RAD = 1.777
+    FR_ENCODER_MOUNT_OFFSET_RAD = 21.05
+    FL_ENCODER_MOUNT_OFFSET_RAD = -90.11
+    BR_ENCODER_MOUNT_OFFSET_RAD = 0.0
+    BL_ENCODER_MOUNT_OFFSET_RAD = 1.40
 
 # Module Indices (for ease of array manipulation)
 FL = 0
@@ -122,28 +122,28 @@ ROBOT_TO_LEFTFRONT_CAM = Transform3d(
     Translation3d(
         inchesToMeters(11.875), inchesToMeters(11.875), inchesToMeters(7.4)  # X  # Y  # Z
     ),
-    Rotation3d.fromDegrees(0, -15.0, -30.0),  # Roll  # Pitch  # Yaw
+    Rotation3d.fromDegrees(0, -15.0, -20.0),  # Roll  # Pitch  # Yaw
 )
 
 ROBOT_TO_RIGHTFRONT_CAM = Transform3d(
     Translation3d(
         inchesToMeters(11.875), inchesToMeters(-11.875), inchesToMeters(7.4)  # X  # Y  # Z
     ),
-    Rotation3d.fromDegrees(0, -15.0, 30.0),  # Roll  # Pitch  # Yaw
+    Rotation3d.fromDegrees(0, -15.0, 20.0),  # Roll  # Pitch  # Yaw
 )
 
 ROBOT_TO_LEFTBACK_CAM = Transform3d(
     Translation3d(
         inchesToMeters(-11.875), inchesToMeters(11.875), inchesToMeters(7.4)  # X  # Y  # Z
     ),
-    Rotation3d.fromDegrees(0, -15.0, 150.0),  # Roll  # Pitch  # Yaw
+    Rotation3d.fromDegrees(0, -15.0, 170.0),  # Roll  # Pitch  # Yaw
 )
 
 ROBOT_TO_RIGHTBACK_CAM = Transform3d(
     Translation3d(
         inchesToMeters(-11.875), inchesToMeters(-11.875), inchesToMeters(7.4)  # X  # Y  # Z
     ),
-    Rotation3d.fromDegrees(0,-15,-150),  # Roll  # Pitch  # Yaw
+    Rotation3d.fromDegrees(0,-15,-170),  # Roll  # Pitch  # Yaw
 )
 
 ROBOT_TO_FRONT_CAM = Transform3d(
