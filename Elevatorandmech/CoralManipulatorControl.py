@@ -75,7 +75,7 @@ class CoralManipulatorControl(metaclass=Singleton):
                     self.coralNextState = CoralManState.DISABLED
                 else:
                     if not self.checkGamePiece():
-                        self.coralNextState = CoralManState.EJECTING
+                        self.coralNextState = CoralManState.INTAKING
         elif self.coralCurState == CoralManState.EJECTING: 
             if not self.overrideToEject:
                 if not self.coralCycleEnabled:
