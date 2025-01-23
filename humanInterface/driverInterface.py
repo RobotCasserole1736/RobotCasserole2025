@@ -1,3 +1,4 @@
+from enum import Enum
 from drivetrain.drivetrainCommand import DrivetrainCommand
 from drivetrain.drivetrainPhysical import MAX_FWD_REV_SPEED_MPS,MAX_STRAFE_SPEED_MPS,\
 MAX_ROTATE_SPEED_RAD_PER_SEC,MAX_TRANSLATE_ACCEL_MPS2,MAX_ROTATE_ACCEL_RAD_PER_SEC_2
@@ -33,6 +34,11 @@ class DriverInterface:
 
         # Utility - reset to zero-angle at the current pose
         self.gyroResetCmd = False
+
+        self.L1 = False
+        self.L2 = False
+        self.L3 = False
+        self.L4 = False
 
         # Logging
         #addLog("DI FwdRev Cmd", lambda: self.velXCmd, "mps")
@@ -75,6 +81,11 @@ class DriverInterface:
             self.velYCmd = self.velYSlewRateLimiter.calculate(velCmdYRaw)
             self.velTCmd = self.velTSlewRateLimiter.calculate(velCmdRotRaw)
 
+            self.L1 = self.ctrl.getXButton()
+            self.L2 = self.ctrl.getAButton()
+            self.L3 = self.ctrl.getBButton()
+            self.L4 = self.ctrl.getYButton()
+            
             self.gyroResetCmd = self.ctrl.getAButton()
 
             self.autoDrive = self.ctrl.getBButton()
@@ -91,6 +102,10 @@ class DriverInterface:
             self.autoDrive = False
             self.createDebugObstacle = False
             self.connectedFault.setFaulted()
+            self.L1 = False
+            self.L2 = False
+            self.L3 = False
+            self.L4 = False
 
 
 
@@ -110,3 +125,15 @@ class DriverInterface:
 
     def getCreateObstacle(self) -> bool:
         return self.createDebugObstacle
+    
+    def getL1(self):
+        return self.L1
+    
+    def getL2(self):
+        return self.L2
+
+    def getL3(self):
+        return self.L3
+    
+    def getL4(self):
+        return self.L4
