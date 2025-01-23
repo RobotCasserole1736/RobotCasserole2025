@@ -117,3 +117,6 @@ class CoralManipulatorControl(metaclass=Singleton):
     
     def checkGamePiece(self):
         return self.gamepieceSensorF.get() and self.gamepieceSensorB.get()
+    
+    def coralSafeToMove(self): #This assumes that the coral is not long enough to enable both sensors while also hanging off of the edge of the elevator. 
+        return self.gamepieceSensorF.get() and self.gamepieceSensorB.get() or not self.gamepieceSensorF.get() and not self.gamepieceSensorB.get()
