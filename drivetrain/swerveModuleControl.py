@@ -10,6 +10,7 @@ from wpilib import TimedRobot
 
 
 from drivetrain.swerveModuleGainSet import SwerveModuleGainSet
+from wrappers.wrapperedKraken import WrapperedKraken
 from wrappers.wrapperedSparkMax import WrapperedSparkMax
 from wrappers.wrapperedSRXMagEncoder import WrapperedSRXMagEncoder
 from dashboardWidgets.swerveState import getAzmthDesTopicName, getAzmthActTopicName
@@ -63,7 +64,7 @@ class SwerveModuleControl:
             invertWheel (bool): Inverts the drive direction of the wheel - needed since left/right sides are mirrored
             invertAzmth (bool): Inverts the steering direction of the wheel - needed if motor is mounted upside
         """
-        self.wheelMotor = WrapperedSparkMax(
+        self.wheelMotor = WrapperedKraken(
             wheelMotorCanID, moduleName + "_wheel", False
         )
         self.azmthMotor = WrapperedSparkMax(
