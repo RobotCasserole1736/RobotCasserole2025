@@ -1,5 +1,6 @@
 from phoenix6 import hardware, configs, signals, controls, StatusCode
 from wpilib import TimedRobot
+from memes.ctreMusicPlayback import CTREMusicPlayback
 from utils.signalLogging import addLog
 from utils.units import rev2Rad, rad2Rev, radPerSec2RPM, RPM2RadPerSec
 from utils.faults import Fault
@@ -49,6 +50,9 @@ class WrapperedKraken:
 
         # Simulation Suport
         self.simActPos = 0
+
+        # Register with the music player
+        CTREMusicPlayback().registerDevice(self.ctrl)
         
 
     def _applyCurCfg(self):
