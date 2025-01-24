@@ -89,6 +89,7 @@ class WrapperedKraken:
         """
         self.simActPos = posCmd
         self.desPos = posCmd
+        self.desVolt = arbFF
         posCmdRev = rad2Rev(posCmd)
         self.ctrl.set_control(controls.PositionVoltage(posCmdRev).with_slot(0).with_feed_forward(arbFF))
 
@@ -104,6 +105,7 @@ class WrapperedKraken:
         """
         velCmdRPM = radPerSec2RPM(velCmd)
         self.desVel = velCmdRPM
+        self.desVolt = arbFF
         velCmdRotPS = velCmdRPM/60.0
         self.ctrl.set_control(controls.VelocityVoltage(velCmdRotPS).with_slot(0).with_feed_forward(arbFF))
 

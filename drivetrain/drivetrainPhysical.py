@@ -64,12 +64,11 @@ def dtMotorRotToLinear(rot):
 
 
 # Drivetrain Performance Mechanical limits
-# Nominal calculations (ideal)
-MAX_DT_MOTOR_SPEED_RPS = DCMotor.krakenX60(1).freeSpeed
+GEARBOX_EFFICIENCY = 0.98  # fudge factor due to gearbox losses
+MAX_DT_MOTOR_SPEED_RPS = DCMotor.krakenX60(1).freeSpeed * GEARBOX_EFFICIENCY  
 MAX_DT_LINEAR_SPEED_MPS = MAX_DT_MOTOR_SPEED_RPS / WHEEL_GEAR_RATIO * in2m(WHEEL_RADIUS_IN)
-# Fudged max expected performance
-MAX_FWD_REV_SPEED_MPS = MAX_DT_LINEAR_SPEED_MPS * 0.98  # fudge factor due to gearbox losses
-MAX_STRAFE_SPEED_MPS = MAX_DT_LINEAR_SPEED_MPS * 0.98  # fudge factor due to gearbox losses
+MAX_FWD_REV_SPEED_MPS = MAX_DT_LINEAR_SPEED_MPS 
+MAX_STRAFE_SPEED_MPS = MAX_DT_LINEAR_SPEED_MPS 
 MAX_ROTATE_SPEED_RAD_PER_SEC = deg2Rad(
     360.0
 )  # Fixed at the maximum rotational speed we'd want.

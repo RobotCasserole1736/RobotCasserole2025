@@ -1,3 +1,4 @@
+from drivetrain.drivetrainPhysical import MAX_DT_MOTOR_SPEED_RPS
 from utils.calibration import Calibration
 from utils.units import RPM2RadPerSec
 
@@ -19,7 +20,7 @@ class SwerveModuleGainSet:
             "Drivetrain Module Wheel kA", 0.000, "volts/radPerSecPerSec"
         )
         self.wheelV = Calibration(
-            "Drivetrain Module Wheel kV", 12.0 / RPM2RadPerSec(6000), "volts/radPerSec"
+            "Drivetrain Module Wheel kV", 12.0 / MAX_DT_MOTOR_SPEED_RPS, "volts/radPerSec"
         )
         self.wheelS = Calibration("Drivetrain Module Wheel kS", 0.12, "volts")
         self.azmthP = Calibration("Drivetrain Module Azmth kP", 0.12)
