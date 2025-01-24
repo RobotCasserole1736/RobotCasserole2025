@@ -21,6 +21,8 @@ from AutoSequencerV2.autoSequencer import AutoSequencer
 from utils.powerMonitor import PowerMonitor
 from wpimath.geometry import Translation2d, Pose2d, Rotation2d
 
+from memoryChecker import memory_report
+
 class MyRobot(wpilib.TimedRobot):
 
     #########################################################
@@ -58,6 +60,8 @@ class MyRobot(wpilib.TimedRobot):
         self.addPeriodic(FaultWrangler().update, 0.2, 0.0)
 
         self.autoHasRun = False
+
+        memory_report(self)
 
 
     def robotPeriodic(self):
