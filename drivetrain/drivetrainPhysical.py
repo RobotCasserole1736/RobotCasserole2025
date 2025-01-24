@@ -65,7 +65,7 @@ def dtMotorRotToLinear(rot):
 
 # Drivetrain Performance Mechanical limits
 # Nominal calculations (ideal)
-MAX_DT_MOTOR_SPEED_RPS = DCMotor.NEO(1).freeSpeed
+MAX_DT_MOTOR_SPEED_RPS = DCMotor.krakenX60(1).freeSpeed
 MAX_DT_LINEAR_SPEED_MPS = MAX_DT_MOTOR_SPEED_RPS / WHEEL_GEAR_RATIO * in2m(WHEEL_RADIUS_IN)
 # Fudged max expected performance
 MAX_FWD_REV_SPEED_MPS = MAX_DT_LINEAR_SPEED_MPS * 0.98  # fudge factor due to gearbox losses
@@ -93,7 +93,7 @@ MAX_ROTATE_ACCEL_RAD_PER_SEC_2 = (
 # 5 - Redeploy code, verify that the  encoder readings are correct as each module is manually rotated
 
 
-FR_ENCODER_MOUNT_OFFSET_RAD = deg2Rad(21.05)
+FR_ENCODER_MOUNT_OFFSET_RAD = deg2Rad(201.05)
 FL_ENCODER_MOUNT_OFFSET_RAD = deg2Rad(-90.11)
 BR_ENCODER_MOUNT_OFFSET_RAD = deg2Rad(-80.96)
 BL_ENCODER_MOUNT_OFFSET_RAD = deg2Rad(1.40)
