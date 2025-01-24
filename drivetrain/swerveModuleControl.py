@@ -97,12 +97,12 @@ class SwerveModuleControl:
 
         addLog(
             getAzmthDesTopicName(moduleName),
-            self.optimizedDesiredState.angle.degrees,
+            lambda: (self.optimizedDesiredState.angle.degrees()),
             "deg",
         )
         addLog(
             getAzmthActTopicName(moduleName),
-            self.actualState.angle.degrees,
+            lambda: (self.actualState.angle.degrees()),
             "deg",
         )
         addLog(
