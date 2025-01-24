@@ -35,12 +35,7 @@ WHEEL_GEAR_RATIO_L3 = 6.12
 AZMTH_GEAR_RATIO = 12.8
 
 ## CHANGE THIS DEPENDING ON WHICH MODULE GEAR RATIO IS INSTALLED
-if RobotIdentification().getRobotType() == RobotTypes.Main:
-    WHEEL_GEAR_RATIO = WHEEL_GEAR_RATIO_L3
-elif RobotIdentification().getRobotType() == RobotTypes.Practice:
-    WHEEL_GEAR_RATIO = WHEEL_GEAR_RATIO_L2
-else:
-    WHEEL_GEAR_RATIO = WHEEL_GEAR_RATIO_L3
+WHEEL_GEAR_RATIO = WHEEL_GEAR_RATIO_L3
 
 # carpet/roughtop interface fudge factor
 # This accounts for the fact that roughtop tread
@@ -98,16 +93,11 @@ MAX_ROTATE_ACCEL_RAD_PER_SEC_2 = (
 # 5 - Redeploy code, verify that the  encoder readings are correct as each module is manually rotated
 
 
-if RobotIdentification().getRobotType() == RobotTypes.Main:
-    FR_ENCODER_MOUNT_OFFSET_RAD = 21.05
-    FL_ENCODER_MOUNT_OFFSET_RAD = -90.11
-    BR_ENCODER_MOUNT_OFFSET_RAD = 0.0
-    BL_ENCODER_MOUNT_OFFSET_RAD = 1.40
-else:
-    FR_ENCODER_MOUNT_OFFSET_RAD = 21.05
-    FL_ENCODER_MOUNT_OFFSET_RAD = -90.11
-    BR_ENCODER_MOUNT_OFFSET_RAD = 0.0
-    BL_ENCODER_MOUNT_OFFSET_RAD = 1.40
+FR_ENCODER_MOUNT_OFFSET_RAD = deg2Rad(21.05)
+FL_ENCODER_MOUNT_OFFSET_RAD = deg2Rad(-90.11)
+BR_ENCODER_MOUNT_OFFSET_RAD = deg2Rad(-80.96)
+BL_ENCODER_MOUNT_OFFSET_RAD = deg2Rad(1.40)
+
 
 # Module Indices (for ease of array manipulation)
 FL = 0
