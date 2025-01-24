@@ -95,7 +95,8 @@ class WrapperedKraken:
         self.desPos = posCmd
         self.desVolt = arbFF
         posCmdRev = rad2Rev(posCmd)
-        self.ctrl.set_control(controls.PositionVoltage(posCmdRev).with_slot(0).with_feed_forward(arbFF))
+        if(not CTREMusicPlayback().isPlaying()):
+            self.ctrl.set_control(controls.PositionVoltage(posCmdRev).with_slot(0).with_feed_forward(arbFF))
 
 
 
@@ -111,12 +112,14 @@ class WrapperedKraken:
         self.desVel = velCmdRPM
         self.desVolt = arbFF
         velCmdRotPS = velCmdRPM/60.0
-        self.ctrl.set_control(controls.VelocityVoltage(velCmdRotPS).with_slot(0).with_feed_forward(arbFF))
+        if(not CTREMusicPlayback().isPlaying()):
+            self.ctrl.set_control(controls.VelocityVoltage(velCmdRotPS).with_slot(0).with_feed_forward(arbFF))
 
 
     def setVoltage(self, outputVoltageVolts):
         self.desVolt = outputVoltageVolts
-        self.ctrl.set_control(controls.VoltageOut(outputVoltageVolts))
+        if(not CTREMusicPlayback().isPlaying()):
+            self.ctrl.set_control(controls.VoltageOut(outputVoltageVolts))
 
     def getMotorPositionRad(self):
         if(TimedRobot.isSimulation()):
