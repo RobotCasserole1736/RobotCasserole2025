@@ -1,4 +1,4 @@
-from phoenix6 import hardware, configs, signals, controls, StatusCode
+from phoenix6 import hardware, configs, signals, controls, StatusCode, SignalLogger
 from wpilib import TimedRobot
 from utils.signalLogging import addLog
 from utils.units import rev2Rad, rad2Rev, radPerSec2RPM, RPM2RadPerSec
@@ -14,6 +14,7 @@ from utils.faults import Fault
 
 class WrapperedKraken:
     def __init__(self, canID, name, brakeMode=False, currentLimitA=40.0):
+        SignalLogger.enable_auto_logging(False)
         self.ctrl = hardware.TalonFX(canID, "rio")
         self.name = name
         self.configSuccess = False
@@ -119,6 +120,7 @@ class WrapperedKraken:
             pos = self.simActPos
         else:
             if self.configSuccess:
+                self.motorPosSig.refresh()
                 pos = rev2Rad(self.motorPosSig.value_as_double)
             else:
                 pos = 0

@@ -74,7 +74,7 @@ MAX_ROTATE_SPEED_RAD_PER_SEC = deg2Rad(
 )  # Fixed at the maximum rotational speed we'd want.
 # Accelerations - also a total guess
 MAX_TRANSLATE_ACCEL_MPS2 = (
-    MAX_FWD_REV_SPEED_MPS / 0.50
+    MAX_FWD_REV_SPEED_MPS / 0.30
 )  # 0-full time of 0.5 second - this is a guestimate
 MAX_ROTATE_ACCEL_RAD_PER_SEC_2 = (
     MAX_ROTATE_SPEED_RAD_PER_SEC / 0.25

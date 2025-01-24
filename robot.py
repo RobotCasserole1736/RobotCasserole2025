@@ -1,4 +1,5 @@
 import sys
+from phoenix6 import SignalLogger
 import wpilib
 from dashboard import Dashboard
 from drivetrain.controlStrategies.autoDrive import AutoDrive
@@ -32,7 +33,11 @@ class MyRobot(wpilib.TimedRobot):
         remoteRIODebugSupport()
 
         self.crashLogger = CrashLogger()
+
+        # We do our own logging, we don't need additional logging in the background.
+        # Both of these will increase CPU load by a lot, and we never use their output.
         wpilib.LiveWindow.disableAllTelemetry()
+
         self.webserver = Webserver()
 
         self.driveTrain = DrivetrainControl()

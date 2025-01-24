@@ -95,8 +95,6 @@ class Calibration:
     # Periodic update to read from the desired value on NT, and publish the current value
     def update(self):
         val = self.desValueSubscriber.getAtomic()
-        if(val.time != 0):
-            print(val.time)
         if val.time > self._lastUpdateTime:
             self.set(val.value)
             self._lastUpdateTime = val.time
