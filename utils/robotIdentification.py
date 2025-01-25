@@ -51,3 +51,5 @@ class RobotIdentification(metaclass=Singleton):
         """
         return self.robotType 
 
+    def isSpiresRobot(self)->bool:
+        return str(self.robotType).startswith('RobotTypes.Spires')

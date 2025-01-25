@@ -4,7 +4,7 @@
 #
 
 [tool.robotpy]
-
+# to see what versions are available: https://pypi.org/pypi/robotpy/json
 # Version of robotpy this project depends on
 robotpy_version = "2025.2.1.0"
 
@@ -15,7 +15,7 @@ robotpy_extras = [
     "apriltag",
     # "commands2"
     "cscore",
-    # "navx"
+    "navx",
     # "pathplannerlib"
     # "phoenix5",
     # "phoenix6",
