@@ -60,9 +60,6 @@ class ElevatorControl(metaclass=Singleton):
         self.relEncOffsetM = 0.0
         # Create a motion profile with the given maximum velocity and maximum
         # acceleration constraints for the next setpoint.
-        # TODO: Get rid of this line I think. I commented it out because self.profiler is properly 
-        # defined above and is used later in code
-        # self.profile = TrapezoidProfile(TrapezoidProfile.Constraints(1.75, 0.75))
 
         self.goal = TrapezoidProfile.State()
         self.setpoint = TrapezoidProfile.State()
@@ -94,7 +91,7 @@ class ElevatorControl(metaclass=Singleton):
         # just whatever offset the relative sensor currently has.
         self.relEncOffsetM = 0.0
 
-        # New Offset = real angle - current rel sensor offset ??
+        # New Offset = real height - what height says?? 
         self.relEncOffsetM = self._getAbsHeight() - self.getHeightM()
 
     def update(self):

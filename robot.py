@@ -1,7 +1,7 @@
 import sys
 import wpilib
-from elevatorAndMech.elevatorControl import ElevatorControl
 from dashboard import Dashboard
+from elevatorAndMech.elevatorControl import ElevatorControl
 from drivetrain.controlStrategies.autoDrive import AutoDrive
 from drivetrain.controlStrategies.trajectory import Trajectory
 from drivetrain.drivetrainCommand import DrivetrainCommand
