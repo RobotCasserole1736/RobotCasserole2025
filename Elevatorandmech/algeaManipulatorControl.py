@@ -1,5 +1,7 @@
 from math import cos
-from Elevatorandmech.ElevatorandMechConstants import ALGAE_ANGLE_ABS_POS_ENC_OFFSET
+
+import wpimath.controller
+from Elevatorandmech.ElevatorandMechConstants import ALGAE_ANGLE_ABS_POS_ENC_OFFSET, ALGAE_GEARBOX_GEAR_RATIO
 from utils.signalLogging import log
 import wpilib
 from wpimath.trajectory import TrapezoidProfile
@@ -8,7 +10,7 @@ from utils.calibration import Calibration
 from utils.constants import ALGAE_INT_CANID, ALGAE_WRIST_CANID, ALGAE_GAMEPIECE_CANID, ALGAE_ENC_PORT
 from utils.singleton import Singleton
 from enum import Enum
-from utils.units import m2in, rad2Deg, deg2Rad
+from utils.units import m2in, rad2Deg, deg2Rad, sign
 from wrappers.wrapperedSparkMax import WrapperedSparkMax
 from playingwithfusion import TimeOfFlight
 from wrappers.wrapperedThroughBoreHexEncoder import WrapperedThroughBoreHexEncoder
@@ -26,7 +28,7 @@ class AlgaeWristControl(metaclass=Singleton):
     def __init__(self):
         #one important assumption we're making right now is that we don't need limits on the algae manipulator based on elevator height
 
-        self.kG = Calibration(name="Algae kG", default=0.1, units="V/degErr")
+        self.kG = 0
         self.kS = Calibration(name="Algae kS", default=0.1, units="V/degErr")
         self.kV = Calibration(name="Algae kV", default=0.1, units="V/degErr")
         self.kP = Calibration(name="Algae kP", default=0.1, units="V/degErr")
@@ -34,7 +36,7 @@ class AlgaeWristControl(metaclass=Singleton):
 
 
         self.WristCurState = AlgaeWristState.DISABLED
-        self.wristMotor = WrapperedSparkMax(ALGAE_WRIST_CANID, "AlgaeWristMotor", True, 10)
+        self.wristMotor = WrapperedSparkMax(ALGAE_WRIST_CANID, "AlgaeWristMotor", True, self.motorVoltage)
         self.curMotorVoltage = 0.0
         self.STOW_POS_DEG = Calibration(name="Stow Position", default = 0, units="deg")
         self.INTAKE_POS_DEG = Calibration(name="Intake Position", default = 0, units="deg")
@@ -42,6 +44,7 @@ class AlgaeWristControl(metaclass=Singleton):
         self.ABSOLUTE_OFFSET = ALGAE_ANGLE_ABS_POS_ENC_OFFSET
         self.curPosCmdDeg = self.STOW_POS_DEG.get()
         self.algaeAbsEnc = WrapperedThroughBoreHexEncoder(port=ALGAE_ENC_PORT, name="AlgaeEncOffset", mountOffsetRad=deg2Rad(self.ABSOLUTE_OFFSET))
+
         self.pos = AlgaeWristState
         self.disPos = 0
         self.inPos = 0
@@ -49,7 +52,22 @@ class AlgaeWristControl(metaclass=Singleton):
         self.reefPos = 0
         self.maxAcc = 0
         self.maxVel = 0
-        self.vel = 0
+        self.controller = wpimath.controller.ProfiledPIDController(self.kP.get(),0,0,TrapezoidProfile.Constraints(self.maxVel, self.maxAcc),0.02) 
+        self.controller.reset(self.disPos)
+        self.stopped = True
+        self.profiledPos = 0
+        self.motorVoltage = 0
+        self.motorVelCmd = 0
+        #TODO: all of these need to be changed eventually
+
+        # Relative Encoder Offsets
+        # Releative encoders always start at 0 at power-on
+        # However, we may or may not have the mechanism at the "zero" position when we powered on
+        # These variables store an offset which is calculated from the absolute sensors
+        # to make sure the relative sensors inside the encoders accurately reflect
+        # the actual position of the mechanism
+        self.relEncOffsetRad = 0.0
+        self.initFromAbsoluteSensor()
         #set the degree details for your goals. For stow, intake off gorund, etc. 
         #Also, the absolute offset will be a constant that you can set here or just have in constants 
     
@@ -59,32 +77,28 @@ class AlgaeWristControl(metaclass=Singleton):
     def getAngleDeg(self):
         return rad2Deg(self.algaeAbsEnc.getAngleRad())
     
+    def _armAngleToMotorRad(self,armAng):
+        return ((armAng + self.relEncOffsetRad)* ALGAE_GEARBOX_GEAR_RATIO)
+    
+        # This routine uses the absolute sensors to adjust the offsets for the relative sensors
+    # so that the relative sensors match reality.
+    # It should be called.... infrequently. Likely once shortly after robot init.
+    def initFromAbsoluteSensor(self):
+        pass
+        # TODO:put actual calculations in this
+        # New Offset = real angle - current rel sensor offset ??
+        # self.relEncOffsetRad = self._getAbsAng() - self.getHeightM()
+
+
     def update(self):
         
         #this is where you will figure out where you're trying to go. See tunerAngleControl.py for a simple answer
         #this could work if it's light enough. But you might have to go to something more like singerA
-        if(self.pos == 0):
-            self.desPos = self.disPos
-        elif(self.pos == 1):
-            self.desPos = self.inPos
-        elif(self.pos == 2):
-            self.desPos = self.stowPos
-        elif(self.pos == 3):
-            self.desPos = self.reefPos
-        else:
-            pass
-
-        TrapezoidProfile.Constraints(self.maxVel, self.maxAcc)
-        TrapezoidProfile.State(self.desPos, self.vel)
-        self.profile = TrapezoidProfile(TrapezoidProfile.Constraints(self.maxVel, self.maxAcc))
-
-
-
         self.algaeAbsEnc.update()
         
         actualPos = self.getAngleDeg()
 
-        self.kG = math.cos(actualPos)
+        
 
         err =  self.curPosCmdDeg - actualPos
         
@@ -98,6 +112,22 @@ class AlgaeWristControl(metaclass=Singleton):
             motorCmdV = -maxMag
         
         self.wristMotor.setVoltage(motorCmdV)
+
+        self.kG = math.cos(actualPos)
+
+        if(self.pos == 0):
+            self.desPos = self.disPos
+        elif(self.pos == 1):
+            self.desPos = self.inPos
+        elif(self.pos == 2):
+            self.desPos = self.stowPos
+        elif(self.pos == 3):
+            self.desPos = self.reefPos
+        else:
+            pass
+
+        vFF = self.kV.get() * self.motorVelCmd  + self.kS.get() * sign(self.motorVelCmd) + self.kG
+        self.wristMotor.setPosCmd(self.controller.calculate(actualPos,self.desPos),vFF)
 
         log("Algae Pos Des", self.curPosCmdDeg,"deg")
         log("Algae Pos Act", actualPos ,"deg")
@@ -121,7 +151,7 @@ class AlgeaIntakeControl(metaclass=Singleton):
         self.tofSensor = TimeOfFlight(ALGAE_GAMEPIECE_CANID)
         self.tofSensor.setRangingMode(TimeOfFlight.RangingMode.kShort, 24)
         self.tofSensor.setRangeOfInterest(6, 6, 10, 10)  # fov for sensor # game piece sensor empty for now
-        # LOOK AT THIS LATER YOU SOFTWARE PEOPLE YOU BETTER LOOK AT THIS
+        #TODO: LOOK AT THIS LATER YOU SOFTWARE PEOPLE YOU BETTER LOOK AT THIS
 
         self.gamePiecePresentCal = Calibration("AlgaePresentThresh", 24, "in")
 
