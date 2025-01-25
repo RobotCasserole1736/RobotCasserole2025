@@ -46,10 +46,10 @@ class DrivetrainPoseEstimator:
         # Generally accurate, but slow and laggy. Might need to be disabled
         # if the robot isn't flat on the ground for some reason.
         self.cams = [
-            WrapperedPoseEstPhotonCamera("LEFTFRONT_CAM", ROBOT_TO_LEFTFRONT_CAM),
-            WrapperedPoseEstPhotonCamera("RIGHTFRONT_CAM", ROBOT_TO_RIGHTFRONT_CAM),
-            WrapperedPoseEstPhotonCamera("LEFTBACK_CAM", ROBOT_TO_LEFTBACK_CAM),
-            WrapperedPoseEstPhotonCamera("RIGHTBACK_CAM", ROBOT_TO_RIGHTBACK_CAM),
+            WrapperedPoseEstPhotonCamera("ACAM4", ROBOT_TO_LEFTFRONT_CAM),
+            WrapperedPoseEstPhotonCamera("ACAM1", ROBOT_TO_RIGHTFRONT_CAM),
+            WrapperedPoseEstPhotonCamera("_ACAM3", ROBOT_TO_LEFTBACK_CAM),
+            WrapperedPoseEstPhotonCamera("ACAM2", ROBOT_TO_RIGHTBACK_CAM),
 
         ]
         self._camTargetsVisible = False
