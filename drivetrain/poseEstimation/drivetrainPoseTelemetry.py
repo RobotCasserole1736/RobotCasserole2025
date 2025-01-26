@@ -30,6 +30,8 @@ class DrivetrainPoseTelemetry:
 
         self.desPose = Pose2d()
 
+        self.autoDriveGoalPose = Pose2d()
+
         self.leftFrontCamPosePublisher = (
             NetworkTableInstance.getDefault()
             .getStructTopic("/LeftFrontCamPose", Pose3d)
@@ -76,6 +78,13 @@ class DrivetrainPoseTelemetry:
     def clearVisionObservations(self):
         self.visionPoses = []
 
+    def setAutoDriveGoalPose(self, pose):
+        if(pose is not None):
+            self.autoDriveGoalPose = pose
+        else:
+            self.autoDriveGoalPose = Pose2d() # default to 0,0
+
+
     def update(self, estPose:Pose2d, moduleAngles):
         self.field.getRobotObject().setPose(estPose)
         self.field.getObject("ModulePoses").setPoses(
@@ -97,6 +106,8 @@ class DrivetrainPoseTelemetry:
 
         self.field.getObject("visionObservations").setPoses(self.visionPoses)
         self.visionPoses = []
+
+        self.field.getObject("autoDriveGoalPose").setPose(self.autoDriveGoalPose)
 
         self.leftFrontCamPosePublisher.set(Pose3d(estPose).transformBy(ROBOT_TO_LEFTFRONT_CAM))
         self.rightFrontCamPosePublisher.set(Pose3d(estPose).transformBy(ROBOT_TO_RIGHTFRONT_CAM))
