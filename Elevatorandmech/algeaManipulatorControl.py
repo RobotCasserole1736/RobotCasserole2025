@@ -86,8 +86,10 @@ class AlgaeWristControl(metaclass=Singleton):
         # New Offset = real angle - current rel sensor offset ??
         # self.relEncOffsetRad = self._getAbsAng() - self.getHeightM()
 
-    def changePos(self,Pos):  
+    def setWriteState(self, newPos : AlgaeWristState):
+        self.pos = newPos
 
+    def changePos(self,Pos):  
         if(Pos == 0):
             return self.disPos
         elif(Pos == 1):
@@ -107,8 +109,6 @@ class AlgaeWristControl(metaclass=Singleton):
         
         actualPos = self.getAngleDeg()
 
-        
-
         err =  self.curPosCmdDeg - actualPos
         
         motorCmdV = err * self.kP.get()
@@ -121,8 +121,6 @@ class AlgaeWristControl(metaclass=Singleton):
             motorCmdV = -maxMag
         
         self.wristMotor.setVoltage(motorCmdV)
-
-
 
         self.desPos = self.changePos(self.pos)
         vFF = self.kV.get() * self.motorVelCmd  + self.kS.get() * sign(self.motorVelCmd) + self.kG.get()*math.cos(actualPos)
