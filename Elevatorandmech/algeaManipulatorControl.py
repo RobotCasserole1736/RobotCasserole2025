@@ -68,8 +68,15 @@ class AlgaeWristControl(metaclass=Singleton):
         #set the degree details for your goals. For stow, intake off gorund, etc. 
         #Also, the absolute offset will be a constant that you can set here or just have in constants 
     
-    def setDesPos(self,desPosin):
-        self.curPosCmdDeg = desPosin
+    def setDesPos(self, desState : AlgaeWristState):
+        self.curPosCmdDeg = changePos(desState)
+        self.pos = desState
+
+    def getDesPosDeg(self):
+        return self.curPosCmdDeg
+
+    def getDesPosCmd(self):
+        return self.pos
 
     def getAngleDeg(self):
         return rad2Deg(self.algaeAbsEnc.getAngleRad())
@@ -85,9 +92,6 @@ class AlgaeWristControl(metaclass=Singleton):
         # TODO:put actual calculations in this
         # New Offset = real angle - current rel sensor offset ??
         # self.relEncOffsetRad = self._getAbsAng() - self.getHeightM()
-
-    def setWriteState(self, newPos : AlgaeWristState):
-        self.pos = newPos
 
     def changePos(self,Pos):  
         if(Pos == 0):
