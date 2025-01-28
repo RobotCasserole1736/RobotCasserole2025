@@ -38,8 +38,7 @@ class DriverInterface:
         self.enableClimbMode = False
         self.disableClimbMode = False
 
-        self.disableCoralSystem = False #I set up the disable/enable coral variables like this to make preserving auto input easier.
-        self.enableCoralSystem = False
+        self.runCoral = False #I set up the disable/enable coral variables like this to make preserving auto input easier.
         self.overrideCoralSystemToEject = False
 
         # Logging
@@ -91,10 +90,7 @@ class DriverInterface:
             self.enableClimbMode = (225 < self.ctrl.getPOV() < 315)
             self.disableClimbMode = (45 < self.ctrl.getPOV() < 135)
 
-            self.enableCoral = (0 <= self.ctrl.getPOV() < 45) or (225 <= self.ctrl.getPOV() <= 0)
-            self.disableCoral = (135 < self.ctrl.getPOV() < 225) 
-
-            self.overrideCoralSystemToEject = self.ctrl.getRightBumperButton()
+            self.runCoral = self.ctrl.getLeftBumper()
 
             if self.disableClimbMode:
                 self.enableClimbMode = False
@@ -110,9 +106,7 @@ class DriverInterface:
             self.autoDrive = False
             self.createDebugObstacle = False
             self.connectedFault.setFaulted()
-            self.enableCoral = False 
-            self.disableCoral = True #I'm assuming that if a controller isn't connected then we want to disable the coral.
-
+            self.runCoral = False 
 
     def getCmd(self) -> DrivetrainCommand:
         retval = DrivetrainCommand()
@@ -133,11 +127,10 @@ class DriverInterface:
     def getClimbMode(self) -> bool:
         return self.disableClimbMode
     
-    def getEnableCoralCommand(self) -> bool:
-        return self.enableCoralSystem
-    
-    def getDisableCoralCommand(self) -> bool: 
-        return self.disableCoralSystem
+    def getEjectCoral(self) -> bool: 
+        #by eject, I'm assuming means running coral once at elevator height
+        return self.runCoral
     
     def getCoralEjectOverride(self) -> bool:
+        #this means eject the coral where you are ASAP, no worry about elevator movement
         return self.overrideCoralSystemToEject
