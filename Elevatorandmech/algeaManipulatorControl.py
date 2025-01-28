@@ -35,25 +35,22 @@ class AlgaeWristControl(metaclass=Singleton):
         self.maxOutputV = Calibration(name="Algae Max Voltage", default=12.0, units="V")
 
 
-        self.WristCurState = AlgaeWristState.DISABLED
+        
         self.wristMotor = WrapperedSparkMax(ALGAE_WRIST_CANID, "AlgaeWristMotor", True, self.motorVoltage)
         self.curMotorVoltage = 0.0
-        self.STOW_POS_DEG = Calibration(name="Stow Position", default = 0, units="deg")
-        self.INTAKE_POS_DEG = Calibration(name="Intake Position", default = 0, units="deg")
-        self.REEF_POS_DEG = Calibration(name="Reef Position", default = 0, units="deg")
         self.ABSOLUTE_OFFSET = ALGAE_ANGLE_ABS_POS_ENC_OFFSET
-        self.curPosCmdDeg = self.STOW_POS_DEG.get()
+        self.curPosCmdDeg = self.stowPos.get()
         self.algaeAbsEnc = WrapperedThroughBoreHexEncoder(port=ALGAE_ENC_PORT, name="AlgaeEncOffset", mountOffsetRad=deg2Rad(self.ABSOLUTE_OFFSET))
 
-        self.pos = AlgaeWristState
-        self.disPos = 0
-        self.inPos = 0
-        self.stowPos = 0
-        self.reefPos = 0
-        self.maxAcc = 500000
-        self.maxVel = 500000
+        self.pos = AlgaeWristState.DISABLED
+        self.disPos = Calibration(name="Disabled Position", default = 0, units="deg")
+        self.inPos = Calibration(name="Intake Position", default = 0, units="deg")
+        self.stowPos = Calibration(name="Stow Position", default = 0, units="deg")
+        self.reefPos = Calibration(name="Reef Position", default = 0, units="deg")
+        self.maxAcc = 0
+        self.maxVel = 0
         self.controller = wpimath.controller.ProfiledPIDController(self.kP.get(),0,0,TrapezoidProfile.Constraints(self.maxVel, self.maxAcc),0.02) 
-        self.controller.reset(self.disPos)
+        self.controller.reset(self.disPos.get())
         self.stopped = True
         self.profiledPos = 0
         self.motorVoltage = 0
@@ -89,6 +86,18 @@ class AlgaeWristControl(metaclass=Singleton):
         # New Offset = real angle - current rel sensor offset ??
         # self.relEncOffsetRad = self._getAbsAng() - self.getHeightM()
 
+    def changePos(self,Pos):  
+
+        if(Pos == 0):
+            return self.disPos
+        elif(Pos == 1):
+            return self.inPos
+        elif(Pos == 2):
+            return self.stowPos
+        elif(Pos == 3):
+            return self.reefPos
+        else:
+            return self.disPos
 
     def update(self):
         
@@ -114,24 +123,15 @@ class AlgaeWristControl(metaclass=Singleton):
         self.wristMotor.setVoltage(motorCmdV)
 
 
-        if(self.pos == 0):
-            self.desPos = self.disPos
-        elif(self.pos == 1):
-            self.desPos = self.inPos
-        elif(self.pos == 2):
-            self.desPos = self.stowPos
-        elif(self.pos == 3):
-            self.desPos = self.reefPos
-        else:
-            pass
 
+        self.desPos = self.changePos(self.pos)
         vFF = self.kV.get() * self.motorVelCmd  + self.kS.get() * sign(self.motorVelCmd) + self.kG.get()*math.cos(actualPos)
-        self.wristMotor.setPosCmd(self.controller.calculate(actualPos,self.desPos),vFF)
+        self.wristMotor.setPosCmd(self.controller.calculate(actualPos,self.desPos.get()),vFF)
 
         log("Algae Pos Des", self.curPosCmdDeg,"deg")
         log("Algae Pos Act", actualPos ,"deg")
         log("Algae Motor Cmd", motorCmdV, "V")
-        
+    
 class AlgeaIntakeControl(metaclass=Singleton):
 
     def __init__(self):
