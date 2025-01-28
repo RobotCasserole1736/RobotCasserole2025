@@ -1,5 +1,5 @@
 from playingwithfusion import TimeOfFlight
-from Elevatorandmech.ElevatorandMechConstants import MAX_ELEV_ACCEL_MPS2, MAX_ELEV_VEL_MPS, ELEV_GEARBOX_GEAR_RATIO, ELEV_SPOOL_RADIUS_M
+from Elevatorandmech.ElevatorandMechConstants import ELEV_HEIGHT, MAX_ELEV_ACCEL_MPS2, MAX_ELEV_VEL_MPS, ELEV_GEARBOX_GEAR_RATIO, ELEV_SPOOL_RADIUS_M
 from utils.calibration import Calibration
 from utils.units import sign
 from utils.signalLogging import log
@@ -12,18 +12,20 @@ from wpilib import Timer
 
 class ElevatorControl(metaclass=Singleton):
     def __init__(self):
+
+        self.desState = TrapezoidProfile.State(self.heightGoal,0)
+
         # Elevator Motors
-        self.Rmotor = WrapperedSparkMax(ELEV_RM_CANID, "ElevatorMotor", brakeMode=True)
-        #self.Rmotor.setInverted(True)
-        self.LMotor = WrapperedSparkMax(ELEV_LM_CANID, SparkLowLevel.MotorType.kBrushless, brakeMode=True)
+        self.Rmotor = WrapperedSparkMax(ELEV_RM_CANID, "ElevatorMotorRight", brakeMode=True)
+        self.LMotor = WrapperedSparkMax(ELEV_LM_CANID, "ElevatorMotorLeft", brakeMode=True)
         #we don't know if we want to invert LMotor (left) or not when we follow RMotor (right), automatically assumed False
         self.LMotor.setFollow(ELEV_RM_CANID)
 
         # Coral Scoring Heights in meters
-        self.L1_Height = Calibration(name="Height of L1", units="m", default=0.5842)
-        self.L2_Height = Calibration(name="Height of L2", units="m", default=0.9398)
-        self.L3_Height = Calibration(name="Height of L3", units="m", default=1.397)
-        self.L4_Height = Calibration(name="Height of L4", units="m", default=2.159)
+        self.L1_Height = Calibration(name="Height of L1", units="m", default=0.5842 - ELEV_HEIGHT)
+        self.L2_Height = Calibration(name="Height of L2", units="m", default=0.9398 - ELEV_HEIGHT)
+        self.L3_Height = Calibration(name="Height of L3", units="m", default=1.397 - ELEV_HEIGHT)
+        self.L4_Height = Calibration(name="Height of L4", units="m", default=2.159 - ELEV_HEIGHT)
 
         # FF and proportional gain constants
         self.kV = Calibration(name="Elevator kV", default=0.02, units="V/rps")
@@ -42,10 +44,8 @@ class ElevatorControl(metaclass=Singleton):
         self.actualPos = 0
         self.stopped = True
 
-        # Absolute sensor used for calculating relative encoder offset
-        self.heightAbsSen = TimeOfFlight(ELEV_TOF_CANID)
-        self.heightAbsSen.setRangingMode(TimeOfFlight.RangingMode.kShort, 24)
-        self.heightAbsSen.setRangeOfInterest(6, 6, 10, 10)  # fov for sensor
+        # Limit switch code; bottom for resetting offset and ensuring it starts correctly, top for saftey to stop from spinning
+    
 
         # Absolute Sensor mount offsets
         # After mounting the sensor, these should be tweaked one time
@@ -107,8 +107,7 @@ class ElevatorControl(metaclass=Singleton):
             self.profiledPos = self.actualPos
         else:
             curState = self.profiler.State()
-            desState = TrapezoidProfile.State(self.heightGoal,0)
-            self.profiler.calculate(0.02,curState,desState)
+            self.profiler.calculate(0.02, curState, self.desState)
 
             self.profiledPos = curState.position
 
@@ -123,6 +122,7 @@ class ElevatorControl(metaclass=Singleton):
 
     # I think we should be able to pass 1 parameter for desired height position
     def setHeightGoal(self, goL1, goL2, goL3, goL4, coralSafe):
+        self.desState = TrapezoidProfile.State(self.heightGoal,0)
         if coralSafe:
             if goL1:
                 self.heightGoal = self.L1_Height.get()
