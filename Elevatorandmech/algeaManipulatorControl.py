@@ -1,20 +1,17 @@
+from enum import Enum
 from math import cos
-
-import wpimath.controller
+from playingwithfusion import TimeOfFlight
 from Elevatorandmech.ElevatorandMechConstants import ALGAE_ANGLE_ABS_POS_ENC_OFFSET, ALGAE_GEARBOX_GEAR_RATIO
 from utils.signalLogging import log
-import wpilib
 from wpimath.trajectory import TrapezoidProfile
 from utils import faults
 from utils.calibration import Calibration
 from utils.constants import ALGAE_INT_CANID, ALGAE_WRIST_CANID, ALGAE_GAMEPIECE_CANID, ALGAE_ENC_PORT
 from utils.singleton import Singleton
-from enum import Enum
 from utils.units import m2in, rad2Deg, deg2Rad, sign
+import wpimath.controller
 from wrappers.wrapperedSparkMax import WrapperedSparkMax
-from playingwithfusion import TimeOfFlight
 from wrappers.wrapperedThroughBoreHexEncoder import WrapperedThroughBoreHexEncoder
-import math
 
 class AlgaeWristState(Enum):
     DISABLED = 0
@@ -34,8 +31,6 @@ class AlgaeWristControl(metaclass=Singleton):
         self.kP = Calibration(name="Algae kP", default=0.1, units="V/degErr")
         self.maxOutputV = Calibration(name="Algae Max Voltage", default=12.0, units="V")
 
-
-        
         self.wristMotor = WrapperedSparkMax(ALGAE_WRIST_CANID, "AlgaeWristMotor", True, self.motorVoltage)
         self.curMotorVoltage = 0.0
         self.ABSOLUTE_OFFSET = ALGAE_ANGLE_ABS_POS_ENC_OFFSET
@@ -67,9 +62,9 @@ class AlgaeWristControl(metaclass=Singleton):
         self.initFromAbsoluteSensor()
         #set the degree details for your goals. For stow, intake off gorund, etc. 
         #Also, the absolute offset will be a constant that you can set here or just have in constants 
-    
+
     def setDesPos(self, desState : AlgaeWristState):
-        self.curPosCmdDeg = changePos(desState)
+        self.curPosCmdDeg = self.changePos(desState)
         self.pos = desState
 
     def getDesPosDeg(self):
@@ -80,41 +75,47 @@ class AlgaeWristControl(metaclass=Singleton):
 
     def getAngleDeg(self):
         return rad2Deg(self.algaeAbsEnc.getAngleRad())
-    
+
+    def _getAbsRot(self):
+        return self.algaeAbsEnc.getAngleRad() - deg2Rad(self.relEncOffsetRad)
+
+    def _motorRadToAngleRad(self, motorRev):
+        return motorRev * 1/ALGAE_GEARBOX_GEAR_RATIO - self.relEncOffsetRad
+
+    def getAngleRad(self):
+        return self._motorRadToAngleRad(self.wristMotor.getMotorPositionRad())
+
     def _armAngleToMotorRad(self,armAng):
         return ((armAng + self.relEncOffsetRad)* ALGAE_GEARBOX_GEAR_RATIO)
-    
-        # This routine uses the absolute sensors to adjust the offsets for the relative sensors
+
+    # This routine uses the absolute sensors to adjust the offsets for the relative sensors
     # so that the relative sensors match reality.
     # It should be called.... infrequently. Likely once shortly after robot init.
     def initFromAbsoluteSensor(self):
-        pass
-        # TODO:put actual calculations in this
-        # New Offset = real angle - current rel sensor offset ??
-        # self.relEncOffsetRad = self._getAbsAng() - self.getHeightM()
+        self.relEncOffsetRad = self._getAbsRot() - self.getAngleRad()
 
-    def changePos(self,Pos):  
+    # Might optimize to accept 1 enum parameter for new position
+    def changePos(self,Pos):
         if(Pos == 0):
-            return self.disPos
+            return self.disPos.get()
         elif(Pos == 1):
-            return self.inPos
+            return self.inPos.get()
         elif(Pos == 2):
-            return self.stowPos
+            return self.stowPos.get()
         elif(Pos == 3):
-            return self.reefPos
+            return self.reefPos.get()
         else:
-            return self.disPos
+            return self.disPos.get()
 
     def update(self):
-        
         #this is where you will figure out where you're trying to go. See tunerAngleControl.py for a simple answer
         #this could work if it's light enough. But you might have to go to something more like singerA
         self.algaeAbsEnc.update()
-        
+
         actualPos = self.getAngleDeg()
 
         err =  self.curPosCmdDeg - actualPos
-        
+
         motorCmdV = err * self.kP.get()
 
         maxMag = self.maxOutputV.get()
@@ -123,26 +124,22 @@ class AlgaeWristControl(metaclass=Singleton):
             motorCmdV = maxMag
         elif(motorCmdV < -maxMag):
             motorCmdV = -maxMag
-        
+
         self.wristMotor.setVoltage(motorCmdV)
 
         self.desPos = self.changePos(self.pos)
-        vFF = self.kV.get() * self.motorVelCmd  + self.kS.get() * sign(self.motorVelCmd) + self.kG.get()*math.cos(actualPos)
-        self.wristMotor.setPosCmd(self.controller.calculate(actualPos,self.desPos.get()),vFF)
+        vFF = self.kV.get() * self.motorVelCmd  + self.kS.get() * sign(self.motorVelCmd) + self.kG.get()*cos(actualPos)
+        self.wristMotor.setPosCmd(self.controller.calculate(actualPos,self.desPos),vFF)
 
         log("Algae Pos Des", self.curPosCmdDeg,"deg")
         log("Algae Pos Act", actualPos ,"deg")
         log("Algae Motor Cmd", motorCmdV, "V")
-    
-class AlgeaIntakeControl(metaclass=Singleton):
 
+class AlgeaIntakeControl(metaclass=Singleton):
     def __init__(self):
         #initialize all of your variables, spark maxes, etc. 
         self.intakeCommandState = False
         self.ejectCommandState = False
-        
-
-        
         self.algaeMotor = WrapperedSparkMax(ALGAE_INT_CANID, "AlgaeIntakeMotor", True)
 
         self.intakeVoltageCal = Calibration("IntakeVoltage", 12, "V")
@@ -155,7 +152,6 @@ class AlgeaIntakeControl(metaclass=Singleton):
         #TODO: LOOK AT THIS LATER YOU SOFTWARE PEOPLE YOU BETTER LOOK AT THIS
 
         self.gamePiecePresentCal = Calibration("AlgaePresentThresh", 24, "in")
-
 
         self.disconTOFFault = faults.Fault("Singer TOF Sensor is Disconnected")
 
