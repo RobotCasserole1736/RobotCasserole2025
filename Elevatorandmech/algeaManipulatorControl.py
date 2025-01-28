@@ -28,9 +28,9 @@ class AlgaeWristControl(metaclass=Singleton):
     def __init__(self):
         #one important assumption we're making right now is that we don't need limits on the algae manipulator based on elevator height
 
-        self.kG = 0
-        self.kS = Calibration(name="Algae kS", default=0.1, units="V/degErr")
-        self.kV = Calibration(name="Algae kV", default=0.1, units="V/degErr")
+        self.kG = Calibration(name="Algae kG", default=0.1, units="V/cos(deg)")
+        self.kS = Calibration(name="Algae kS", default=0.1, units="V")
+        self.kV = Calibration(name="Algae kV", default=0.1, units="V/rps")
         self.kP = Calibration(name="Algae kP", default=0.1, units="V/degErr")
         self.maxOutputV = Calibration(name="Algae Max Voltage", default=12.0, units="V")
 
@@ -50,8 +50,8 @@ class AlgaeWristControl(metaclass=Singleton):
         self.inPos = 0
         self.stowPos = 0
         self.reefPos = 0
-        self.maxAcc = 0
-        self.maxVel = 0
+        self.maxAcc = 500000
+        self.maxVel = 500000
         self.controller = wpimath.controller.ProfiledPIDController(self.kP.get(),0,0,TrapezoidProfile.Constraints(self.maxVel, self.maxAcc),0.02) 
         self.controller.reset(self.disPos)
         self.stopped = True
@@ -113,7 +113,6 @@ class AlgaeWristControl(metaclass=Singleton):
         
         self.wristMotor.setVoltage(motorCmdV)
 
-        self.kG = math.cos(actualPos)
 
         if(self.pos == 0):
             self.desPos = self.disPos
@@ -126,7 +125,7 @@ class AlgaeWristControl(metaclass=Singleton):
         else:
             pass
 
-        vFF = self.kV.get() * self.motorVelCmd  + self.kS.get() * sign(self.motorVelCmd) + self.kG
+        vFF = self.kV.get() * self.motorVelCmd  + self.kS.get() * sign(self.motorVelCmd) + self.kG.get()*math.cos(actualPos)
         self.wristMotor.setPosCmd(self.controller.calculate(actualPos,self.desPos),vFF)
 
         log("Algae Pos Des", self.curPosCmdDeg,"deg")
