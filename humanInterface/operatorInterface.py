@@ -17,6 +17,7 @@ class OperatorInterface:
         self.ctrl = XboxController(ctrlIdx)
         self.connectedFault = Fault(f"Operator XBox controller ({ctrlIdx}) unplugged")
         self.ejectCoral = False
+        self.autoIntakeCoral = True
         self.intakeAlgae = False
         self.ejectAlgae = False
         #we are going to use elevManual commands as a if-pressed, make goal go up by __ m
@@ -39,11 +40,24 @@ class OperatorInterface:
             self.L2 = self.ctrl.getAButton()
             self.L3 = self.ctrl.getBButton()
             self.L4 = self.ctrl.getYButton()
+            self.elevManualUp = self.ctrl.getLeftBumper()
+            self.elevManualUp = self.ctrl.getRightBumper()
+
+            self.intakeAlgae = self.ctrl.getLeftTriggerAxis() > .3
+            self.ejectAlgae = self.ctrl.getRightTriggerAxis() > .3
+            self.ejectCoral = True if self.ctrl.getPOV() != -1 else False
+
+            if self.ctrl.getStartButtonPressed():
+                if self.autoIntakeCoral:
+                    self.autoIntakeCoral = False
+                else:
+                    self.autoIntakeCoral = True
 
             self.connectedFault.setNoFault()
 
         else:
             # If the joystick is unplugged, pick safe-state commands and raise a fault
+            self.autoIntakeCoral = False
             self.ejectCoral = False
             self.intakeAlgae = False
             self.ejectAlgae = False
@@ -81,7 +95,6 @@ class OperatorInterface:
     
     def getElevManDown(self):
         return self.elevManualDown
-
-"""def getCmd(self):
-    return self.Cmd
-"""
+    
+    def getAutoIntake(self):
+        return self.autoIntakeCoral
