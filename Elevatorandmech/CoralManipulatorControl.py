@@ -43,10 +43,7 @@ class CoralManipulatorControl(metaclass=Singleton):
 
         #state to set what current state we're in
         #if there's an eject command, we just want to eject right away
-        if self.overrideToEject:
-            self.coralCurState = CoralManState.EJECTING
-        #if we're trying to run coral while we currently have a gamepiece, we eject
-        elif self.ejectCoral and self.hasGamePiece:
+        if self.ejectCoral and self.hasGamePiece:
             self.coralCurState = CoralManState.EJECTING
         #if we have a game piece, we hold it
         elif self.hasGamePiece:
@@ -95,9 +92,9 @@ class CoralManipulatorControl(metaclass=Singleton):
             self.coralMotorR.setVoltage(IVoltage)
     
     def getCheckGamePiece(self):
-        """We think the back sensor (the one the coral hits first) needs to be clear or coral while intaking.
-        For now, we want to assume we don't need to feed back. So if back is tripped, intake. If it's not, don't.   
-        The front one (the one that hits second) needs to be clear in order for us to say we successfully ejected."""
+        """We think the back sensor (the one the coral hits first) needs to be clear to have a game piece.
+        And the front sensor needs to be tripped.
+        For now, we want to assume we don't need to feed back.   """
         return self.gamepieceSensorF.get() and not self.gamepieceSensorB.get()
     
     def getcoralSafeToMove(self): 
