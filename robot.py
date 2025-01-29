@@ -8,6 +8,7 @@ from drivetrain.drivetrainCommand import DrivetrainCommand
 from drivetrain.drivetrainControl import DrivetrainControl
 from humanInterface.driverInterface import DriverInterface
 from humanInterface.ledControl import LEDControl
+from humanInterface.operatorInterface import OperatorInterface
 from navigation.forceGenerators import PointObstacle
 from utils.segmentTimeTracker import SegmentTimeTracker
 from utils.signalLogging import logUpdate
@@ -46,6 +47,8 @@ class MyRobot(wpilib.TimedRobot):
         self.stt = SegmentTimeTracker()      
 
         self.dInt = DriverInterface()
+        self.oInt = OperatorInterface()
+
         self.ledCtrl = LEDControl()
 
         self.autoSequencer = AutoSequencer()
