@@ -1,5 +1,6 @@
 import sys
 import wpilib
+from Elevatorandmech.coralManipulatorControl import CoralManipulatorControl
 from dashboard import Dashboard
 from drivetrain.controlStrategies.autoDrive import AutoDrive
 from drivetrain.controlStrategies.trajectory import Trajectory
@@ -7,6 +8,7 @@ from drivetrain.drivetrainCommand import DrivetrainCommand
 from drivetrain.drivetrainControl import DrivetrainControl
 from humanInterface.driverInterface import DriverInterface
 from humanInterface.ledControl import LEDControl
+from humanInterface.operatorInterface import OperatorInterface
 from navigation.forceGenerators import PointObstacle
 from utils.segmentTimeTracker import SegmentTimeTracker
 from utils.signalLogging import logUpdate
@@ -41,6 +43,8 @@ class MyRobot(wpilib.TimedRobot):
         self.stt = SegmentTimeTracker()      
 
         self.dInt = DriverInterface()
+        self.oInt = OperatorInterface()
+
         self.ledCtrl = LEDControl()
 
         self.autoSequencer = AutoSequencer()
@@ -49,6 +53,8 @@ class MyRobot(wpilib.TimedRobot):
 
         self.rioMonitor = RIOMonitor()
         self.pwrMon = PowerMonitor()
+
+        self.coralMan = CoralManipulatorControl()
 
         # Normal robot code updates every 20ms, but not everything needs to be that fast.
         # Register slower-update periodic functions
@@ -65,6 +71,9 @@ class MyRobot(wpilib.TimedRobot):
 
         self.dInt.update()
         self.stt.mark("Driver Interface")
+
+        self.oInt.update()
+        self.stt.mark("Operator Interface")
 
         self.driveTrain.update()
         self.stt.mark("Drivetrain")
@@ -143,6 +152,8 @@ class MyRobot(wpilib.TimedRobot):
             for tf in tfs:
                 obs = PointObstacle(location=(ct+tf), strength=0.5)
                 self.autodrive.rfp.addObstacleObservation(obs)
+
+        self.coralMan.setCoralCommand(self.oInt.getEjectCoral(), self.oInt.getAutoIntake(), self.oInt.getL1())
 
         self.autodrive.setRequest(self.dInt.getAutoDrive())
 

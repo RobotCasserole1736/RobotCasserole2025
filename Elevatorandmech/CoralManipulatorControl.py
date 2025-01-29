@@ -32,7 +32,7 @@ class CoralManipulatorControl(metaclass=Singleton):
         self.motorEjectVoltage =  Calibration("MotorEject", -11.0, "V") 
         self.RMotorEjectVoltageL1 = Calibration("MotorEjectRForL1", -5.0, "V")
         self.overrideToEject = False
-        self.runCoral = False
+        self.ejectCoral = False
         self.hasGamePiece = False
         self.atL1 = False
 
@@ -46,13 +46,13 @@ class CoralManipulatorControl(metaclass=Singleton):
         if self.overrideToEject:
             self.coralCurState = CoralManState.EJECTING
         #if we're trying to run coral while we currently have a gamepiece, we eject
-        elif self.runCoral and self.hasGamePiece:
+        elif self.ejectCoral and self.hasGamePiece:
             self.coralCurState = CoralManState.EJECTING
         #if we have a game piece, we hold it
         elif self.hasGamePiece:
             self.coralCurState = CoralManState.HOLDING
-        #if the back sensor is being sensed, we want to intake
-        elif self.gamepieceSensorB.get():
+        #if we don't have a gamepiece and should be intaking, then intake
+        elif self.intakeCoralAuto and not self.hasGamePiece:
             self.coralCurState = CoralManState.INTAKING
         #if nothing else, we stop
         else:
@@ -98,20 +98,18 @@ class CoralManipulatorControl(metaclass=Singleton):
         """We think the back sensor (the one the coral hits first) needs to be clear or coral while intaking.
         For now, we want to assume we don't need to feed back. So if back is tripped, intake. If it's not, don't.   
         The front one (the one that hits second) needs to be clear in order for us to say we successfully ejected."""
-        return self.gamepieceSensorF.get()
+        return self.gamepieceSensorF.get() and not self.gamepieceSensorB.get()
     
     def getcoralSafeToMove(self): 
         #I think this is just a function that is going to be used by elevator control. 
         # theoretically, As long as the back gamepiece sensor isn't being tripped, the robot is good to up because a coral isn't in the way. 
         return not self.gamepieceSensorB.get()
     
-    def setL1(self, gotoL1):
-        #make sure to use this based on elevator height command function for L1 being our goal
-        self.atL1 = gotoL1
+    def setCoralAutoIntake(self):
+        self.intakeCoralAuto = True
 
-    def setCoralCommand(self, atHeight, coralEjectOveride):
-        #if we're at the right height, we want to run coral
-        self.runCoral = atHeight
-        if coralEjectOveride:
-            #if we're ejecting, we want to run coral no matter what
-            self.runCoral = True
+    def setCoralCommand(self, Coraleject, autoIntake, gotoL1):
+        #if we're at the ejecting, we want to run coral
+        self.ejectCoral = Coraleject
+        self.intakeCoralAuto = autoIntake
+        self.atL1 = gotoL1
