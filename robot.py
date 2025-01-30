@@ -1,6 +1,6 @@
 import sys
 import wpilib
-from Elevatorandmech.coralManipulatorControl import CoralManipulatorControl
+from Elevatorandmech.blahblah import CoralManipulatorControl
 from dashboard import Dashboard
 from drivetrain.controlStrategies.autoDrive import AutoDrive
 from drivetrain.controlStrategies.trajectory import Trajectory
