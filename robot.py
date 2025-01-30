@@ -74,6 +74,9 @@ class MyRobot(wpilib.TimedRobot):
         self.dInt.update()
         self.stt.mark("Driver Interface")
 
+        self.oInt.update()
+        self.stt.mark("Operator Interface")
+
         self.driveTrain.update()
         self.stt.mark("Drivetrain")
 

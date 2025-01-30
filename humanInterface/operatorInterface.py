@@ -1,11 +1,5 @@
-from drivetrain.drivetrainCommand import DrivetrainCommand
-from drivetrain.drivetrainPhysical import MAX_FWD_REV_SPEED_MPS,MAX_STRAFE_SPEED_MPS,\
-MAX_ROTATE_SPEED_RAD_PER_SEC,MAX_TRANSLATE_ACCEL_MPS2,MAX_ROTATE_ACCEL_RAD_PER_SEC_2
-from utils.allianceTransformUtils import onRed
 from utils.faults import Fault
 from utils.signalLogging import addLog
-from wpimath import applyDeadband
-from wpimath.filter import SlewRateLimiter
 from wpilib import XboxController
 
 class OperatorInterface:
@@ -28,7 +22,16 @@ class OperatorInterface:
         self.L3 = False
         self.L4 = False
 
-        # Logging
+        #addLog("scoreL1",lambda: self.L1,"Bool")
+        #addLog("scoreL2",lambda: self.L2,"Bool")
+        #addLog("scoreL3",lambda: self.L3,"Bool")
+        #addLog("scoreL4",lambda: self.L4,"Bool")
+        #addLog("elevManUp", lambda: self.elevManualUp, "Bool")
+        #addLog("elevManDown", lambda: self.elevManualDown, "Bool")
+        #addLog("intakeAlgae", lambda: self.intakeAlgae, "Bool")
+        #addLog("ejectAlgae", lambda: self.ejectAlgae, "Bool")
+        #addLog("ejectCoral", lambda: self.ejectCoral, "Bool")
+        #addLog("autoIntakeCoral", lambda: self.autoIntakeCoral, "Bool")
 
     def update(self):
         # value of controller buttons
@@ -41,13 +44,13 @@ class OperatorInterface:
             self.L3 = self.ctrl.getBButton()
             self.L4 = self.ctrl.getYButton()
             self.elevManualUp = self.ctrl.getLeftBumper()
-            self.elevManualUp = self.ctrl.getRightBumper()
+            self.elevManualDown = self.ctrl.getRightBumper()
 
             self.intakeAlgae = self.ctrl.getLeftTriggerAxis() > .3
             self.ejectAlgae = self.ctrl.getRightTriggerAxis() > .3
             self.ejectCoral = True if self.ctrl.getPOV() != -1 else False
 
-            if self.ctrl.getStartButtonPressed():
+            if self.ctrl.getBackButtonPressed():
                 if self.autoIntakeCoral:
                     self.autoIntakeCoral = False
                 else:
