@@ -37,6 +37,7 @@ class CoralManipulatorControl(metaclass=Singleton):
         self.atL1 = False
 
         addLog("Coral Enum", lambda:self.coralCurState.value, "state")
+        addLog("Has Game Piece", lambda:self.hasGamePiece, "Bool")
 
     def update(self):
         self.hasGamePiece = self.getCheckGamePiece()
