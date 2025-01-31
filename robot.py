@@ -69,6 +69,9 @@ class MyRobot(wpilib.TimedRobot):
         self.dInt.update()
         self.stt.mark("Driver Interface")
 
+        self.elev.update()
+        self.stt.mark("Elevator")
+
         self.driveTrain.update()
         self.stt.mark("Drivetrain")
 
@@ -149,7 +152,8 @@ class MyRobot(wpilib.TimedRobot):
 
         self.autodrive.setRequest(self.dInt.getAutoDrive())
 
-        #self.elev.setHeightGoal(self.dInt.getL1(), self.dInt.getL2(), self.dInt.getL3(), self.dInt.getL4(), kylefunciton)
+        # TODO better interface
+        self.elev.setHeightGoal(self.dInt.getL1(), self.dInt.getL2(), self.dInt.getL3(), self.dInt.getL4(), False)
 
         # No trajectory in Teleop
         Trajectory().setCmd(None)

@@ -13,6 +13,14 @@ from wpilib import Timer
 class ElevatorControl(metaclass=Singleton):
     def __init__(self):
 
+        # Coral Scoring Heights in meters
+        self.L1_Height = Calibration(name="Height of L1", units="m", default=0.5842 - ELEV_HEIGHT)
+        self.L2_Height = Calibration(name="Height of L2", units="m", default=0.9398 - ELEV_HEIGHT)
+        self.L3_Height = Calibration(name="Height of L3", units="m", default=1.397 - ELEV_HEIGHT)
+        self.L4_Height = Calibration(name="Height of L4", units="m", default=2.159 - ELEV_HEIGHT)
+
+        self.heightGoal = self.L1_Height.get()
+
         self.desState = TrapezoidProfile.State(self.heightGoal,0)
 
         # Elevator Motors
@@ -21,11 +29,7 @@ class ElevatorControl(metaclass=Singleton):
         #we don't know if we want to invert LMotor (left) or not when we follow RMotor (right), automatically assumed False
         self.LMotor.setFollow(ELEV_RM_CANID)
 
-        # Coral Scoring Heights in meters
-        self.L1_Height = Calibration(name="Height of L1", units="m", default=0.5842 - ELEV_HEIGHT)
-        self.L2_Height = Calibration(name="Height of L2", units="m", default=0.9398 - ELEV_HEIGHT)
-        self.L3_Height = Calibration(name="Height of L3", units="m", default=1.397 - ELEV_HEIGHT)
-        self.L4_Height = Calibration(name="Height of L4", units="m", default=2.159 - ELEV_HEIGHT)
+
 
         # FF and proportional gain constants
         self.kV = Calibration(name="Elevator kV", default=0.02, units="V/rps")
@@ -63,7 +67,6 @@ class ElevatorControl(metaclass=Singleton):
         # Create a motion profile with the given maximum velocity and maximum
         # acceleration constraints for the next setpoint.
 
-        self.heightGoal = self.L1_Height.get()
 
         self.profiledPos = 0.0
         self.curUnprofiledPosCmd = 0.0
