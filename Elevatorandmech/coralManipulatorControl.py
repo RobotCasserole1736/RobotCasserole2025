@@ -34,6 +34,7 @@ class CoralManipulatorControl(metaclass=Singleton):
         self.overrideToEject = False
         self.ejectCoral = False
         self.hasGamePiece = False
+        self.intakeCoralAuto = True
         self.atL1 = False
 
         addLog("Coral Enum", lambda:self.coralCurState.value, "state")
@@ -56,20 +57,26 @@ class CoralManipulatorControl(metaclass=Singleton):
         else:
             self.coralCurState = CoralManState.DISABLED
 
+        """
         #set next state based on those
         if self.coralCurState == CoralManState.INTAKING:
             #If we have a gamepiece, the next state is holding
             #if not, we don't want to change the state - keep it at intaking
             if self.hasGamePiece:
                 self.coralNextState = CoralManState.HOLDING
+            else:
+                self.coralNextState = CoralManState.INTAKING
         #if we are ejecting coral
         elif self.coralCurState == CoralManState.EJECTING:
             #once we no longer have a game piece, we want to stop turning the motors
             #otherwise, just keep the state - don't set it to anything new. 
             if not self.hasGamePiece:
                 self.coralNextState = CoralManState.DISABLED 
+            else:
+                self.coralNextState = CoralManState.EJECTING
+        """
                              
-        self.coralCurState = self.coralNextState
+        #self.coralCurState = self.coralNextState
         
         #actually set the voltages
         if self.coralCurState == CoralManState.DISABLED:
@@ -102,12 +109,9 @@ class CoralManipulatorControl(metaclass=Singleton):
         #I think this is just a function that is going to be used by elevator control. 
         # theoretically, As long as the back gamepiece sensor isn't being tripped, the robot is good to up because a coral isn't in the way. 
         return not self.gamepieceSensorB.get()
-    
-    def setCoralAutoIntake(self):
-        self.intakeCoralAuto = True
 
     def setCoralCommand(self, Coraleject, autoIntake, gotoL1):
-        #if we're at the ejecting, we want to run coral
+        #we need commands to tell us what the coral motors should be doing. 
         self.ejectCoral = Coraleject
         self.intakeCoralAuto = autoIntake
         self.atL1 = gotoL1

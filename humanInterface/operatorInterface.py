@@ -29,16 +29,16 @@ class OperatorInterface:
         self.L4 = False
 
         # Logging
-        #addLog("scoreL1",lambda: self.L1,"Bool")
-        #addLog("scoreL2",lambda: self.L2,"Bool")
-        #addLog("scoreL3",lambda: self.L3,"Bool")
-        #addLog("scoreL4",lambda: self.L4,"Bool")
+        addLog("scoreL1",lambda: self.L1,"Bool")
+        addLog("scoreL2",lambda: self.L2,"Bool")
+        addLog("scoreL3",lambda: self.L3,"Bool")
+        addLog("scoreL4",lambda: self.L4,"Bool")
         #addLog("elevManUp", lambda: self.elevManualUp, "Bool")
         #addLog("elevManDown", lambda: self.elevManualDown, "Bool")
         #addLog("intakeAlgae", lambda: self.intakeAlgae, "Bool")
         #addLog("ejectAlgae", lambda: self.ejectAlgae, "Bool")
-        #addLog("ejectCoral", lambda: self.ejectCoral, "Bool")
-        #addLog("autoIntakeCoral", lambda: self.autoIntakeCoral, "Bool")
+        addLog("ejectCoral", lambda: self.ejectCoral, "Bool")
+        addLog("autoIntakeCoral", lambda: self.autoIntakeCoral, "Bool")
 
     def update(self):
         # value of controller buttons

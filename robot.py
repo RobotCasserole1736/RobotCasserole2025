@@ -83,6 +83,9 @@ class MyRobot(wpilib.TimedRobot):
         self.driveTrain.poseEst._telemetry.setCurObstacles(self.autodrive.rfp.getObstacleStrengths())
         self.stt.mark("Telemetry")
 
+        self.coralMan.update()
+        self.stt.mark("Coral Manipulator")
+
         self.ledCtrl.setAutoDrive(self.autodrive.isRunning())
         self.ledCtrl.setStuck(self.autodrive.rfp.isStuck())
         self.ledCtrl.update()
