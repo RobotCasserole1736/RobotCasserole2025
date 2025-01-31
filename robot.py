@@ -152,8 +152,9 @@ class MyRobot(wpilib.TimedRobot):
 
         self.autodrive.setRequest(self.dInt.getAutoDrive())
 
-        # TODO better interface
-        self.elev.setHeightGoal(self.dInt.getL1(), self.dInt.getL2(), self.dInt.getL3(), self.dInt.getL4(), False)
+        # TODO - pass in the bool from coral manipulator whether we're "safe" to leave L1 or not.
+        self.elev.setManualAdjCmd(self.dInt.getElevManAdjCmd())
+        self.elev.setHeightGoal(self.dInt.getElevCmd())
 
         # No trajectory in Teleop
         Trajectory().setCmd(None)
