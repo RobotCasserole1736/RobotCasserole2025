@@ -55,28 +55,7 @@ class CoralManipulatorControl(metaclass=Singleton):
             self.coralCurState = CoralManState.INTAKING
         #if nothing else, we stop
         else:
-            self.coralCurState = CoralManState.DISABLED
-
-        """
-        #set next state based on those
-        if self.coralCurState == CoralManState.INTAKING:
-            #If we have a gamepiece, the next state is holding
-            #if not, we don't want to change the state - keep it at intaking
-            if self.hasGamePiece:
-                self.coralNextState = CoralManState.HOLDING
-            else:
-                self.coralNextState = CoralManState.INTAKING
-        #if we are ejecting coral
-        elif self.coralCurState == CoralManState.EJECTING:
-            #once we no longer have a game piece, we want to stop turning the motors
-            #otherwise, just keep the state - don't set it to anything new. 
-            if not self.hasGamePiece:
-                self.coralNextState = CoralManState.DISABLED 
-            else:
-                self.coralNextState = CoralManState.EJECTING
-        """
-                             
-        #self.coralCurState = self.coralNextState
+            self.coralCurState = CoralManState.DISABLED  
         
         #actually set the voltages
         if self.coralCurState == CoralManState.DISABLED:
@@ -104,6 +83,7 @@ class CoralManipulatorControl(metaclass=Singleton):
         And the front sensor needs to be tripped.
         For now, we want to assume we don't need to feed back.   """
         return self.gamepieceSensorF.get() and not self.gamepieceSensorB.get()
+        #return True
     
     def getcoralSafeToMove(self): 
         #I think this is just a function that is going to be used by elevator control. 
