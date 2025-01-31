@@ -7,9 +7,6 @@ Constants related to navigation
 
 
 # Happy Constants for the goal poses we may want to drive to
-GOAL_PICKUP = Pose2d.fromFeet(40,5,Rotation2d.fromDegrees(0.0))
-GOAL_SPEAKER = Pose2d.fromFeet(3,20,Rotation2d.fromDegrees(180.0))
-
 GOAL_1A = Pose2d(5.954,3.815,Rotation2d.fromDegrees(180.0))
 GOAL_1B = Pose2d(5.954,4.193,Rotation2d.fromDegrees(180.0))
 GOAL_2A = Pose2d(5.370,5.215,Rotation2d.fromDegrees(240.0))

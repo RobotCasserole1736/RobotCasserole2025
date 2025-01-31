@@ -151,7 +151,8 @@ class MyRobot(wpilib.TimedRobot):
                 obs = PointObstacle(location=(ct+tf), strength=0.5)
                 self.autodrive.rfp.addObstacleObservation(obs)
 
-        self.autosteer.setReefAutoAlignCmd(self.dInt.getAutoDrive())
+        self.autosteer.setReefAutoAlignCmd(self.dInt.getAutoSteer())
+        self.autodrive.setRequest(self.dInt.getAutoDrive())
 
         # No trajectory in Teleop
         Trajectory().setCmd(None)
