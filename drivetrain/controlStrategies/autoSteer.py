@@ -27,8 +27,12 @@ class AutoSteer(metaclass=Singleton):
 
         self.desiredAngle = 0
 
-    def setReefAutoAlignCmd(self, shouldAutoAlign: bool):
+    def setReefAutoSteerCmd(self, shouldAutoAlign: bool):
         self.reefAlignActive = shouldAutoAlign
+    
+    def autoSteerIsRunning(self):
+        return self.reefAlignActive
+        
 
     def update(self, cmdIn: DrivetrainCommand, curPose: Pose2d) -> DrivetrainCommand:
         if self.reefAlignActive:
