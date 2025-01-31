@@ -118,7 +118,7 @@ class SwerveModuleControl:
 
 
         # Simulation Support Only
-        self.wheelSimFilter = SlewRateLimiter(24.0)
+        self.wheelSimFilter = SlewRateLimiter(48.0)
 
     def getActualPosition(self)->SwerveModulePosition:
         """
@@ -209,7 +209,7 @@ class SwerveModuleControl:
             # sensor data for the next loop.
 
             # Very simple voltage/motor model of azimuth rotation
-            self.actualState.angle += Rotation2d.fromDegrees(self.azmthVoltage / 12.0 * 1000.0 * 0.02)
+            self.actualState.angle += Rotation2d.fromDegrees(self.azmthVoltage / 12.0 * 1500.0 * 0.02)
             self.actualPosition.angle = self.actualState.angle
 
             # Wheel speed is slew-rate filtered to roughly simulate robot inertia

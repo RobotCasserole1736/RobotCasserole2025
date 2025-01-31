@@ -6,6 +6,7 @@ import wpilib
 from wpimath.trajectory import Trajectory
 from wpimath.geometry import Pose2d, Pose3d, Transform2d, Rotation2d, Translation2d
 from ntcore import NetworkTableInstance
+from choreo.trajectory import SwerveTrajectory
 
 from utils.allianceTransformUtils import transform
 from drivetrain.drivetrainPhysical import ROBOT_TO_FRONT_CAM, ROBOT_TO_LEFTFRONT_CAM, ROBOT_TO_RIGHTFRONT_CAM, ROBOT_TO_RIGHTBACK_CAM, ROBOT_TO_LEFTBACK_CAM, robotToModuleTranslations
@@ -128,24 +129,28 @@ class DrivetrainPoseTelemetry:
         else:
             self.curTraj = Trajectory()
 
-    def setChoreoTrajectory(self, trajIn):
+    def setChoreoTrajectory(self, trajIn: SwerveTrajectory):
         """Display a specific trajectory on the robot Field2d
 
         Args:
             trajIn (Choreo Trajectory object): The trajectory to display
         """
+        MAX_POINTS_SHOWN = 30.0
+
         # Transform choreo state list into useful trajectory for telemetry
         if trajIn is not None:
             stateList = []
-
             # For visual appearance and avoiding sending too much over NT,
             # make sure we only send a sampled subset of the positions
             sampTime = 0
+            sampStep = trajIn.get_total_time()/MAX_POINTS_SHOWN
             while sampTime < trajIn.get_total_time():
-                stateList.append(
-                    self._choreoToWPIState(transform(trajIn.sample_at(sampTime)))
-                )
-                sampTime += 0.5
+                state = transform(trajIn.sample_at(sampTime))
+                if(state is not None):
+                    stateList.append(
+                        self._choreoToWPIState(state)
+                    )
+                sampTime += sampStep
 
             # Make sure final pose is in the list
             stateList.append(self._choreoToWPIState(transform(trajIn.samples[-1])))
