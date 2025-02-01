@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
+
+<svg
+   width="800px"
+   height="800px"
+   viewBox="0 0 256 256"
+   preserveAspectRatio="xMidYMid"
+   sodipodi:docname="algae.svg"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.4 (86a8ad7, 2024-10-11)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="1.01"
+     inkscape:cx="400"
+     inkscape:cy="400"
+     inkscape:window-width="1920"
+     inkscape:window-height="1046"
+     inkscape:window-x="-11"
+     inkscape:window-y="-11"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg1" />
+  <defs
+     id="defs1">
+    <style
+       id="style1">
+
+      .cls-3 {
+        fill: rgb(0, 120, 0);
+      }
+
+      .cls-4 {
+        fill: rgb(0, 110, 0)
+      }
+
+      .cls-5 {
+        fill: rgb(0, 100, 0)
+      }
+
+      .cls-6 {
+        fill:rgb(0, 90, 0);
+      }
+
+      .cls-7 {
+        fill:rgb(0, 80, 0);
+      }
+
+      .cls-8 {
+        fill:rgb(0, 70, 0);
+      }
+
+      .cls-9 {
+        fill:rgb(0, 60, 0);
+      }
+    </style>
+  </defs>
+  <g
+     id="algae">
+    <path
+       d="M128.000,1.000 C198.692,1.000 256.000,57.308 256.000,128.000 C256.000,198.692 198.692,256.000 128.000,256.000 C57.308,256.000 -0.000,198.692 -0.000,128.000 C-0.000,57.308 57.308,1.000 128.000,1.000 Z"
+       id="path-1"
+       class="cls-3"
+       fill-rule="evenodd"
+       style="opacity:0.15" />
+    <ellipse
+       id="ellipse-1"
+       class="cls-4"
+       cx="128"
+       cy="132"
+       rx="128"
+       ry="108"
+       style="opacity:0.206" />
+    <ellipse
+       id="ellipse-2"
+       class="cls-5"
+       cx="128"
+       cy="114"
+       rx="126"
+       ry="97"
+       style="display:inline;opacity:0.252" />
+    <path
+       d="M247.000,92.000 C247.000,136.183 193.722,172.000 128.000,172.000 C62.278,172.000 9.000,136.183 9.000,92.000 C9.000,86.079 9.985,80.131 11.801,74.266 C21.950,52.355 38.111,33.801 58.170,20.717 C77.786,9.240 101.904,2.000 128.000,2.000 C154.096,2.000 178.213,9.240 197.829,20.717 C217.889,33.801 234.050,52.355 244.199,74.266 C246.014,80.131 247.000,86.079 247.000,92.000 Z"
+       id="path-2"
+       class="cls-6"
+       fill-rule="evenodd"
+       style="opacity:0.299" />
+    <path
+       d="M128.000,129.000 C72.771,129.000 28.000,100.346 28.000,65.000 C28.000,55.597 31.194,46.464 36.885,38.111 C60.095,14.586 92.342,-0.000 128.000,-0.000 C163.658,-0.000 195.905,14.586 219.115,38.111 C224.806,46.464 228.000,55.597 228.000,65.000 C228.000,100.346 183.228,129.000 128.000,129.000 Z"
+       id="path-3"
+       class="cls-7"
+       fill-rule="evenodd"
+       style="opacity:0.388" />
+    <ellipse
+       id="ellipse-3"
+       class="cls-8"
+       cx="128"
+       cy="48"
+       rx="74"
+       ry="47"
+       style="opacity:0.458" />
+    <ellipse
+       id="ellipse-4"
+       class="cls-9"
+       cx="128"
+       cy="29"
+       rx="46"
+       ry="29"
+       style="opacity:0.5" />
+  </g>
+</svg>
