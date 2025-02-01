@@ -98,9 +98,6 @@ class MyRobot(wpilib.TimedRobot):
         self.driveTrain.poseEst._telemetry.setCurObstacles(self.autodrive.rfp.getObstacleStrengths())
         self.stt.mark("Telemetry")
 
-        self.algaeManip.setDesPos(self.oInt.getAlgaeManipCmd())
-        self.stt.mark("Algae Mainpulator")
-
         self.ledCtrl.setAutoDrive(self.autodrive.isRunning())
         self.ledCtrl.setStuck(self.autodrive.rfp.isStuck())
         self.ledCtrl.update()
@@ -153,6 +150,8 @@ class MyRobot(wpilib.TimedRobot):
         self.driveTrain.setManualCmd(self.dInt.getCmd())
 
         self.algaeIntake.setInput(self.oInt.getIntakeAlgae(),self.oInt.getEjectAlgae())
+
+        self.algaeManip.setDesPos(self.oInt.getAlgaeManipCmd())
 
         if self.dInt.getGyroResetCmd():
             self.driveTrain.resetGyro()

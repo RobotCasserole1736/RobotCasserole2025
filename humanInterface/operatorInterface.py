@@ -38,7 +38,7 @@ class OperatorInterface:
         addLog("ejectAlgae", lambda: self.ejectAlgae, "Bool")
         #addLog("ejectCoral", lambda: self.ejectCoral, "Bool")
         #addLog("autoIntakeCoral", lambda: self.autoIntakeCoral, "Bool")
-
+    
     def update(self):
         # value of controller buttons
 

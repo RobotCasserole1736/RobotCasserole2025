@@ -1,3 +1,6 @@
+from enum import Enum
+
+
 class AlgaeWristState(Enum):
     DISABLED = 0
     INTAKEOFFGROUND = 1

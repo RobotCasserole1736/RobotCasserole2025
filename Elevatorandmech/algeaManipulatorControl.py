@@ -20,42 +20,39 @@ class AlgaeWristControl(metaclass=Singleton):
     def __init__(self):
         #one important assumption we're making right now is that we don't need limits on the algae manipulator based on elevator height
 
+        #PID stuff calibrations
         self.kG = Calibration(name="Algae kG", default=0.1, units="V/cos(deg)")
         self.kS = Calibration(name="Algae kS", default=0.1, units="V")
         self.kV = Calibration(name="Algae kV", default=0.1, units="V/rps")
         self.kP = Calibration(name="Algae kP", default=0.1, units="V/degErr")
+
+        #position calibrations... what units? 
         self.maxOutputV = Calibration(name="Algae Max Voltage", default=12.0, units="V")
-        self.disPos = Calibration(name="Disabled Position", default = 0, units="deg")
-        self.inPos = Calibration(name="Intake Position", default = 0, units="deg")
-        self.stowPos = Calibration(name="Stow Position", default = 0, units="deg")
-        self.reefPos = Calibration(name="Reef Position", default = 0, units="deg")
+        self.disPos = Calibration(name="Disabled Position", default = -90, units="deg")
+        self.inPos = Calibration(name="Intake Position", default = -30, units="deg")
+        self.stowPos = Calibration(name="Stow Position", default = -80, units="deg")
+        self.reefPos = Calibration(name="Reef Position", default = 20, units="deg")
        
         self.pos = AlgaeWristState.DISABLED
-        self.maxAcc = 0
-        self.maxVel = 0
-        self.controller = wpimath.controller.ProfiledPIDController(self.kP.get(),0,0,TrapezoidProfile.Constraints(self.maxVel, self.maxAcc),0.02) 
+        self.maxAcc = 12
+        self.controller = wpimath.controller.ProfiledPIDController(self.kP.get(),0,0,TrapezoidProfile.Constraints(self.maxOutputV.get(), self.maxAcc),0.02) 
         self.controller.reset(self.disPos.get())
-        self.stopped = True
-        self.profiledPos = 0
-        self.motorVoltage = 0
         self.motorVelCmd = 0
 
         self.wristMotor = WrapperedSparkMax(ALGAE_WRIST_CANID, "AlgaeWristMotor", True)
-        self.curMotorVoltage = 0.0
-        self.ABSOLUTE_OFFSET = ALGAE_ANGLE_ABS_POS_ENC_OFFSET
         self.curPosCmdDeg = self.stowPos.get()
-        self.algaeAbsEnc = WrapperedThroughBoreHexEncoder(port=ALGAE_ENC_PORT, name="AlgaeEncOffset", mountOffsetRad=deg2Rad(self.ABSOLUTE_OFFSET))
+        self.algaeAbsEnc = WrapperedThroughBoreHexEncoder(port=ALGAE_ENC_PORT, name="AlgaeEncOffset", mountOffsetRad=deg2Rad(ALGAE_ANGLE_ABS_POS_ENC_OFFSET))
 
-
-        #TODO: all of these need to be changed eventually
+        addLog("Algae wrist state",lambda:self.pos.value,"enum")
 
         # Relative Encoder Offsets
-        # Releative encoders always start at 0 at power-on
+        # Relative encoders always start at 0 at power-on
         # However, we may or may not have the mechanism at the "zero" position when we powered on
         # These variables store an offset which is calculated from the absolute sensors
         # to make sure the relative sensors inside the encoders accurately reflect
         # the actual position of the mechanism
         self.relEncOffsetRad = 0.0
+        #the above named the relative encoder offset, the below calculates it
         self.initFromAbsoluteSensor()
         #set the degree details for your goals. For stow, intake off gorund, etc. 
         #Also, the absolute offset will be a constant that you can set here or just have in constants 
@@ -93,13 +90,13 @@ class AlgaeWristControl(metaclass=Singleton):
 
     # Might optimize to accept 1 enum parameter for new position
     def changePos(self,Pos):
-        if(Pos == 0):
+        if(Pos == AlgaeWristState.DISABLED):
             return self.disPos.get()
-        elif(Pos == 1):
+        elif(Pos == AlgaeWristState.INTAKEOFFGROUND):
             return self.inPos.get()
-        elif(Pos == 2):
+        elif(Pos == AlgaeWristState.STOW):
             return self.stowPos.get()
-        elif(Pos == 3):
+        elif(Pos == AlgaeWristState.REEF):
             return self.reefPos.get()
         else:
             return self.disPos.get()
@@ -167,7 +164,7 @@ class AlgeaIntakeControl(metaclass=Singleton):
             else: 
                 self.hasGamePiece = False
 
-        if  self.intakeCommandState:
+        if self.intakeCommandState and not self.hasGamePiece:
             self.updateIntake(True)
         elif self.ejectCommandState:
             self.updateEject(True)
