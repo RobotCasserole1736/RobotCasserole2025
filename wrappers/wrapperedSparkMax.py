@@ -66,6 +66,11 @@ class WrapperedSparkMax:
         addLog(self.name + "_actPos", lambda: self.actPos, "rad")
         addLog(self.name + "_actVel", lambda: self.actVel, "RPM")
 
+    def setFollow(self, leaderCanID, invert=False):
+        self.cfg.follow(leaderCanID, invert)
+        self.ctrl.configure(self.cfg,
+                                SparkBase.ResetMode.kNoResetSafeParameters, 
+                                SparkBase.PersistMode.kPersistParameters)
 
     def setInverted(self, isInverted):
         if self.configSuccess:

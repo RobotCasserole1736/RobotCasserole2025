@@ -15,6 +15,9 @@ FIELD_Y_M = 8.062  # "Width"
 
 # Reserved_CANID = 0
 # Reserved_CANID = 1
+
+# Reserved_CANID = 0
+# Reserved_CANID = 1
 DT_FR_WHEEL_CANID = 2
 DT_FR_AZMTH_CANID = 3
 DT_FL_WHEEL_CANID = 4
@@ -23,9 +26,9 @@ DT_BR_WHEEL_CANID = 6
 DT_BR_AZMTH_CANID = 7
 DT_BL_WHEEL_CANID = 8
 DT_BL_AZMTH_CANID = 9
-# Unused_CANID = 10
-# Unused_CANID = 11
-# Unused_CANID = 12
+ELEV_RM_CANID = 10
+ELEV_LM_CANID = 11
+# change ELEV CANID later
 # Unused_CANID = 13
 # Unused_CANID = 14
 ALGAE_INT_CANID = 15
@@ -58,7 +61,7 @@ DT_BR_AZMTH_ENC_PORT = 0
 DT_FL_AZMTH_ENC_PORT = 1
 DT_BL_AZMTH_ENC_PORT = 2
 DT_FR_AZMTH_ENC_PORT = 3
-# Unused = 4
+ELEV_TOF_CANID = 4
 ALGAE_ENC_PORT = 5
 # Unused = 6
 # Unused = 7

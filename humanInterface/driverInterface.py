@@ -1,3 +1,5 @@
+from enum import Enum
+from Elevatorandmech.ElevatorandMechConstants import ElevatorLevelCmd
 from drivetrain.drivetrainCommand import DrivetrainCommand
 from drivetrain.drivetrainPhysical import MAX_FWD_REV_SPEED_MPS,MAX_STRAFE_SPEED_MPS,\
 MAX_ROTATE_SPEED_RAD_PER_SEC,MAX_TRANSLATE_ACCEL_MPS2,MAX_ROTATE_ACCEL_RAD_PER_SEC_2
@@ -33,16 +35,16 @@ class DriverInterface:
 
         # Utility - reset to zero-angle at the current pose
         self.gyroResetCmd = False
-
-        #Elevator commands
-        self.climberExtendV = 0
-        self.climberRetractV = 0
+        #elevator commands
+        self.elevatorLevelCmd = ElevatorLevelCmd.NO_CMD
+        self.elevManAdjCmd = 0.0
 
         # Logging
-        #addLog("DI FwdRev Cmd", lambda: self.velXCmd, "mps")
-        #addLog("DI Strafe Cmd", lambda: self.velYCmd, "mps")
-        #addLog("DI Rot Cmd", lambda: self.velTCmd, "radps")
-        #addLog("DI gyroResetCmd", lambda: self.gyroResetCmd, "bool")
+        addLog("DI FwdRev Cmd", lambda: self.velXCmd, "mps")
+        addLog("DI Strafe Cmd", lambda: self.velYCmd, "mps")
+        addLog("DI Rot Cmd", lambda: self.velTCmd, "radps")
+        addLog("DI GyroResetCmd", lambda: self.gyroResetCmd, "bool")
+        addLog("DI AutoDrive", lambda: self.autoDrive, "bool")
 
     def update(self):
         # value of contoller buttons
@@ -77,7 +79,24 @@ class DriverInterface:
             self.velYCmd = self.velYSlewRateLimiter.calculate(velCmdYRaw)
             self.velTCmd = self.velTSlewRateLimiter.calculate(velCmdRotRaw)
 
-            #other commands that we set - gyro, autoDrive, debugObstacle, climberExtend, climberRetract
+            # Elevator Commands
+            self.elevatorLevelCmd = ElevatorLevelCmd.NO_CMD # default to no command
+            if(self.ctrl.getXButton()):
+                self.elevatorLevelCmd = ElevatorLevelCmd.L1 
+            elif(self.ctrl.getAButton()):
+                self.elevatorLevelCmd = ElevatorLevelCmd.L2
+            elif(self.ctrl.getBButton()):
+                self.elevatorLevelCmd = ElevatorLevelCmd.L3
+            elif(self.ctrl.getYButton()):
+                self.elevatorLevelCmd = ElevatorLevelCmd.L4
+
+            self.L1 = self.ctrl.getXButton()
+            self.L2 = self.ctrl.getAButton()
+            self.L3 = self.ctrl.getBButton()
+            self.L4 = self.ctrl.getYButton()
+
+            self.elevManAdjCmd = self.ctrl.getRightTriggerAxis() - self.ctrl.getLeftTriggerAxis() 
+            
             self.gyroResetCmd = self.ctrl.getAButton()
 
             self.autoDrive = self.ctrl.getBButton()
@@ -96,9 +115,12 @@ class DriverInterface:
             self.gyroResetCmd = False
             self.autoDrive = False
             self.createDebugObstacle = False
-            self.climberExtendV = 0
-            self.climberRetractV = 0
+            self.elevatorLevelCmd = ElevatorLevelCmd.NO_CMD
+            self.elevManAdjCmd = 0.0
             self.connectedFault.setFaulted()
+
+
+
 
 
     def getCmd(self) -> DrivetrainCommand:
@@ -117,13 +139,10 @@ class DriverInterface:
     def getCreateObstacle(self) -> bool:
         return self.createDebugObstacle
     
-    def getClimbWinchCmd(self):
-        #we need to pick some order in case both climb triggers are being pressed
-        if self.climberRetractV != 0.0:
-            climbVolt = self.climberRetractV
-        elif self.climberExtendV != 0.0:
-            climbVolt = self.climberExtendV
-        else:
-            climbVolt = 0.0
-
-        return climbVolt
+    def getElevCmd(self) -> ElevatorLevelCmd:
+        return self.elevatorLevelCmd
+    
+    # Returns a manual offset to the elevator height
+    # -1.0 is full down motion, 1.0 is full up motion
+    def getElevManAdjCmd(self) -> float:
+        return self.elevManAdjCmd

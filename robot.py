@@ -2,6 +2,7 @@ import sys
 from phoenix6 import SignalLogger
 import wpilib
 from dashboard import Dashboard
+from Elevatorandmech.ElevatorControl import ElevatorControl
 from drivetrain.controlStrategies.autoDrive import AutoDrive
 from drivetrain.controlStrategies.trajectory import Trajectory
 from drivetrain.drivetrainCommand import DrivetrainCommand
@@ -63,6 +64,8 @@ class MyRobot(wpilib.TimedRobot):
         self.rioMonitor = RIOMonitor()
         self.pwrMon = PowerMonitor()
 
+        self.elev = ElevatorControl()
+
         self.algaeManip = AlgaeWristControl()
 
         # Normal robot code updates every 20ms, but not everything needs to be that fast.
@@ -86,6 +89,9 @@ class MyRobot(wpilib.TimedRobot):
 
         self.dInt.update()
         self.stt.mark("Driver Interface")
+
+        self.elev.update()
+        self.stt.mark("Elevator")
 
         self.oInt.update()
         self.stt.mark("Operator Interface")
@@ -173,6 +179,10 @@ class MyRobot(wpilib.TimedRobot):
                 self.autodrive.rfp.addObstacleObservation(obs)
 
         self.autodrive.setRequest(self.dInt.getAutoDrive())
+
+        # TODO - pass in the bool from coral manipulator whether we're "safe" to leave L1 or not.
+        self.elev.setManualAdjCmd(self.dInt.getElevManAdjCmd())
+        self.elev.setHeightGoal(self.dInt.getElevCmd())
 
         # No trajectory in Teleop
         Trajectory().setCmd(None)
