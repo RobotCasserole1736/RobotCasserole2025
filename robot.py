@@ -48,6 +48,7 @@ class MyRobot(wpilib.TimedRobot):
 
         self.algaeWrist = AlgaeWristControl()
         self.algaeIntake = AlgeaIntakeControl()
+        self.coralMan = CoralManipulatorControl()
 
         self.driveTrain = DrivetrainControl()
         self.autodrive = AutoDrive()
