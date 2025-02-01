@@ -1,4 +1,4 @@
-from rev import SparkMax, SparkBase, SparkMaxConfig, REVLibError, ClosedLoopSlot, SparkBaseConfig, ClosedLoopConfig, SparkClosedLoopController
+from rev import SparkMax, SparkBase, SparkMaxConfig, REVLibError, ClosedLoopSlot, SparkBaseConfig, SparkClosedLoopController
 from wpilib import TimedRobot
 from utils.signalLogging import addLog
 from utils.units import rev2Rad, rad2Rev, radPerSec2RPM, RPM2RadPerSec
@@ -14,7 +14,7 @@ import time
 # Fault handling for not crashing code if the motor controller is disconnected
 # Fault annunication logic to trigger warnings if a motor couldn't be configured
 class WrapperedSparkMax:
-    def __init__(self, canID, name, brakeMode=False, currentLimitA=40.0):
+    def __init__(self, canID, name, brakeMode=False, currentLimitA=40.0, fLimitEna=True, rLimitEna=True):
         self.ctrl = SparkMax(canID, SparkMax.MotorType.kBrushless)
         self.closedLoopCtrl = self.ctrl.getClosedLoopController()
         self.encoder = self.ctrl.getEncoder()
@@ -36,6 +36,8 @@ class WrapperedSparkMax:
         self.cfg.signals.primaryEncoderVelocityPeriodMs(200)
         self.cfg.setIdleMode(SparkBaseConfig.IdleMode.kBrake if brakeMode else SparkBaseConfig.IdleMode.kCoast)
         self.cfg.smartCurrentLimit(round(currentLimitA))
+        self.cfg.limitSwitch.forwardLimitSwitchEnabled(fLimitEna)
+        self.cfg.limitSwitch.reverseLimitSwitchEnabled(rLimitEna)
 
         # Perform motor configuration, tracking errors and retrying until we have success
         # Clear previous configuration, and persist anything set in this config.
