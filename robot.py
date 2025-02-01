@@ -3,6 +3,7 @@ from phoenix6 import SignalLogger
 import wpilib
 from dashboard import Dashboard
 from drivetrain.controlStrategies.autoDrive import AutoDrive
+from drivetrain.controlStrategies.autoSteer import AutoSteer
 from drivetrain.controlStrategies.trajectory import Trajectory
 from drivetrain.drivetrainCommand import DrivetrainCommand
 from drivetrain.drivetrainControl import DrivetrainControl
@@ -42,6 +43,7 @@ class MyRobot(wpilib.TimedRobot):
 
         self.driveTrain = DrivetrainControl()
         self.autodrive = AutoDrive()
+        self.autosteer = AutoSteer()
 
         self.stt = SegmentTimeTracker()      
 
@@ -149,6 +151,7 @@ class MyRobot(wpilib.TimedRobot):
                 obs = PointObstacle(location=(ct+tf), strength=0.5)
                 self.autodrive.rfp.addObstacleObservation(obs)
 
+        self.autosteer.setReefAutoSteerCmd(self.dInt.getAutoSteer())
         self.autodrive.setRequest(self.dInt.getAutoDrive())
 
         # No trajectory in Teleop

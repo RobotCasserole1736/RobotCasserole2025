@@ -8,6 +8,8 @@
 
 FIELD_X_M = 17.548 # "Length"
 FIELD_Y_M = 8.062  # "Width"
+REEF_LOC_X_M = 4.5747
+REEF_LOC_Y_M = 4.0363
 
 #######################################################################################
 ## CAN ID'S
@@ -54,10 +56,10 @@ LED_STACK_LIGHT_CTRL_PWM = 9
 ## DIO Bank
 #######################################################################################
 
-DT_BR_AZMTH_ENC_PORT = 0
-DT_FL_AZMTH_ENC_PORT = 1
+DT_FR_AZMTH_ENC_PORT = 0
+DT_BR_AZMTH_ENC_PORT = 1
 DT_BL_AZMTH_ENC_PORT = 2
-DT_FR_AZMTH_ENC_PORT = 3
+DT_FL_AZMTH_ENC_PORT = 3
 # Unused = 4
 # Unused = 5
 # Unused = 6

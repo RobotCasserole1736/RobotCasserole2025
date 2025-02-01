@@ -29,6 +29,7 @@ class DriverInterface:
 
         # Navigation commands
         self.autoDrive = False
+        self.autoSteer = False
         self.createDebugObstacle = False
 
         # Utility - reset to zero-angle at the current pose
@@ -78,6 +79,7 @@ class DriverInterface:
             self.gyroResetCmd = self.ctrl.getAButton()
 
             self.autoDrive = self.ctrl.getBButton()
+            self.autoSteer = self.ctrl.getXButton()
             self.createDebugObstacle = self.ctrl.getYButtonPressed()
 
             self.connectedFault.setNoFault()
@@ -104,6 +106,9 @@ class DriverInterface:
 
     def getAutoDrive(self) -> bool:
         return self.autoDrive
+    
+    def getAutoSteer(self) -> bool:
+        return self.autoSteer
 
     def getGyroResetCmd(self) -> bool:
         return self.gyroResetCmd

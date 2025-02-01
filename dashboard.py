@@ -8,6 +8,7 @@ from dashboardWidgets.text import Text
 from utils.faults import FaultWrangler
 from utils.signalLogging import addLog
 from webserver.webserver import Webserver
+from drivetrain.controlStrategies.autoSteer import AutoSteer
 
 
 class Dashboard:
@@ -17,6 +18,9 @@ class Dashboard:
         webServer.addDashboardWidget(ReefIndicator(15, 15, "/SmartDashboard/reefGoalPosIdx"))
 
 
+        webServer.addDashboardWidget(Icon(35, 45, "/SmartDashboard/isautoSteerState", "#9632bf", "autoSteer"))
+        webServer.addDashboardWidget(Icon(45, 55, "/SmartDashboard/isautoSteerState", "#FF0000", "coral"))
+        webServer.addDashboardWidget(Icon(55, 55, "/SmartDashboard/isautoSteerState", "#00FF00", "algae"))
         webServer.addDashboardWidget(Icon(45, 45, "/SmartDashboard/isRedIconState", "#FF0000", "allianceRed"))
         webServer.addDashboardWidget(Icon(55, 45, "/SmartDashboard/isBlueIconState", "#0000FF", "allianceBlue"))
         webServer.addDashboardWidget(Icon(65, 45, "/SmartDashboard/PE Vision Targets Seen", "#00FF00", "vision"))
@@ -41,6 +45,12 @@ class Dashboard:
         )
 
         # Add logging for things that don't come from anywhere else
+        addLog("isautoSteerState",  
+               lambda: (
+            Icon.kON if AutoSteer().autoSteerIsRunning()
+            else Icon.kOFF)
+        )
+
         addLog("isRedIconState",  
                lambda: (
             Icon.kON if wpilib.DriverStation.getAlliance() == wpilib.DriverStation.Alliance.kRed 
