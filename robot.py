@@ -6,6 +6,7 @@ from drivetrain.controlStrategies.trajectory import Trajectory
 from drivetrain.drivetrainCommand import DrivetrainCommand
 from drivetrain.drivetrainControl import DrivetrainControl
 from humanInterface.driverInterface import DriverInterface
+from humanInterface.operatorInterface import OperatorInterface
 from humanInterface.ledControl import LEDControl
 from navigation.forceGenerators import PointObstacle
 from utils.segmentTimeTracker import SegmentTimeTracker
@@ -20,6 +21,7 @@ from webserver.webserver import Webserver
 from AutoSequencerV2.autoSequencer import AutoSequencer
 from utils.powerMonitor import PowerMonitor
 from wpimath.geometry import Translation2d, Pose2d, Rotation2d
+from Elevatorandmech.algeaManipulatorControl import AlgeaIntakeControl, AlgaeWristControl
 
 class MyRobot(wpilib.TimedRobot):
 
@@ -30,10 +32,13 @@ class MyRobot(wpilib.TimedRobot):
         # to ignore these instantiations in a method.
         # pylint: disable=attribute-defined-outside-init
         remoteRIODebugSupport()
-
+        
         self.crashLogger = CrashLogger()
         wpilib.LiveWindow.disableAllTelemetry()
         self.webserver = Webserver()
+
+        self.algaeWrist = AlgaeWristControl()
+        self.algaeIntake = AlgeaIntakeControl()
 
         self.driveTrain = DrivetrainControl()
         self.autodrive = AutoDrive()
@@ -41,6 +46,7 @@ class MyRobot(wpilib.TimedRobot):
         self.stt = SegmentTimeTracker()      
 
         self.dInt = DriverInterface()
+        self.oInt = OperatorInterface()
         self.ledCtrl = LEDControl()
 
         self.autoSequencer = AutoSequencer()
@@ -63,8 +69,17 @@ class MyRobot(wpilib.TimedRobot):
     def robotPeriodic(self):
         self.stt.start()
 
+        self.algaeIntake.update()
+        self.stt.mark("algaeIntake")
+
+        self.algaeWrist.update()
+        self.stt.mark("algaeWrist")
+
         self.dInt.update()
         self.stt.mark("Driver Interface")
+
+        self.oInt.update()
+        self.stt.mark("Operator Interface")
 
         self.driveTrain.update()
         self.stt.mark("Drivetrain")
@@ -124,6 +139,8 @@ class MyRobot(wpilib.TimedRobot):
         # TODO - this is technically one loop delayed, which could induce lag
         # Probably not noticeable, but should be corrected.
         self.driveTrain.setManualCmd(self.dInt.getCmd())
+
+        self.algaeIntake.setInput(self.oInt.getIntakeAlgae(),self.oInt.getEjectAlgae())
 
         if self.dInt.getGyroResetCmd():
             self.driveTrain.resetGyro()

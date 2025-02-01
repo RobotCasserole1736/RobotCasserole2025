@@ -2,7 +2,7 @@ from enum import Enum
 from math import cos
 from playingwithfusion import TimeOfFlight
 from Elevatorandmech.ElevatorandMechConstants import ALGAE_ANGLE_ABS_POS_ENC_OFFSET, ALGAE_GEARBOX_GEAR_RATIO
-from utils.signalLogging import log
+from utils.signalLogging import addLog, log
 from wpimath.trajectory import TrapezoidProfile
 from utils import faults
 from utils.calibration import Calibration
@@ -30,18 +30,12 @@ class AlgaeWristControl(metaclass=Singleton):
         self.kV = Calibration(name="Algae kV", default=0.1, units="V/rps")
         self.kP = Calibration(name="Algae kP", default=0.1, units="V/degErr")
         self.maxOutputV = Calibration(name="Algae Max Voltage", default=12.0, units="V")
-
-        self.wristMotor = WrapperedSparkMax(ALGAE_WRIST_CANID, "AlgaeWristMotor", True, self.motorVoltage)
-        self.curMotorVoltage = 0.0
-        self.ABSOLUTE_OFFSET = ALGAE_ANGLE_ABS_POS_ENC_OFFSET
-        self.curPosCmdDeg = self.stowPos.get()
-        self.algaeAbsEnc = WrapperedThroughBoreHexEncoder(port=ALGAE_ENC_PORT, name="AlgaeEncOffset", mountOffsetRad=deg2Rad(self.ABSOLUTE_OFFSET))
-
-        self.pos = AlgaeWristState.DISABLED
         self.disPos = Calibration(name="Disabled Position", default = 0, units="deg")
         self.inPos = Calibration(name="Intake Position", default = 0, units="deg")
         self.stowPos = Calibration(name="Stow Position", default = 0, units="deg")
         self.reefPos = Calibration(name="Reef Position", default = 0, units="deg")
+       
+        self.pos = AlgaeWristState.DISABLED
         self.maxAcc = 0
         self.maxVel = 0
         self.controller = wpimath.controller.ProfiledPIDController(self.kP.get(),0,0,TrapezoidProfile.Constraints(self.maxVel, self.maxAcc),0.02) 
@@ -50,6 +44,14 @@ class AlgaeWristControl(metaclass=Singleton):
         self.profiledPos = 0
         self.motorVoltage = 0
         self.motorVelCmd = 0
+
+        self.wristMotor = WrapperedSparkMax(ALGAE_WRIST_CANID, "AlgaeWristMotor", True)
+        self.curMotorVoltage = 0.0
+        self.ABSOLUTE_OFFSET = ALGAE_ANGLE_ABS_POS_ENC_OFFSET
+        self.curPosCmdDeg = self.stowPos.get()
+        self.algaeAbsEnc = WrapperedThroughBoreHexEncoder(port=ALGAE_ENC_PORT, name="AlgaeEncOffset", mountOffsetRad=deg2Rad(self.ABSOLUTE_OFFSET))
+
+
         #TODO: all of these need to be changed eventually
 
         # Relative Encoder Offsets
@@ -131,9 +133,6 @@ class AlgaeWristControl(metaclass=Singleton):
         vFF = self.kV.get() * self.motorVelCmd  + self.kS.get() * sign(self.motorVelCmd) + self.kG.get()*cos(actualPos)
         self.wristMotor.setPosCmd(self.controller.calculate(actualPos,self.desPos),vFF)
 
-        log("Algae Pos Des", self.curPosCmdDeg,"deg")
-        log("Algae Pos Act", actualPos ,"deg")
-        log("Algae Motor Cmd", motorCmdV, "V")
 
 class AlgeaIntakeControl(metaclass=Singleton):
     def __init__(self):
@@ -143,8 +142,10 @@ class AlgeaIntakeControl(metaclass=Singleton):
         self.algaeMotor = WrapperedSparkMax(ALGAE_INT_CANID, "AlgaeIntakeMotor", True)
 
         self.intakeVoltageCal = Calibration("IntakeVoltage", 12, "V")
-        self.ejectVoltageCal = Calibration("EjectVoltage", 12, "V")
-        self.holdVoltageCal = Calibration("HoldVoltage", 12, "V")
+        self.ejectVoltageCal = Calibration("EjectVoltage", -12, "V")
+        self.holdVoltageCal = Calibration("HoldVoltage", 5, "V")
+
+        self.hasGamePiece = False
 
         self.tofSensor = TimeOfFlight(ALGAE_GAMEPIECE_CANID)
         self.tofSensor.setRangingMode(TimeOfFlight.RangingMode.kShort, 24)
@@ -154,6 +155,8 @@ class AlgeaIntakeControl(metaclass=Singleton):
         self.gamePiecePresentCal = Calibration("AlgaePresentThresh", 24, "in")
 
         self.disconTOFFault = faults.Fault("Singer TOF Sensor is Disconnected")
+
+        #addLog("Has Game Piece",lambda:self.hasGamePiece, "Bool")
 
     def update(self):
         
