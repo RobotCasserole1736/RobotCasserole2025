@@ -31,14 +31,13 @@ class AlgaeWristControl(metaclass=Singleton):
         self.kP = Calibration(name="Algae kP", default=0.1, units="V/degErr")
 
         #position calibrations... an angle in degrees. Assumingt 0 is horizontal, - is down, etc.  
-        self.disPos = Calibration(name="Disabled Position", default = -90, units="deg")
-        self.inPos = Calibration(name="Intake Position", default = -30, units="deg")
-        self.stowPos = Calibration(name="Stow Position", default = -80, units="deg")
-        self.reefPos = Calibration(name="Reef Position", default = 20, units="deg")
+        self.inPos = Calibration(name="Intake Position", default = 0, units="deg")
+        self.stowPos = Calibration(name="Stow Position", default = -90, units="deg")
+        self.reefPos = Calibration(name="Reef Position", default = -45, units="deg")
 
         
         #positions
-        self.pos = AlgaeWristState.DISABLED
+        self.pos = AlgaeWristState.STOW
         self.actualPos = 0
         self.curPosCmdDeg = self.stowPos.get()
 
@@ -97,16 +96,12 @@ class AlgaeWristControl(metaclass=Singleton):
 
     # Might optimize to accept 1 enum parameter for new position
     def changePos(self,Pos):
-        if(Pos == AlgaeWristState.DISABLED):
-            return self.disPos.get()
-        elif(Pos == AlgaeWristState.INTAKEOFFGROUND):
+        if(Pos == AlgaeWristState.INTAKEOFFGROUND):
             return self.inPos.get()
-        elif(Pos == AlgaeWristState.STOW):
-            return self.stowPos.get()
         elif(Pos == AlgaeWristState.REEF):
             return self.reefPos.get()
         else:
-            return self.disPos.get()
+            return self.stowPos.get()
 
     def update(self):
 

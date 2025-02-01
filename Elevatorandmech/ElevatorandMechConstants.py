@@ -3,10 +3,9 @@ from utils.calibration import Calibration
 from utils.units import in2m
 
 class AlgaeWristState(Enum):
-    DISABLED = 0
-    INTAKEOFFGROUND = 1
-    STOW = 2
-    REEF = 3
+    INTAKEOFFGROUND = 0
+    STOW = 1
+    REEF = 2
 
 # Enum for all four Level height commands for the elevator
 class ElevatorLevelCmd(Enum):

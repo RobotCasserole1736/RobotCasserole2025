@@ -23,7 +23,6 @@ class OperatorInterface:
         self.L3 = False
         self.L4 = False
 
-        self.algaeManipDisabledPos = False
         self.algaeManipGround = False
         self.algaeManipStow = False
         self.algaeManipReef = False
@@ -57,8 +56,6 @@ class OperatorInterface:
             # self.ejectCoral = True if self.ctrl.getPOV() != -1 else False
             self.ejectCoral = self.ctrl.getLeftBumper()
 
-            # Dpad up
-            self.algaeManipDisabledPos =  self.ctrl.getPOV() < 45 or self.ctrl.getPOV() > 315
             # Dpad right
             self.algaeManipGround = 45 < self.ctrl.getPOV() < 135
             # Dpad down
@@ -112,12 +109,10 @@ class OperatorInterface:
     def getAlgaeManipCmd(self):
         if self.algaeManipReef:
             return AlgaeWristState.REEF
-        elif self.algaeManipStow:
-            return AlgaeWristState.STOW
         elif self.algaeManipGround:
             return AlgaeWristState.INTAKEOFFGROUND
         else:
-            return AlgaeWristState.DISABLED
+            return AlgaeWristState.STOW
 
     def getElevManUp(self):
         return self.elevManualUp
