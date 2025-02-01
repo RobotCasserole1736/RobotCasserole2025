@@ -54,7 +54,7 @@ class ElevatorControl(metaclass=Singleton):
         self.curState = self.profiler.State()
 
         self.actualPos = 0
-        self.stopped = False # TODO - does this need to get changed anywhere?
+        self.stopped = False
 
         # Limit switch code; bottom for resetting offset and ensuring it starts correctly, top for saftey to stop from spinning
         # Only for protection, not for initializing the elevator height

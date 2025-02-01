@@ -20,30 +20,39 @@ class AlgaeWristControl(metaclass=Singleton):
     def __init__(self):
         #one important assumption we're making right now is that we don't need limits on the algae manipulator based on elevator height
 
+        #motor and encoder
+        self.wristMotor = WrapperedSparkMax(ALGAE_WRIST_CANID, "AlgaeWristMotor", True)
+        self.algaeAbsEnc = WrapperedThroughBoreHexEncoder(port=ALGAE_ENC_PORT, name="AlgaeEncOffset", mountOffsetRad=deg2Rad(ALGAE_ANGLE_ABS_POS_ENC_OFFSET))
+
         #PID stuff calibrations
         self.kG = Calibration(name="Algae kG", default=0.1, units="V/cos(deg)")
         self.kS = Calibration(name="Algae kS", default=0.1, units="V")
         self.kV = Calibration(name="Algae kV", default=0.1, units="V/rps")
         self.kP = Calibration(name="Algae kP", default=0.1, units="V/degErr")
 
-        #position calibrations... what units? 
-        self.maxOutputV = Calibration(name="Algae Max Voltage", default=12.0, units="V")
+        #position calibrations... an angle in degrees. Assumingt 0 is horizontal, - is down, etc.  
         self.disPos = Calibration(name="Disabled Position", default = -90, units="deg")
         self.inPos = Calibration(name="Intake Position", default = -30, units="deg")
         self.stowPos = Calibration(name="Stow Position", default = -80, units="deg")
         self.reefPos = Calibration(name="Reef Position", default = 20, units="deg")
-       
+
+        
+        #positions
         self.pos = AlgaeWristState.DISABLED
-        self.maxAcc = 12
-        self.controller = wpimath.controller.ProfiledPIDController(self.kP.get(),0,0,TrapezoidProfile.Constraints(self.maxOutputV.get(), self.maxAcc),0.02) 
-        self.controller.reset(self.disPos.get())
-        self.motorVelCmd = 0
-
-        self.wristMotor = WrapperedSparkMax(ALGAE_WRIST_CANID, "AlgaeWristMotor", True)
+        self.actualPos = 0
         self.curPosCmdDeg = self.stowPos.get()
-        self.algaeAbsEnc = WrapperedThroughBoreHexEncoder(port=ALGAE_ENC_PORT, name="AlgaeEncOffset", mountOffsetRad=deg2Rad(ALGAE_ANGLE_ABS_POS_ENC_OFFSET))
 
-        addLog("Algae wrist state",lambda:self.pos.value,"enum")
+        self.desState = TrapezoidProfile.State(self.curPosCmdDeg,0)
+
+    
+        #set P gain on controller
+        self.wristMotor.setPID(self.kP.get(), 0.0, 0.0)
+
+        #Profiler
+        self.maxV = Calibration(name="Algae Max Velocity", default=90.0, units="deg/sec")
+        self.maxA = Calibration(name="Algae Max Acceleration", default=90.0, units="dec/sec2")
+        self.profiler = TrapezoidProfile(TrapezoidProfile.Constraints(self.maxV.get(),self.maxA.get()))
+        self.curState = self.profiler.State()
 
         # Relative Encoder Offsets
         # Relative encoders always start at 0 at power-on
@@ -51,42 +60,40 @@ class AlgaeWristControl(metaclass=Singleton):
         # These variables store an offset which is calculated from the absolute sensors
         # to make sure the relative sensors inside the encoders accurately reflect
         # the actual position of the mechanism
-        self.relEncOffsetRad = 0.0
         #the above named the relative encoder offset, the below calculates it
         self.initFromAbsoluteSensor()
         #set the degree details for your goals. For stow, intake off gorund, etc. 
         #Also, the absolute offset will be a constant that you can set here or just have in constants 
 
+        addLog("Algae Wrist State",lambda:self.pos.value,"enum")
+        addLog("Algae Profiled Angle", lambda: self.curState.position, "deg")
+        addLog("Algae Actual Angle", lambda: self.actualPos, "deg")
+
     def setDesPos(self, desState : AlgaeWristState):
+        #this is called in teleop periodic to set the desired pos of algae manipulator
         self.curPosCmdDeg = self.changePos(desState)
         self.pos = desState
 
-    def getDesPosDeg(self):
-        return self.curPosCmdDeg
-
-    def getDesPosCmd(self):
-        return self.pos
-
-    def getAngleDeg(self):
+    def getAbsAngleMeas(self):
         return rad2Deg(self.algaeAbsEnc.getAngleRad())
 
-    def _getAbsRot(self):
-        return self.algaeAbsEnc.getAngleRad() - deg2Rad(self.relEncOffsetRad)
-
     def _motorRadToAngleRad(self, motorRev):
+        #get angle of algae manipulator arm using the motor sensor
         return motorRev * 1/ALGAE_GEARBOX_GEAR_RATIO - self.relEncOffsetRad
 
     def getAngleRad(self):
         return self._motorRadToAngleRad(self.wristMotor.getMotorPositionRad())
 
-    def _armAngleToMotorRad(self,armAng):
+    def _AngleRadToMotorRad(self,armAng):
         return ((armAng + self.relEncOffsetRad)* ALGAE_GEARBOX_GEAR_RATIO)
 
     # This routine uses the absolute sensors to adjust the offsets for the relative sensors
     # so that the relative sensors match reality.
     # It should be called.... infrequently. Likely once shortly after robot init.
     def initFromAbsoluteSensor(self):
-        self.relEncOffsetRad = self._getAbsRot() - self.getAngleRad()
+        self.relEncOffsetRad = 0.0
+
+        self.relEncOffsetRad = self.getAbsAngleMeas() - self.getAngleRad()
 
     # Might optimize to accept 1 enum parameter for new position
     def changePos(self,Pos):
@@ -102,28 +109,26 @@ class AlgaeWristControl(metaclass=Singleton):
             return self.disPos.get()
 
     def update(self):
-        #this is where you will figure out where you're trying to go. See tunerAngleControl.py for a simple answer
-        #this could work if it's light enough. But you might have to go to something more like singerA
-        self.algaeAbsEnc.update()
 
-        actualPos = self.getAngleDeg()
+        self.actualPos = self.getAbsAngleMeas()
 
-        err =  self.curPosCmdDeg - actualPos
+        # Update profiler desired state based on any change in algae angle goal
+        self.desState = TrapezoidProfile.State(self.curPosCmdDeg,0)
 
-        motorCmdV = err * self.kP.get()
+        # Update motor closed-loop calibration
+        if(self.kP.isChanged()):
+            self.wristMotor.setPID(self.kP.get(), 0.0, 0.0)
 
-        maxMag = self.maxOutputV.get()
+        self.curState = self.profiler.calculate(0.02, self.curState, self.desState)
 
-        if(motorCmdV > maxMag):
-            motorCmdV = maxMag
-        elif(motorCmdV < -maxMag):
-            motorCmdV = -maxMag
+        motorPosCmd = self._AngleRadToMotorRad(self.curState.position)
+        motorVelCmd = self._AngleRadToMotorRad(self.curState.velocity)
 
-        self.wristMotor.setVoltage(motorCmdV)
+        vFF = self.kV.get() * motorVelCmd  + self.kS.get() * sign(motorVelCmd) \
+            + self.kG.get()
 
-        self.desPos = self.changePos(self.pos)
-        vFF = self.kV.get() * self.motorVelCmd  + self.kS.get() * sign(self.motorVelCmd) + self.kG.get()*cos(actualPos)
-        self.wristMotor.setPosCmd(self.controller.calculate(actualPos,self.desPos),vFF)
+        self.wristMotor.setPosCmd(motorPosCmd, vFF)
+
 
 
 class AlgeaIntakeControl(metaclass=Singleton):

@@ -24,7 +24,7 @@ from webserver.webserver import Webserver
 from AutoSequencerV2.autoSequencer import AutoSequencer
 from utils.powerMonitor import PowerMonitor
 from wpimath.geometry import Translation2d, Pose2d, Rotation2d
-from Elevatorandmech.algeaManipulatorControl import AlgeaIntakeControl, AlgaeWristControl
+from Elevatorandmech.algaeManipulatorControl import AlgeaIntakeControl, AlgaeWristControl
 
 class MyRobot(wpilib.TimedRobot):
 
