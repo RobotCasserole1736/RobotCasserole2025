@@ -11,25 +11,19 @@
           "incKey": 83
         },
         {
+          "decKey": 69,
           "decayRate": 0.0,
+          "incKey": 82,
           "keyRate": 0.009999999776482582
-        },
-        {},
-        {
-          "decKey": 81,
-          "incKey": 69
         }
       ],
-      "axisCount": 6,
-      "buttonCount": 7,
+      "axisCount": 3,
+      "buttonCount": 4,
       "buttonKeys": [
         90,
         88,
         67,
-        86,
-        66,
-        78,
-        77
+        86
       ],
       "povConfig": [
         {
@@ -59,7 +53,7 @@
       "axisCount": 2,
       "buttonCount": 4,
       "buttonKeys": [
-        -1,
+        77,
         44,
         46,
         47
@@ -93,18 +87,6 @@
       "axisCount": 0,
       "buttonCount": 0,
       "povCount": 0
-    }
-  ],
-  "robotJoysticks": [
-    {
-<<<<<<< HEAD
-      "guid": "78696e70757401000000000000000000",
-      "useGamepad": true
-    },
-    {
-=======
->>>>>>> origin/elliott_Choreofixes
-      "guid": "Keyboard0"
     }
   ]
 }

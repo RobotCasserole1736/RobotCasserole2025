@@ -4,9 +4,22 @@ from AutoSequencerV2.modeList import ModeList
 from AutoSequencerV2.builtInModes.doNothingMode import DoNothingMode
 from AutoSequencerV2.builtInModes.waitMode import WaitMode
 from AutoSequencerV2.sequentialCommandGroup import SequentialCommandGroup
+from Autonomous.modes.NineAToSixB import NineAToSixB
 from Autonomous.modes.driveOut import DriveOut
-
+from Autonomous.modes.eightAToFiveB import EightAToFiveB
+from Autonomous.modes.eightAToOneA import EightAToOneA
 from Autonomous.modes.driveTest1 import driveTest1
+from Autonomous.modes.eightAToSixA import EightAToSixA
+from Autonomous.modes.eightAToThreeA import EightAToThreeA
+from Autonomous.modes.eightAToTwoA import EightAToTwoA
+from Autonomous.modes.eightBToFourB import EightBToFourB
+from Autonomous.modes.nineAToFiveA import NineAToFiveA
+from Autonomous.modes.nineAToFiveB import NineAToFiveB
+from Autonomous.modes.nineAToFourA import NineAToFourA
+from Autonomous.modes.nineAToOneB import NineAToOneB
+from Autonomous.modes.nineAToSixA import NineAToSixA
+from Autonomous.modes.nineAToTwoB import NineAToTwoB
+from Autonomous.nineAToThreeA import NineAToThreeA
 from utils.singleton import Singleton
 from utils.allianceTransformUtils import onRed
 
@@ -27,6 +40,21 @@ class AutoSequencer(metaclass=Singleton):
         #right now, DriveOut is all commented out, so we don't need to add it to the list. 
         self.mainModeList.addMode(DriveOut())
         self.mainModeList.addMode(driveTest1())
+        self.mainModeList.addMode(EightAToOneA())
+        self.mainModeList.addMode(EightAToThreeA())
+        self.mainModeList.addMode(EightAToTwoA())
+        self.mainModeList.addMode(EightAToFiveB())
+        self.mainModeList.addMode(EightAToSixA())
+        self.mainModeList.addMode(EightBToFourB())
+        self.mainModeList.addMode(NineAToOneB())
+        self.mainModeList.addMode(NineAToTwoB())
+        self.mainModeList.addMode(NineAToThreeA())
+        self.mainModeList.addMode(NineAToFourA())
+        self.mainModeList.addMode(NineAToFiveA())
+        self.mainModeList.addMode(NineAToFiveB())
+        self.mainModeList.addMode(NineAToSixA())
+        self.mainModeList.addMode(NineAToSixB())
+
         self.topLevelCmdGroup = SequentialCommandGroup()
         self.startPose = Pose2d()
 
