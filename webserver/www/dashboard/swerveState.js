@@ -206,8 +206,19 @@ export class SwerveState {
         this.ctx.rect(this.botMargin, this.botMargin, this.canvas.width - this.botMargin*2 , this.canvas.height - this.botMargin*2 );
         this.ctx.stroke();
 
-        if(this.hasData){
-            this.modList.forEach(mod => mod.draw());
+        this.modList.forEach(mod => mod.draw());
+        
+
+        // Draw big red X if no data
+        if (!this.hasData) {
+            this.ctx.beginPath();
+            this.ctx.moveTo(0,0);
+            this.ctx.lineTo(this.canvas.width, this.canvas.height);
+            this.ctx.moveTo(0, this.canvas.height);
+            this.ctx.lineTo(this.canvas.width, 0);
+            this.ctx.strokeStyle = 'red';
+            this.ctx.lineWidth = 8;
+            this.ctx.stroke();
         }
 
         this.prevTime = curTime;

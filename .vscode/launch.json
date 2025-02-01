@@ -41,7 +41,10 @@
             "console": "integratedTerminal",
             "justMyCode": true,
             "args": [
-                "test"
+                "test",
+                "--",
+                "-k",
+                "test_practice"
             ]
         }
     ]

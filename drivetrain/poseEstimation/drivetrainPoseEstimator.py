@@ -6,8 +6,10 @@ from wpimath.estimator import SwerveDrive4PoseEstimator
 from wpimath.geometry import Pose2d, Rotation2d, Twist2d
 from drivetrain.drivetrainPhysical import (
     kinematics,
-    ROBOT_TO_LEFT_CAM,
-    ROBOT_TO_RIGHT_CAM,
+    ROBOT_TO_LEFTFRONT_CAM,
+    ROBOT_TO_RIGHTFRONT_CAM,
+    ROBOT_TO_LEFTBACK_CAM,
+    ROBOT_TO_RIGHTBACK_CAM
 )
 from drivetrain.poseEstimation.drivetrainPoseTelemetry import DrivetrainPoseTelemetry
 from utils.faults import Fault
@@ -44,8 +46,11 @@ class DrivetrainPoseEstimator:
         # Generally accurate, but slow and laggy. Might need to be disabled
         # if the robot isn't flat on the ground for some reason.
         self.cams = [
-            WrapperedPoseEstPhotonCamera("LEFT_CAM", ROBOT_TO_LEFT_CAM),
-            WrapperedPoseEstPhotonCamera("RIGHT_CAM", ROBOT_TO_RIGHT_CAM),
+            WrapperedPoseEstPhotonCamera("ACAM4", ROBOT_TO_LEFTFRONT_CAM),
+            WrapperedPoseEstPhotonCamera("ACAM1", ROBOT_TO_RIGHTFRONT_CAM),
+            WrapperedPoseEstPhotonCamera("_ACAM3", ROBOT_TO_LEFTBACK_CAM),
+            WrapperedPoseEstPhotonCamera("ACAM2", ROBOT_TO_RIGHTBACK_CAM),
+
         ]
         self._camTargetsVisible = False
         self._useAprilTags = True
@@ -59,7 +64,7 @@ class DrivetrainPoseEstimator:
 
         # Logging and Telemetry
         addLog("PE Vision Targets Seen", lambda: self._camTargetsVisible, "bool")
-        #addLog("PE Gyro Angle", self._curRawGyroAngle.degrees, "deg")
+        addLog("PE Gyro Angle", lambda:(self._curRawGyroAngle.degrees()), "deg")
         self._telemetry = DrivetrainPoseTelemetry()
 
         # Simulation Only - maintain a rough estimate of pose from velocities

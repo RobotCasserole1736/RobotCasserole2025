@@ -34,13 +34,15 @@ class DriverInterface:
         # Utility - reset to zero-angle at the current pose
         self.gyroResetCmd = False
 
+        #Elevator commands
+        self.climberExtendV = 0
+        self.climberRetractV = 0
+
         # Logging
         #addLog("DI FwdRev Cmd", lambda: self.velXCmd, "mps")
         #addLog("DI Strafe Cmd", lambda: self.velYCmd, "mps")
         #addLog("DI Rot Cmd", lambda: self.velTCmd, "radps")
         #addLog("DI gyroResetCmd", lambda: self.gyroResetCmd, "bool")
-        #addLog("DI autoDriveToSpeaker", lambda: self.autoDriveToSpeaker, "bool")
-        #addLog("DI autoDriveToPickup", lambda: self.autoDriveToPickup, "bool")
 
     def update(self):
         # value of contoller buttons
@@ -57,28 +59,32 @@ class DriverInterface:
                 vYJoyRaw *= -1.0
 
             # deadband
-            vXJoyWithDeadband = applyDeadband(vXJoyRaw, 0.15)
-            vYJoyWithDeadband = applyDeadband(vYJoyRaw, 0.15)
-            vRotJoyWithDeadband = applyDeadband(vRotJoyRaw, 0.2)
+            vXJoyWithDeadband = applyDeadband(vXJoyRaw, 0.05)
+            vYJoyWithDeadband = applyDeadband(vYJoyRaw, 0.05)
+            vRotJoyWithDeadband = applyDeadband(vRotJoyRaw, 0.05)
 
             # TODO - if the driver wants a slow or sprint button, add it here.
-            slowMult = 1.0 if (self.ctrl.getRightBumper()) else 0.75
+            slowMult = 1.0 if (self.ctrl.getRightBumper()) else 0.7
             #slowMult = 1.0
 
             # Shape velocity command
             velCmdXRaw = vXJoyWithDeadband * MAX_STRAFE_SPEED_MPS * slowMult
             velCmdYRaw = vYJoyWithDeadband * MAX_FWD_REV_SPEED_MPS * slowMult
-            velCmdRotRaw = vRotJoyWithDeadband * MAX_ROTATE_SPEED_RAD_PER_SEC
+            velCmdRotRaw = vRotJoyWithDeadband * MAX_ROTATE_SPEED_RAD_PER_SEC * 0.8
 
             # Slew rate limiter
             self.velXCmd = self.velXSlewRateLimiter.calculate(velCmdXRaw)
             self.velYCmd = self.velYSlewRateLimiter.calculate(velCmdYRaw)
             self.velTCmd = self.velTSlewRateLimiter.calculate(velCmdRotRaw)
 
+            #other commands that we set - gyro, autoDrive, debugObstacle, climberExtend, climberRetract
             self.gyroResetCmd = self.ctrl.getAButton()
 
             self.autoDrive = self.ctrl.getBButton()
             self.createDebugObstacle = self.ctrl.getYButtonPressed()
+
+            self.climberExtendV = applyDeadband(self.ctrl.getLeftTriggerAxis(),.1) * 12
+            self.climberRetractV = applyDeadband(self.ctrl.getRightTriggerAxis(),.1) *-12
 
             self.connectedFault.setNoFault()
 
@@ -90,9 +96,9 @@ class DriverInterface:
             self.gyroResetCmd = False
             self.autoDrive = False
             self.createDebugObstacle = False
+            self.climberExtendV = 0
+            self.climberRetractV = 0
             self.connectedFault.setFaulted()
-
-
 
 
     def getCmd(self) -> DrivetrainCommand:
@@ -110,3 +116,14 @@ class DriverInterface:
 
     def getCreateObstacle(self) -> bool:
         return self.createDebugObstacle
+    
+    def getClimbWinchCmd(self):
+        #we need to pick some order in case both climb triggers are being pressed
+        if self.climberRetractV != 0.0:
+            climbVolt = self.climberRetractV
+        elif self.climberExtendV != 0.0:
+            climbVolt = self.climberExtendV
+        else:
+            climbVolt = 0.0
+
+        return climbVolt

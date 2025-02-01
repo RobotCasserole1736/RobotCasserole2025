@@ -1,6 +1,7 @@
 from utils.faults import Fault
 from utils.signalLogging import addLog
 from wpilib import XboxController
+from Elevatorandmech.ElevatorandMechConstants import AlgaeWristState
 
 class OperatorInterface:
     """Class to gather input from the driver of the robot"""
@@ -21,6 +22,11 @@ class OperatorInterface:
         self.L2 = False
         self.L3 = False
         self.L4 = False
+
+        self.algaeManipDisabledPos = False
+        self.algaeManipGround = False
+        self.algaeManipStow = False
+        self.algaeManipReef = False
 
         #addLog("scoreL1",lambda: self.L1,"Bool")
         #addLog("scoreL2",lambda: self.L2,"Bool")
@@ -43,12 +49,22 @@ class OperatorInterface:
             self.L2 = self.ctrl.getAButton()
             self.L3 = self.ctrl.getBButton()
             self.L4 = self.ctrl.getYButton()
-            self.elevManualUp = self.ctrl.getLeftBumper()
-            self.elevManualDown = self.ctrl.getRightBumper()
+            self.elevManualUp = self.ctrl.getRightTriggerAxis()
+            self.elevManualDown = self.ctrl.getLeftTriggerAxis()
 
-            self.intakeAlgae = self.ctrl.getLeftTriggerAxis() > .3
-            self.ejectAlgae = self.ctrl.getRightTriggerAxis() > .3
-            self.ejectCoral = True if self.ctrl.getPOV() != -1 else False
+            self.intakeAlgae = self.ctrl.getLeftY() > 0.3
+            self.ejectAlgae = self.ctrl.getLeftY() < -0.3
+            # self.ejectCoral = True if self.ctrl.getPOV() != -1 else False
+            self.ejectCoral = self.ctrl.getLeftBumper()
+
+            # Dpad up
+            self.algaeManipDisabledPos =  self.ctrl.getPOV() < 45 or self.ctrl.getPOV() > 315
+            # Dpad right
+            self.algaeManipGround = 45 < self.ctrl.getPOV() < 135
+            # Dpad down
+            self.algaeManipStow = 135 < self.ctrl.getPOV() < 225
+            # Dpad left
+            self.algaeManipReef = 225 < self.ctrl.getPOV() < 315
 
             if self.ctrl.getBackButtonPressed():
                 if self.autoIntakeCoral:
@@ -92,7 +108,17 @@ class OperatorInterface:
     
     def getL4(self):
         return self.L4
-    
+
+    def getAlgaeManipCmd(self):
+        if self.algaeManipReef:
+            return AlgaeWristState.REEF
+        elif self.algaeManipStow:
+            return AlgaeWristState.STOW
+        elif self.algaeManipGround:
+            return AlgaeWristState.INTAKEOFFGROUND
+        else:
+            return AlgaeWristState.DISABLED
+
     def getElevManUp(self):
         return self.elevManualUp
     

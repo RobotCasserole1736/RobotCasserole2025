@@ -27,7 +27,7 @@ class AutoDrive(metaclass=Singleton):
         self._olCmd = DrivetrainCommand()
         self._prevCmd:DrivetrainCommand|None = None
         self._plannerDur:float = 0.0
-        self.autoPrevEnabled = False #This name might be a wee bit confusing. It just keeps track if we were in auto targeting the speaker last refresh.
+        self._autoPrevEnabled = False #This name might be a wee bit confusing. It just keeps track if we were in auto targeting the speaker last refresh.
         self.stuckTracker = 0 
         self.prevPose = Pose2d()
         self.LenList = []
@@ -35,13 +35,13 @@ class AutoDrive(metaclass=Singleton):
 
         addLog("AutoDrive Proc Time", lambda:(self._plannerDur * 1000.0), "ms")
 
+    def getGoal(self) -> Pose2d | None:
+        return self.rfp.goal
 
     def setRequest(self, autoDrive) -> None:
+        self._autoPrevEnabled = self._autoDrive
         self._autoDrive = autoDrive
-        #The following if statement is just logic to enable self.autoPrevEnabled when the driver enables an auto.
-        if self.autoPrevEnabled != self._autoDrive:
-            self.stuckTracker = 0
-        self.autoPrevEnabled = self._autoDrive
+
         
     def updateTelemetry(self) -> None:        
         self._telemTraj = self.rfp.getLookaheadTraj()
@@ -98,7 +98,11 @@ class AutoDrive(metaclass=Singleton):
         #version 2 - this is based on distance, then rotation if the distances are too close
         #but it's not really working. 
 
-        if (self._autoDrive):
+        if(not self._autoDrive):
+            # Driving not requested, set no goal
+            self.rfp.setGoal(None)
+        elif(self._autoDrive and not self._autoPrevEnabled):
+            # First loop of auto drive, calc a new goal based on current position
             for goalOption in goalListTot:
                 goalWTransform = transform(goalOption.translation())
                 self.LenList.append(goalWTransform.distance(curPose.translation()))
@@ -127,8 +131,6 @@ class AutoDrive(metaclass=Singleton):
             else:
                 target = primeTarget
             self.rfp.setGoal(target)
-        else:
-            self.rfp.setGoal(None)
         """
         if self._autoDrive:
             target = transform(goalListTot[10])
@@ -139,30 +141,22 @@ class AutoDrive(metaclass=Singleton):
 
         # If being asked to auto-align, use the command from the dynamic path planner
         if(self._autoDrive):
-            if self.stuckTracker < 10: #Only run if the robot isn't stuck
-                #This checks how much we moved, and if we moved less than one cm it increments the counter by one.
-                if math.sqrt(((curPose.X() - self.prevPose.X()) ** 2) + ((curPose.Y() - self.prevPose.Y()) ** 2)) < .01:
-                    self.stuckTracker += 1
-                else:
-                    if self.stuckTracker > 0:
-                        self.stuckTracker -= 1
-
             
-                # Open Loop - Calculate the new desired pose and velocity to get there from the 
-                # repulsor field path planner
-                if(self._prevCmd is None):
-                    initCmd = DrivetrainCommand(0,0,0,curPose) # TODO - init this from current odometry vel
-                    self._olCmd = self.rfp.update(initCmd, MAX_PATHPLAN_SPEED_MPS*0.02)
-                else:
-                    self._olCmd = self.rfp.update(self._prevCmd, MAX_PATHPLAN_SPEED_MPS*0.02)
+            # Open Loop - Calculate the new desired pose and velocity to get there from the 
+            # repulsor field path planner
+            if(self._prevCmd is None):
+                initCmd = DrivetrainCommand(0,0,0,curPose) # TODO - init this from current odometry vel
+                self._olCmd = self.rfp.update(initCmd, MAX_PATHPLAN_SPEED_MPS*0.02)
+            else:
+                self._olCmd = self.rfp.update(self._prevCmd, MAX_PATHPLAN_SPEED_MPS*0.02)
 
-                # Add closed loop - use the trajectory controller to add in additional 
-                # velocity if we're currently far away from the desired pose
-                retCmd = self._trajCtrl.update2(self._olCmd.velX, 
-                                                self._olCmd.velY, 
-                                                self._olCmd.velT, 
-                                                self._olCmd.desPose, curPose)    
-                self._prevCmd = retCmd
+            # Add closed loop - use the trajectory controller to add in additional 
+            # velocity if we're currently far away from the desired pose
+            retCmd = self._trajCtrl.update2(self._olCmd.velX, 
+                                            self._olCmd.velY, 
+                                            self._olCmd.velT, 
+                                            self._olCmd.desPose, curPose)    
+            self._prevCmd = retCmd
         else:
             self._prevCmd = None
 
@@ -170,9 +164,6 @@ class AutoDrive(metaclass=Singleton):
 
         #Set our curPos as the new old pose
         self.prevPose = curPose
-        #assume that we are either stuck or done if the counter reaches above 15. (sometimes it will get to like 4 when we are accelerating or taking a sharp turn)
-        if self.stuckTracker >= 15:
-            retCmd = cmdIn #set the returned cmd to the cmd that we were originally given.
-            self._prevCmd = None
+
 
         return retCmd
