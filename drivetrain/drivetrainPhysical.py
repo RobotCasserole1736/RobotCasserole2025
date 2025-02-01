@@ -99,10 +99,10 @@ BL_ENCODER_MOUNT_OFFSET_RAD = deg2Rad(1.40)
 
 
 # Module Indices (for ease of array manipulation)
-FL = 0
-FR = 1
+FR = 0
+BR = 1
 BL = 2
-BR = 3
+FL = 3
 
 # Camera Mount Offsets
 # These are relative to the robot origin
@@ -147,22 +147,22 @@ ROBOT_TO_FRONT_CAM = Transform3d(
 # Array of translations from robot's origin (center bottom, on floor) to the module's contact patch with the ground
 robotToModuleTranslations = []
 robotToModuleTranslations.append(
-    Translation2d(WHEEL_BASE_HALF_WIDTH_M, WHEEL_BASE_HALF_LENGTH_M)
+    Translation2d(WHEEL_BASE_HALF_WIDTH_M, -WHEEL_BASE_HALF_LENGTH_M)
 )
 robotToModuleTranslations.append(
-    Translation2d(WHEEL_BASE_HALF_WIDTH_M, -WHEEL_BASE_HALF_LENGTH_M)
+    Translation2d(-WHEEL_BASE_HALF_WIDTH_M, -WHEEL_BASE_HALF_LENGTH_M)
 )
 robotToModuleTranslations.append(
     Translation2d(-WHEEL_BASE_HALF_WIDTH_M, WHEEL_BASE_HALF_LENGTH_M)
 )
 robotToModuleTranslations.append(
-    Translation2d(-WHEEL_BASE_HALF_WIDTH_M, -WHEEL_BASE_HALF_LENGTH_M)
+    Translation2d(WHEEL_BASE_HALF_WIDTH_M, WHEEL_BASE_HALF_LENGTH_M)
 )
 
 # WPILib Kinematics object
 kinematics = SwerveDrive4Kinematics(
-    robotToModuleTranslations[FL],
     robotToModuleTranslations[FR],
-    robotToModuleTranslations[BL],
     robotToModuleTranslations[BR],
+    robotToModuleTranslations[BL],
+    robotToModuleTranslations[FL],
 )
