@@ -3,12 +3,14 @@ from phoenix6 import SignalLogger
 import wpilib
 from Elevatorandmech.coralManipulatorControl import CoralManipulatorControl
 from dashboard import Dashboard
+from Elevatorandmech.ElevatorControl import ElevatorControl
 from drivetrain.controlStrategies.autoDrive import AutoDrive
 from drivetrain.controlStrategies.autoSteer import AutoSteer
 from drivetrain.controlStrategies.trajectory import Trajectory
 from drivetrain.drivetrainCommand import DrivetrainCommand
 from drivetrain.drivetrainControl import DrivetrainControl
 from humanInterface.driverInterface import DriverInterface
+from humanInterface.operatorInterface import OperatorInterface
 from humanInterface.ledControl import LEDControl
 from humanInterface.operatorInterface import OperatorInterface
 from navigation.forceGenerators import PointObstacle
@@ -24,6 +26,7 @@ from webserver.webserver import Webserver
 from AutoSequencerV2.autoSequencer import AutoSequencer
 from utils.powerMonitor import PowerMonitor
 from wpimath.geometry import Translation2d, Pose2d, Rotation2d
+from Elevatorandmech.algaeManipulatorControl import AlgeaIntakeControl, AlgaeWristControl
 
 class MyRobot(wpilib.TimedRobot):
 
@@ -34,7 +37,7 @@ class MyRobot(wpilib.TimedRobot):
         # to ignore these instantiations in a method.
         # pylint: disable=attribute-defined-outside-init
         remoteRIODebugSupport()
-
+        
         self.crashLogger = CrashLogger()
 
         # We do our own logging, we don't need additional logging in the background.
@@ -42,6 +45,9 @@ class MyRobot(wpilib.TimedRobot):
         wpilib.LiveWindow.disableAllTelemetry()
 
         self.webserver = Webserver()
+
+        self.algaeWrist = AlgaeWristControl()
+        self.algaeIntake = AlgeaIntakeControl()
 
         self.driveTrain = DrivetrainControl()
         self.autodrive = AutoDrive()
@@ -61,7 +67,9 @@ class MyRobot(wpilib.TimedRobot):
         self.rioMonitor = RIOMonitor()
         self.pwrMon = PowerMonitor()
 
-        self.coralMan = CoralManipulatorControl()
+        self.elev = ElevatorControl()
+
+        self.algaeManip = AlgaeWristControl()
 
         # Normal robot code updates every 20ms, but not everything needs to be that fast.
         # Register slower-update periodic functions
@@ -76,8 +84,17 @@ class MyRobot(wpilib.TimedRobot):
     def robotPeriodic(self):
         self.stt.start()
 
+        self.algaeIntake.update()
+        self.stt.mark("algaeIntake")
+
+        self.algaeWrist.update()
+        self.stt.mark("algaeWrist")
+
         self.dInt.update()
         self.stt.mark("Driver Interface")
+
+        self.elev.update()
+        self.stt.mark("Elevator")
 
         self.oInt.update()
         self.stt.mark("Operator Interface")
@@ -144,6 +161,10 @@ class MyRobot(wpilib.TimedRobot):
         # Probably not noticeable, but should be corrected.
         self.driveTrain.setManualCmd(self.dInt.getCmd())
 
+        self.algaeIntake.setInput(self.oInt.getIntakeAlgae(),self.oInt.getEjectAlgae())
+
+        self.algaeManip.setDesPos(self.oInt.getAlgaeManipCmd())
+
         if self.dInt.getGyroResetCmd():
             self.driveTrain.resetGyro()
 
@@ -166,6 +187,10 @@ class MyRobot(wpilib.TimedRobot):
         self.autosteer.setReefAutoSteerCmd(self.dInt.getAutoSteer())
         self.coralMan.setCoralCommand(self.oInt.getEjectCoral(), self.oInt.getAutoIntake(), self.oInt.getL1())
         self.autodrive.setRequest(self.dInt.getAutoDrive())
+
+        # TODO - pass in the bool from coral manipulator whether we're "safe" to leave L1 or not.
+        self.elev.setManualAdjCmd(self.oInt.getElevManAdjCmd())
+        self.elev.setHeightGoal(self.oInt.getElevCmd())
 
         # No trajectory in Teleop
         Trajectory().setCmd(None)

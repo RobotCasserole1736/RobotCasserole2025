@@ -44,6 +44,8 @@ class DriverInterface:
         #addLog("DI Strafe Cmd", lambda: self.velYCmd, "mps")
         #addLog("DI Rot Cmd", lambda: self.velTCmd, "radps")
         #addLog("DI gyroResetCmd", lambda: self.gyroResetCmd, "bool")
+        #addLog("DI autoDriveToSpeaker", lambda: self.autoDriveToSpeaker, "bool")
+        #addLog("DI autoDriveToPickup", lambda: self.autoDriveToPickup, "bool")
 
     def update(self):
         # value of contoller buttons
@@ -66,7 +68,6 @@ class DriverInterface:
 
             # TODO - if the driver wants a slow or sprint button, add it here.
             slowMult = 1.0 if (self.ctrl.getRightBumper()) else 0.7
-            #slowMult = 1.0
 
             # Shape velocity command
             velCmdXRaw = vXJoyWithDeadband * MAX_STRAFE_SPEED_MPS * slowMult
@@ -78,7 +79,6 @@ class DriverInterface:
             self.velYCmd = self.velYSlewRateLimiter.calculate(velCmdYRaw)
             self.velTCmd = self.velTSlewRateLimiter.calculate(velCmdRotRaw)
 
-            #other commands that we set - gyro, autoDrive, debugObstacle, climberExtend, climberRetract
             self.gyroResetCmd = self.ctrl.getAButton()
 
             self.autoDrive = self.ctrl.getBButton()
