@@ -1,7 +1,7 @@
 from enum import Enum
 from math import cos
 from playingwithfusion import TimeOfFlight
-from Elevatorandmech.ElevatorandMechConstants import ALGAE_ANGLE_ABS_POS_ENC_OFFSET, ALGAE_GEARBOX_GEAR_RATIO
+from Elevatorandmech.ElevatorandMechConstants import ALGAE_ANGLE_ABS_POS_ENC_OFFSET, ALGAE_GEARBOX_GEAR_RATIO, AlgaeWristState
 from utils.signalLogging import log
 from wpimath.trajectory import TrapezoidProfile
 from utils import faults
@@ -13,11 +13,6 @@ import wpimath.controller
 from wrappers.wrapperedSparkMax import WrapperedSparkMax
 from wrappers.wrapperedThroughBoreHexEncoder import WrapperedThroughBoreHexEncoder
 
-class AlgaeWristState(Enum):
-    DISABLED = 0
-    INTAKEOFFGROUND = 1
-    STOW = 2
-    REEF = 3
 
 #The most important question - why is this two separate things?? I think they should be combined
 #the same button-type thing will be pressed to bring the algae manipulator up to angle, then start spinning it

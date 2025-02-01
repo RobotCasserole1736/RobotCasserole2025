@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Evil Button</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: red;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    button {
+      position: absolute;
+      padding: 10px 20px;
+      font-size: 20px;
+      font-weight: bold;
+      cursor: pointer;
+      border: none;
+      background-color: white;
+      color: black;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <button id="evilButton">Click Me!</button>
+
+  <script>
+    const button = document.getElementById('evilButton');
+    const speed = 0.2; // Speed of the button's movement (higher = faster)
+
+    document.addEventListener('mousemove', (e) => {
+      const mouseX = e.clientX;
+      const mouseY = e.clientY;
+
+      const buttonRect = button.getBoundingClientRect();
+      const buttonX = buttonRect.left + buttonRect.width / 2;
+      const buttonY = buttonRect.top + buttonRect.height / 2;
+
+      // Calculate the new position of the button
+      const deltaX = (mouseX - buttonX) * speed;
+      const deltaY = (mouseY - buttonY) * speed;
+
+      button.style.left = `${button.offsetLeft + deltaX}px`;
+      button.style.top = `${button.offsetTop + deltaY}px`;
+    });
+
+    button.addEventListener('click', () => {
+      alert("You got me! But it won't be this easy next time...");
+    });
+  </script>
+</body>
+</html>

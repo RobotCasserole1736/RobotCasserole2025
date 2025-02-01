@@ -1,4 +1,5 @@
 import sys
+from phoenix6 import SignalLogger
 import wpilib
 from dashboard import Dashboard
 from drivetrain.controlStrategies.autoDrive import AutoDrive
@@ -7,6 +8,7 @@ from drivetrain.drivetrainCommand import DrivetrainCommand
 from drivetrain.drivetrainControl import DrivetrainControl
 from humanInterface.driverInterface import DriverInterface
 from humanInterface.ledControl import LEDControl
+from humanInterface.operatorInterface import OperatorInterface
 from navigation.forceGenerators import PointObstacle
 from utils.segmentTimeTracker import SegmentTimeTracker
 from utils.signalLogging import logUpdate
@@ -32,7 +34,11 @@ class MyRobot(wpilib.TimedRobot):
         remoteRIODebugSupport()
 
         self.crashLogger = CrashLogger()
+
+        # We do our own logging, we don't need additional logging in the background.
+        # Both of these will increase CPU load by a lot, and we never use their output.
         wpilib.LiveWindow.disableAllTelemetry()
+
         self.webserver = Webserver()
 
         self.driveTrain = DrivetrainControl()
@@ -41,6 +47,8 @@ class MyRobot(wpilib.TimedRobot):
         self.stt = SegmentTimeTracker()      
 
         self.dInt = DriverInterface()
+        self.oInt = OperatorInterface()
+
         self.ledCtrl = LEDControl()
 
         self.autoSequencer = AutoSequencer()
@@ -49,6 +57,8 @@ class MyRobot(wpilib.TimedRobot):
 
         self.rioMonitor = RIOMonitor()
         self.pwrMon = PowerMonitor()
+
+        self.algaeManip = AlgaeWristControl()
 
         # Normal robot code updates every 20ms, but not everything needs to be that fast.
         # Register slower-update periodic functions
@@ -66,6 +76,9 @@ class MyRobot(wpilib.TimedRobot):
         self.dInt.update()
         self.stt.mark("Driver Interface")
 
+        self.oInt.update()
+        self.stt.mark("Operator Interface")
+
         self.driveTrain.update()
         self.stt.mark("Drivetrain")
 
@@ -73,6 +86,9 @@ class MyRobot(wpilib.TimedRobot):
         self.driveTrain.poseEst._telemetry.setCurAutoDriveWaypoints(self.autodrive.getWaypoints())
         self.driveTrain.poseEst._telemetry.setCurObstacles(self.autodrive.rfp.getObstacleStrengths())
         self.stt.mark("Telemetry")
+
+        self.algaeManip.setDesPos(self.oInt.getAlgaeManipCmd())
+        self.stt.mark("Algae Mainpulator")
 
         self.ledCtrl.setAutoDrive(self.autodrive.isRunning())
         self.ledCtrl.setStuck(self.autodrive.rfp.isStuck())
@@ -169,7 +185,15 @@ class MyRobot(wpilib.TimedRobot):
     #########################################################
     ## Cleanup
     def endCompetition(self):
-        self.rioMonitor.stopThreads()
+
+        # Sometimes `robopy test pyfrc_test.py` will invoke endCompetition() without completing robotInit(),
+        # this will create a confusing exception here because we can reach self.rioMonitor.stopThreads()
+        # when self.rioMonitor does not exist.
+        # To prevent the exception and confusion, we only call self.rioMonitor.stopThreads() when exists.
+        rioMonitorExists = getattr(self, "rioMonitor", None)
+        if rioMonitorExists is not None:
+            self.rioMonitor.stopThreads()
+
         destroyAllSingletonInstances()
         super().endCompetition()
 

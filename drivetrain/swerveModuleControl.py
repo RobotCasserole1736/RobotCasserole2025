@@ -10,6 +10,7 @@ from wpilib import TimedRobot
 
 
 from drivetrain.swerveModuleGainSet import SwerveModuleGainSet
+from wrappers.wrapperedKraken import WrapperedKraken
 from wrappers.wrapperedSparkMax import WrapperedSparkMax
 from wrappers.wrapperedSRXMagEncoder import WrapperedSRXMagEncoder
 from dashboardWidgets.swerveState import getAzmthDesTopicName, getAzmthActTopicName
@@ -63,7 +64,7 @@ class SwerveModuleControl:
             invertWheel (bool): Inverts the drive direction of the wheel - needed since left/right sides are mirrored
             invertAzmth (bool): Inverts the steering direction of the wheel - needed if motor is mounted upside
         """
-        self.wheelMotor = WrapperedSparkMax(
+        self.wheelMotor = WrapperedKraken(
             wheelMotorCanID, moduleName + "_wheel", False
         )
         self.azmthMotor = WrapperedSparkMax(
@@ -96,12 +97,12 @@ class SwerveModuleControl:
 
         addLog(
             getAzmthDesTopicName(moduleName),
-            self.optimizedDesiredState.angle.degrees,
+            lambda: (self.optimizedDesiredState.angle.degrees()),
             "deg",
         )
         addLog(
             getAzmthActTopicName(moduleName),
-            self.actualState.angle.degrees,
+            lambda: (self.actualState.angle.degrees()),
             "deg",
         )
         addLog(
@@ -198,8 +199,7 @@ class SwerveModuleControl:
 
         # Send voltage and speed commands to the wheel motor
         motorDesSpd = dtLinearToMotorRot(self.optimizedDesiredState.speed)
-        motorDesAccel = (motorDesSpd - self._prevMotorDesSpeed) / 0.02
-        motorVoltageFF = self.wheelMotorFF.calculate(self.actualState.speed, motorDesSpd) #This is the problem child of the new non-backwards compatable Robotpy update. actualstate.speed is "prev" and motorDesSpd is "cur"
+        motorVoltageFF = self.wheelMotorFF.calculate(self._prevMotorDesSpeed, motorDesSpd) #This is the problem child of the new non-backwards compatable Robotpy update. actualstate.speed is "prev" and motorDesSpd is "cur"
         self.wheelMotor.setVelCmd(motorDesSpd, motorVoltageFF)                            
 
         self._prevMotorDesSpeed = motorDesSpd  # save for next loop

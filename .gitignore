@@ -6,3 +6,5 @@ simgui-ds.json
 .coverage
 .simulationLogs
 *.orig
+ctre_sim/
+memory_report.txt
