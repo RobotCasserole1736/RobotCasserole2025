@@ -1,7 +1,7 @@
 from utils.faults import Fault
 from utils.signalLogging import addLog
 from wpilib import XboxController
-from Elevatorandmech.ElevatorandMechConstants import AlgaeWristState
+from Elevatorandmech.ElevatorandMechConstants import AlgaeWristState, ElevatorLevelCmd
 
 class OperatorInterface:
     """Class to gather input from the driver of the robot"""
@@ -15,13 +15,10 @@ class OperatorInterface:
         self.autoIntakeCoral = True
         self.intakeAlgae = False
         self.ejectAlgae = False
-        #we are going to use elevManual commands as a if-pressed, make goal go up by __ m
-        self.elevManualUp = False
-        self.elevManualDown = False
-        self.L1 = False
-        self.L2 = False
-        self.L3 = False
-        self.L4 = False
+
+        #elevator commands
+        self.elevatorLevelCmd = ElevatorLevelCmd.NO_CMD
+        self.elevManAdjCmd = 0.0
 
         self.algaeManipGround = False
         self.algaeManipStow = False
@@ -44,16 +41,21 @@ class OperatorInterface:
         if self.ctrl.isConnected():
             # Convert from  joystic sign/axis conventions to robot velocity conventions
 
-            self.L1 = self.ctrl.getXButton()
-            self.L2 = self.ctrl.getAButton()
-            self.L3 = self.ctrl.getBButton()
-            self.L4 = self.ctrl.getYButton()
-            self.elevManualUp = self.ctrl.getRightTriggerAxis()
-            self.elevManualDown = self.ctrl.getLeftTriggerAxis()
+            # Elevator Commands
+            self.elevatorLevelCmd = ElevatorLevelCmd.NO_CMD # default to no command
+            if(self.ctrl.getXButton()):
+                self.elevatorLevelCmd = ElevatorLevelCmd.L1 
+            elif(self.ctrl.getAButton()):
+                self.elevatorLevelCmd = ElevatorLevelCmd.L2
+            elif(self.ctrl.getBButton()):
+                self.elevatorLevelCmd = ElevatorLevelCmd.L3
+            elif(self.ctrl.getYButton()):
+                self.elevatorLevelCmd = ElevatorLevelCmd.L4
+            self.elevManAdjCmd = self.ctrl.getRightTriggerAxis() - self.ctrl.getLeftTriggerAxis() 
+
 
             self.intakeAlgae = self.ctrl.getLeftY() > 0.3
             self.ejectAlgae = self.ctrl.getLeftY() < -0.3
-            # self.ejectCoral = True if self.ctrl.getPOV() != -1 else False
             self.ejectCoral = self.ctrl.getLeftBumper()
 
             # Dpad right
@@ -76,13 +78,8 @@ class OperatorInterface:
             self.autoIntakeCoral = False
             self.ejectCoral = False
             self.intakeAlgae = False
-            self.ejectAlgae = False
-            self.elevManualUp = False
-            self.elevManualDown = False
-            self.L1 = False
-            self.L2 = False
-            self.L3 = False
-            self.L4 = False
+            self.elevatorLevelCmd = ElevatorLevelCmd.NO_CMD
+            self.elevManAdjCmd = 0.0
             self.connectedFault.setFaulted()
 
     def getEjectCoral(self):
@@ -93,18 +90,6 @@ class OperatorInterface:
     
     def getEjectAlgae(self):
         return self.ejectAlgae
-    
-    def getL1(self):
-        return self.L1
-    
-    def getL2(self):
-        return self.L2
-
-    def getL3(self):
-        return self.L3
-    
-    def getL4(self):
-        return self.L4
 
     def getAlgaeManipCmd(self):
         if self.algaeManipReef:
@@ -114,11 +99,13 @@ class OperatorInterface:
         else:
             return AlgaeWristState.STOW
 
-    def getElevManUp(self):
-        return self.elevManualUp
+    def getElevCmd(self) -> ElevatorLevelCmd:
+        return self.elevatorLevelCmd
     
-    def getElevManDown(self):
-        return self.elevManualDown
-    
+    # Returns a manual offset to the elevator height
+    # -1.0 is full down motion, 1.0 is full up motion
+    def getElevManAdjCmd(self) -> float:
+        return self.elevManAdjCmd
+
     def getAutoIntake(self):
         return self.autoIntakeCoral
