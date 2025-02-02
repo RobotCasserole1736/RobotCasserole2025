@@ -1,5 +1,4 @@
 from enum import Enum
-from utils.calibration import Calibration
 from utils.units import in2m
 
 class AlgaeWristState(Enum):
@@ -15,6 +14,11 @@ class ElevatorLevelCmd(Enum):
     L4 = 3
     NO_CMD = -1
 
+class CoralManState(Enum):
+    DISABLED = 0
+    INTAKING = 1
+    EJECTING = 2 
+    HOLDING = 3
 
 ALGAE_ANGLE_ABS_POS_ENC_OFFSET = 0
 ALGAE_GEARBOX_GEAR_RATIO = 1#the max speed/acceleration the elevator can go
