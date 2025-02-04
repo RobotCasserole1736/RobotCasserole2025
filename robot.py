@@ -186,7 +186,7 @@ class MyRobot(wpilib.TimedRobot):
                 self.autodrive.rfp.addObstacleObservation(obs)
 
         self.autosteer.setReefAutoSteerCmd(self.dInt.getAutoSteer())
-        self.coralMan.setCoralCommand(self.oInt.getEjectCoral(), self.oInt.getAutoIntake(), self.oInt.getL1())
+        self.coralMan.setCoralCommand(self.oInt.getEjectCoral(), self.oInt.getAutoIntake(), self.oInt.getElevCmd())
         self.autodrive.setRequest(self.dInt.getAutoDrive())
 
         # TODO - pass in the bool from coral manipulator whether we're "safe" to leave L1 or not.
