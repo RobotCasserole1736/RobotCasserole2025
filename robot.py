@@ -1,32 +1,31 @@
 import sys
-from phoenix6 import SignalLogger
-import wpilib
-from Elevatorandmech.coralManipulatorControl import CoralManipulatorControl
+# from phoenix6 import SignalLogger
+from AutoSequencerV2.autoSequencer import AutoSequencer
 from dashboard import Dashboard
-from Elevatorandmech.ElevatorControl import ElevatorControl
 from drivetrain.controlStrategies.autoDrive import AutoDrive
 from drivetrain.controlStrategies.autoSteer import AutoSteer
 from drivetrain.controlStrategies.trajectory import Trajectory
 from drivetrain.drivetrainCommand import DrivetrainCommand
 from drivetrain.drivetrainControl import DrivetrainControl
+from Elevatorandmech.algaeManipulatorControl import AlgeaIntakeControl, AlgaeWristControl
+from Elevatorandmech.coralManipulatorControl import CoralManipulatorControl
+from Elevatorandmech.ElevatorandMechConstants import ElevatorLevelCmd
+from Elevatorandmech.ElevatorControl import ElevatorControl
 from humanInterface.driverInterface import DriverInterface
-from humanInterface.operatorInterface import OperatorInterface
 from humanInterface.ledControl import LEDControl
 from humanInterface.operatorInterface import OperatorInterface
 from navigation.forceGenerators import PointObstacle
 from utils.segmentTimeTracker import SegmentTimeTracker
-from utils.signalLogging import logUpdate
 from utils.calibration import CalibrationWrangler
-from utils.faults import FaultWrangler
 from utils.crashLogger import CrashLogger
+from utils.faults import FaultWrangler
+from utils.powerMonitor import PowerMonitor
 from utils.rioMonitor import RIOMonitor
+from utils.signalLogging import logUpdate
 from utils.singleton import destroyAllSingletonInstances
-from utils.powerMonitor import PowerMonitor
 from webserver.webserver import Webserver
-from AutoSequencerV2.autoSequencer import AutoSequencer
-from utils.powerMonitor import PowerMonitor
+import wpilib
 from wpimath.geometry import Translation2d, Pose2d, Rotation2d
-from Elevatorandmech.algaeManipulatorControl import AlgeaIntakeControl, AlgaeWristControl
 
 class MyRobot(wpilib.TimedRobot):
 
@@ -37,7 +36,7 @@ class MyRobot(wpilib.TimedRobot):
         # to ignore these instantiations in a method.
         # pylint: disable=attribute-defined-outside-init
         remoteRIODebugSupport()
-        
+
         self.crashLogger = CrashLogger()
 
         # We do our own logging, we don't need additional logging in the background.
@@ -81,7 +80,6 @@ class MyRobot(wpilib.TimedRobot):
 
         self.autoHasRun = False
 
-
     def robotPeriodic(self):
         self.stt.start()
 
@@ -94,22 +92,23 @@ class MyRobot(wpilib.TimedRobot):
         self.dInt.update()
         self.stt.mark("Driver Interface")
 
-        self.elev.update()
-        self.stt.mark("Elevator")
+        self.driveTrain.update()
+        self.stt.mark("Drivetrain")
 
         self.oInt.update()
         self.stt.mark("Operator Interface")
 
-        self.driveTrain.update()
-        self.stt.mark("Drivetrain")
+        self.elev.update()
+        self.stt.mark("Elevator")
+
+        self.coralMan.update()
+        self.stt.mark("Coral Manipulator")
 
         self.autodrive.updateTelemetry()
         self.driveTrain.poseEst._telemetry.setCurAutoDriveWaypoints(self.autodrive.getWaypoints())
         self.driveTrain.poseEst._telemetry.setCurObstacles(self.autodrive.rfp.getObstacleStrengths())
         self.stt.mark("Telemetry")
 
-        self.coralMan.update()
-        self.stt.mark("Coral Manipulator")
 
         self.ledCtrl.setAutoDrive(self.autodrive.isRunning())
         self.ledCtrl.setStuck(self.autodrive.rfp.isStuck())
@@ -186,10 +185,12 @@ class MyRobot(wpilib.TimedRobot):
                 self.autodrive.rfp.addObstacleObservation(obs)
 
         self.autosteer.setReefAutoSteerCmd(self.dInt.getAutoSteer())
-        self.coralMan.setCoralCommand(self.oInt.getEjectCoral(), self.oInt.getAutoIntake(), self.oInt.getElevCmd())
         self.autodrive.setRequest(self.dInt.getAutoDrive())
 
-        # TODO - pass in the bool from coral manipulator whether we're "safe" to leave L1 or not.
+        self.coralMan.setCoralCmd(self.oInt.getCoralCmd())
+        self.coralMan.setAtL1(self.elev.getHeightM() < (self.elev.L1_Height.get() + 0.1))
+
+        self.elev.setSafeToLeaveL1(self.coralMan.getCoralSafeToMove())
         self.elev.setManualAdjCmd(self.oInt.getElevManAdjCmd())
         self.elev.setHeightGoal(self.oInt.getElevCmd())
 

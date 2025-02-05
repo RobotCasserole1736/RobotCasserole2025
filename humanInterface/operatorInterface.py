@@ -1,7 +1,7 @@
+from Elevatorandmech.ElevatorandMechConstants import AlgaeWristState, ElevatorLevelCmd, CoralManState
 from utils.faults import Fault
 from utils.signalLogging import addLog
 from wpilib import XboxController
-from Elevatorandmech.ElevatorandMechConstants import AlgaeWristState, ElevatorLevelCmd
 
 class OperatorInterface:
     """Class to gather input from the driver of the robot"""
@@ -11,8 +11,7 @@ class OperatorInterface:
         ctrlIdx = 1
         self.ctrl = XboxController(ctrlIdx)
         self.connectedFault = Fault(f"Operator XBox controller ({ctrlIdx}) unplugged")
-        self.ejectCoral = False
-        self.autoIntakeCoral = True
+        self.coralCmd = CoralManState.DISABLED
         self.intakeAlgae = False
         self.ejectAlgae = False
 
@@ -53,10 +52,15 @@ class OperatorInterface:
                 self.elevatorLevelCmd = ElevatorLevelCmd.L4
             self.elevManAdjCmd = self.ctrl.getRightTriggerAxis() - self.ctrl.getLeftTriggerAxis() 
 
+            if self.ctrl.getLeftBumper() and not self.ctrl.getBackButton():
+                self.coralCmd = CoralManState.INTAKING
+            elif not self.ctrl.getLeftBumper() and self.ctrl.getBackButton():
+                self.coralCmd = CoralManState.EJECTING
+            else:
+                self.coralCmd = CoralManState.DISABLED
 
             self.intakeAlgae = self.ctrl.getLeftY() > 0.3
             self.ejectAlgae = self.ctrl.getLeftY() < -0.3
-            self.ejectCoral = self.ctrl.getLeftBumper()
 
             # Dpad right
             self.algaeManipGround = 45 < self.ctrl.getPOV() < 135
@@ -64,12 +68,6 @@ class OperatorInterface:
             self.algaeManipStow = 135 < self.ctrl.getPOV() < 225
             # Dpad left
             self.algaeManipReef = 225 < self.ctrl.getPOV() < 315
-
-            if self.ctrl.getBackButtonPressed():
-                if self.autoIntakeCoral:
-                    self.autoIntakeCoral = False
-                else:
-                    self.autoIntakeCoral = True
 
             self.connectedFault.setNoFault()
 
@@ -82,12 +80,12 @@ class OperatorInterface:
             self.elevManAdjCmd = 0.0
             self.connectedFault.setFaulted()
 
-    def getEjectCoral(self):
-        return self.ejectCoral
-    
+    def getCoralCmd(self) -> CoralManState:
+        return self.coralCmd
+
     def getIntakeAlgae(self):
         return self.intakeAlgae
-    
+
     def getEjectAlgae(self):
         return self.ejectAlgae
 
@@ -106,6 +104,3 @@ class OperatorInterface:
     # -1.0 is full down motion, 1.0 is full up motion
     def getElevManAdjCmd(self) -> float:
         return self.elevManAdjCmd
-
-    def getAutoIntake(self):
-        return self.autoIntakeCoral
