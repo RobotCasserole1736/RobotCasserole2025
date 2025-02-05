@@ -137,7 +137,7 @@ class MyRobot(wpilib.TimedRobot):
         self.autoSequencer.update()
 
         # Operators cannot control in autonomous
-        self.driveTrain.setManualCmd(DrivetrainCommand())
+        #self.driveTrain.setManualCmd(DrivetrainCommand())
 
     def autonomousExit(self):
         self.autoSequencer.end()

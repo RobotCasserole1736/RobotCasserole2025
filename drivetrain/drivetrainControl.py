@@ -1,6 +1,5 @@
 from wpimath.kinematics import ChassisSpeeds
 from wpimath.geometry import Pose2d, Rotation2d
-from Autonomous.commands.driveForwardSlowCommand import DriveForwardSlowCommand
 from drivetrain.controlStrategies.autoSteer import AutoSteer
 from drivetrain.poseEstimation.drivetrainPoseEstimator import DrivetrainPoseEstimator
 from drivetrain.swerveModuleControl import SwerveModuleControl

@@ -35,7 +35,7 @@ class CoralManipulatorControl(metaclass=Singleton):
         self.overrideToEject = False
         self.ejectCoral = False
         self.hasGamePiece = False
-        self.intakeCoralAuto = True
+        self.intakeCoralAuto = False
         self.atL1 = False
 
         addLog("Coral Enum", lambda:self.coralCurState.value, "state")

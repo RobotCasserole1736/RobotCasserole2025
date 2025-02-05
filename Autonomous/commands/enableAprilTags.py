@@ -3,7 +3,7 @@ from AutoSequencerV2.command import Command
 from drivetrain.drivetrainControl import DrivetrainControl
 from drivetrain.poseEstimation.drivetrainPoseEstimator import DrivetrainPoseEstimator
 
-class DisableAprilTagCommand(Command):
+class EnableAprilTagCommand(Command):
     def __init__(self):
         self.drivetrainPoseEstimator = DrivetrainPoseEstimator(DrivetrainControl().getModulePositions())   
 

@@ -12,7 +12,7 @@ class OperatorInterface:
         self.ctrl = XboxController(ctrlIdx)
         self.connectedFault = Fault(f"Operator XBox controller ({ctrlIdx}) unplugged")
         self.ejectCoral = False
-        self.autoIntakeCoral = True
+        self.autoIntakeCoral = False
         self.intakeAlgae = False
         self.ejectAlgae = False
 
@@ -30,10 +30,10 @@ class OperatorInterface:
         #addLog("scoreL4",lambda: self.L4,"Bool")
         #addLog("elevManUp", lambda: self.elevManualUp, "Bool")
         #addLog("elevManDown", lambda: self.elevManualDown, "Bool")
-        addLog("intakeAlgae", lambda: self.intakeAlgae, "Bool")
-        addLog("ejectAlgae", lambda: self.ejectAlgae, "Bool")
+        addLog("intakeAlgaeOpCmd", lambda: self.intakeAlgae, "Bool")
+        #addLog("ejectAlgaeOpCmd", lambda: self.ejectAlgae, "Bool")
         #addLog("ejectCoral", lambda: self.ejectCoral, "Bool")
-        #addLog("autoIntakeCoral", lambda: self.autoIntakeCoral, "Bool")
+        addLog("autoIntakeCoral", lambda: self.autoIntakeCoral, "Bool")
     
     def update(self):
         # value of controller buttons
