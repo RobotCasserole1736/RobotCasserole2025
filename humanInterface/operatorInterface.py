@@ -6,7 +6,7 @@ from wpilib import XboxController
 class OperatorInterface:
     """Class to gather input from the driver of the robot"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         # controller
         ctrlIdx = 1
         self.ctrl = XboxController(ctrlIdx)
@@ -34,7 +34,7 @@ class OperatorInterface:
         #addLog("ejectCoral", lambda: self.ejectCoral, "Bool")
         #addLog("autoIntakeCoral", lambda: self.autoIntakeCoral, "Bool")
 
-    def update(self):
+    def update(self) -> None:
         # value of controller buttons
 
         if self.ctrl.isConnected():
@@ -83,13 +83,13 @@ class OperatorInterface:
     def getCoralCmd(self) -> CoralManState:
         return self.coralCmd
 
-    def getIntakeAlgae(self):
+    def getIntakeAlgae(self) -> bool:
         return self.intakeAlgae
 
-    def getEjectAlgae(self):
+    def getEjectAlgae(self) -> bool:
         return self.ejectAlgae
 
-    def getAlgaeManipCmd(self):
+    def getAlgaeManipCmd(self) -> AlgaeWristState:
         if self.algaeManipReef:
             return AlgaeWristState.REEF
         elif self.algaeManipGround:

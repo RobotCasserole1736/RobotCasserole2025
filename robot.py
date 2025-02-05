@@ -9,7 +9,6 @@ from drivetrain.drivetrainCommand import DrivetrainCommand
 from drivetrain.drivetrainControl import DrivetrainControl
 from Elevatorandmech.algaeManipulatorControl import AlgeaIntakeControl, AlgaeWristControl
 from Elevatorandmech.coralManipulatorControl import CoralManipulatorControl
-from Elevatorandmech.ElevatorandMechConstants import ElevatorLevelCmd
 from Elevatorandmech.ElevatorControl import ElevatorControl
 from humanInterface.driverInterface import DriverInterface
 from humanInterface.ledControl import LEDControl

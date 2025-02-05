@@ -1,4 +1,4 @@
-from Elevatorandmech.ElevatorandMechConstants import ElevatorLevelCmd, CoralManState
+from Elevatorandmech.ElevatorandMechConstants import CoralManState
 from utils.calibration import Calibration
 from utils.constants import CORAL_L_CANID, CORAL_R_CANID, CORAL_GAME_PIECE_B_PORT, CORAL_GAME_PIECE_F_PORT
 from utils.singleton import Singleton
@@ -8,7 +8,7 @@ from wrappers.wrapperedSparkMax import WrapperedSparkMax
 
 class CoralManipulatorControl(metaclass=Singleton):
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.coralCurState = CoralManState.DISABLED
         self.coralMotorL = WrapperedSparkMax(CORAL_L_CANID, "CoralMotorL", True, 10)
         self.coralMotorR = WrapperedSparkMax(CORAL_R_CANID, "CoralMotorR", True, 10)
@@ -25,7 +25,7 @@ class CoralManipulatorControl(metaclass=Singleton):
         addLog("Coral Enum", lambda:self.coralCurState.value, "state")
         addLog("Has Game Piece", self.getCheckGamePiece, "Bool")
 
-    def update(self):
+    def update(self) -> None:
         # Always disable if commanded to disable
         if self.coralCurState == CoralManState.DISABLED:
             self.coralMotorL.setVoltage(0)
@@ -54,14 +54,14 @@ class CoralManipulatorControl(metaclass=Singleton):
                 self.coralMotorL.setVoltage(0)
                 self.coralMotorR.setVoltage(0)
 
-    def getCheckGamePiece(self):
+    def getCheckGamePiece(self) -> bool:
         """We think the back sensor (the one the coral hits first) needs to be clear to have a game piece.
         And the front sensor needs to be tripped.
         For now, we want to assume we don't need to feed back.   """
         return self.gamepieceSensorF.get() and not self.gamepieceSensorB.get()
         #return True
 
-    def getCoralSafeToMove(self):
+    def getCoralSafeToMove(self) -> bool:
         #I think this is just a function that is going to be used by elevator control.
         # theoretically, As long as the back gamepiece sensor isn't being tripped, the robot is good to up because a coral isn't in the way.
         return not self.gamepieceSensorB.get()
