@@ -33,7 +33,7 @@ class OperatorInterface:
         addLog("ejectAlgae", lambda: self.ejectAlgae, "Bool")
         #addLog("ejectCoral", lambda: self.ejectCoral, "Bool")
         #addLog("autoIntakeCoral", lambda: self.autoIntakeCoral, "Bool")
-    
+
     def update(self):
         # value of controller buttons
 
@@ -43,14 +43,14 @@ class OperatorInterface:
             # Elevator Commands
             self.elevatorLevelCmd = ElevatorLevelCmd.NO_CMD # default to no command
             if(self.ctrl.getXButton()):
-                self.elevatorLevelCmd = ElevatorLevelCmd.L1 
+                self.elevatorLevelCmd = ElevatorLevelCmd.L1
             elif(self.ctrl.getAButton()):
                 self.elevatorLevelCmd = ElevatorLevelCmd.L2
             elif(self.ctrl.getBButton()):
                 self.elevatorLevelCmd = ElevatorLevelCmd.L3
             elif(self.ctrl.getYButton()):
                 self.elevatorLevelCmd = ElevatorLevelCmd.L4
-            self.elevManAdjCmd = self.ctrl.getRightTriggerAxis() - self.ctrl.getLeftTriggerAxis() 
+            self.elevManAdjCmd = self.ctrl.getRightTriggerAxis() - self.ctrl.getLeftTriggerAxis()
 
             if self.ctrl.getLeftBumper() and not self.ctrl.getBackButton():
                 self.coralCmd = CoralManState.INTAKING
@@ -99,7 +99,7 @@ class OperatorInterface:
 
     def getElevCmd(self) -> ElevatorLevelCmd:
         return self.elevatorLevelCmd
-    
+
     # Returns a manual offset to the elevator height
     # -1.0 is full down motion, 1.0 is full up motion
     def getElevManAdjCmd(self) -> float:

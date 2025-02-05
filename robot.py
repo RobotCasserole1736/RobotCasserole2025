@@ -53,7 +53,7 @@ class MyRobot(wpilib.TimedRobot):
         self.autodrive = AutoDrive()
         self.autosteer = AutoSteer()
 
-        self.stt = SegmentTimeTracker()      
+        self.stt = SegmentTimeTracker()
 
         self.dInt = DriverInterface()
         self.oInt = OperatorInterface()
@@ -239,4 +239,3 @@ def remoteRIODebugSupport():
         else:
             debugpy.listen(("0.0.0.0", 5678))
             debugpy.wait_for_client()
-

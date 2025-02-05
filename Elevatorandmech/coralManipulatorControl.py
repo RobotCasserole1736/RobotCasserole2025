@@ -14,11 +14,11 @@ class CoralManipulatorControl(metaclass=Singleton):
         self.coralMotorR = WrapperedSparkMax(CORAL_R_CANID, "CoralMotorR", True, 10)
         self.coralMotorR.setInverted(True)
         #we're assuming B is the one that hits first (it's closer to the intake side), while F is closer to front of eject side
-        self.gamepieceSensorF = DigitalInput(CORAL_GAME_PIECE_F_PORT) 
-        self.gamepieceSensorB = DigitalInput(CORAL_GAME_PIECE_B_PORT)   
-        self.motorHoldingVoltage = Calibration("MotorHolding", 1.0, "V") 
+        self.gamepieceSensorF = DigitalInput(CORAL_GAME_PIECE_F_PORT)
+        self.gamepieceSensorB = DigitalInput(CORAL_GAME_PIECE_B_PORT)
+        self.motorHoldingVoltage = Calibration("MotorHolding", 1.0, "V")
         self.motorIntakeVoltage =  Calibration("MotorIntake", 8.0, "V")
-        self.motorEjectVoltage =  Calibration("MotorEject", 11.0, "V") 
+        self.motorEjectVoltage =  Calibration("MotorEject", 11.0, "V")
         self.RMotorEjectVoltageL1 = Calibration("MotorEjectRForL1", 5.0, "V")
         self.atL1 = False
 
@@ -61,9 +61,9 @@ class CoralManipulatorControl(metaclass=Singleton):
         return self.gamepieceSensorF.get() and not self.gamepieceSensorB.get()
         #return True
 
-    def getCoralSafeToMove(self): 
-        #I think this is just a function that is going to be used by elevator control. 
-        # theoretically, As long as the back gamepiece sensor isn't being tripped, the robot is good to up because a coral isn't in the way. 
+    def getCoralSafeToMove(self):
+        #I think this is just a function that is going to be used by elevator control.
+        # theoretically, As long as the back gamepiece sensor isn't being tripped, the robot is good to up because a coral isn't in the way.
         return not self.gamepieceSensorB.get()
 
     def setCoralCmd(self, cmdStateIn: CoralManState) -> None:
