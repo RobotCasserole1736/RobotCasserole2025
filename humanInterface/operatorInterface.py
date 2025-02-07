@@ -19,9 +19,7 @@ class OperatorInterface:
         self.elevatorLevelCmd = ElevatorLevelCmd.NO_CMD
         self.elevManAdjCmd = 0.0
 
-        self.algaeManipGround = False
-        self.algaeManipStow = False
-        self.algaeManipReef = False
+        self.algaeManipCmd = AlgaeWristState.STOW
 
         #addLog("scoreL1",lambda: self.L1,"Bool")
         #addLog("scoreL2",lambda: self.L2,"Bool")
@@ -59,15 +57,25 @@ class OperatorInterface:
             else:
                 self.coralCmd = CoralManState.DISABLED
 
+            # Intake/Eject Algae
             self.intakeAlgae = self.ctrl.getLeftY() > 0.3
             self.ejectAlgae = self.ctrl.getLeftY() < -0.3
 
-            # Dpad right
-            self.algaeManipGround = 45 < self.ctrl.getPOV() < 135
-            # Dpad down
-            self.algaeManipStow = 135 < self.ctrl.getPOV() < 225
-            # Dpad left
-            self.algaeManipReef = 225 < self.ctrl.getPOV() < 315
+            # Set Algae Manipulator command
+            # Dpad right = Ground Position
+            if 45 < self.ctrl.getPOV() < 135:
+                self.algaeManipCmd = AlgaeWristState.INTAKEOFFGROUND
+            # Dpad down = Stow Position
+            elif 135 < self.ctrl.getPOV() < 225:
+                self.algaeManipCmd = AlgaeWristState.STOW
+            # Dpad left = Reef Position
+            elif 225 < self.ctrl.getPOV() < 315:
+                self.algaeManipCmd = AlgaeWristState.REEF
+            # Always return to stow if other positions are not commanded
+            # Could we just free up Dpad down since we always return to Stow?
+            # We may change anyway based on human operator feedback
+            else:
+                self.algaeManipCmd = AlgaeWristState.STOW
 
             self.connectedFault.setNoFault()
 
@@ -76,6 +84,7 @@ class OperatorInterface:
             self.autoIntakeCoral = False
             self.ejectCoral = False
             self.intakeAlgae = False
+            self.algaeManipCmd = AlgaeWristState.STOW
             self.elevatorLevelCmd = ElevatorLevelCmd.NO_CMD
             self.elevManAdjCmd = 0.0
             self.connectedFault.setFaulted()
@@ -90,12 +99,7 @@ class OperatorInterface:
         return self.ejectAlgae
 
     def getAlgaeManipCmd(self) -> AlgaeWristState:
-        if self.algaeManipReef:
-            return AlgaeWristState.REEF
-        elif self.algaeManipGround:
-            return AlgaeWristState.INTAKEOFFGROUND
-        else:
-            return AlgaeWristState.STOW
+        return self.algaeManipCmd
 
     def getElevCmd(self) -> ElevatorLevelCmd:
         return self.elevatorLevelCmd
