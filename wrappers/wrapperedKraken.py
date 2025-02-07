@@ -1,5 +1,6 @@
 from phoenix6 import hardware, configs, signals, controls, StatusCode, SignalLogger
 from wpilib import TimedRobot
+from memes.ctreMusicPlayback import CTREMusicPlayback
 from utils.signalLogging import addLog
 from utils.units import rev2Rad, rad2Rev, radPerSec2RPM, RPM2RadPerSec
 from utils.faults import Fault
@@ -50,6 +51,9 @@ class WrapperedKraken:
 
         # Simulation Suport
         self.simActPos = 0
+
+        # Register with the music player
+        CTREMusicPlayback().registerDevice(self.ctrl)
         
 
     def _applyCurCfg(self):
@@ -92,7 +96,8 @@ class WrapperedKraken:
         self.desPos = posCmd
         self.desVolt = arbFF
         posCmdRev = rad2Rev(posCmd)
-        self.ctrl.set_control(controls.PositionVoltage(posCmdRev).with_slot(0).with_feed_forward(arbFF))
+        if(not CTREMusicPlayback().isPlaying()):
+            self.ctrl.set_control(controls.PositionVoltage(posCmdRev).with_slot(0).with_feed_forward(arbFF))
 
 
 
@@ -108,12 +113,14 @@ class WrapperedKraken:
         self.desVel = velCmdRPM
         self.desVolt = arbFF
         velCmdRotPS = velCmdRPM/60.0
-        self.ctrl.set_control(controls.VelocityVoltage(velCmdRotPS).with_slot(0).with_feed_forward(arbFF))
+        if(not CTREMusicPlayback().isPlaying()):
+            self.ctrl.set_control(controls.VelocityVoltage(velCmdRotPS).with_slot(0).with_feed_forward(arbFF))
 
 
     def setVoltage(self, outputVoltageVolts):
         self.desVolt = outputVoltageVolts
-        self.ctrl.set_control(controls.VoltageOut(outputVoltageVolts))
+        if(not CTREMusicPlayback().isPlaying()):
+            self.ctrl.set_control(controls.VoltageOut(outputVoltageVolts))
 
     def getMotorPositionRad(self):
         if(TimedRobot.isSimulation()):

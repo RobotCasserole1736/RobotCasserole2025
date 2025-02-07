@@ -12,6 +12,7 @@ from Elevatorandmech.coralManipulatorControl import CoralManipulatorControl
 from Elevatorandmech.ElevatorControl import ElevatorControl
 from humanInterface.driverInterface import DriverInterface
 from humanInterface.ledControl import LEDControl
+from memes.ctreMusicPlayback import CTREMusicPlayback
 from humanInterface.operatorInterface import OperatorInterface
 from navigation.forceGenerators import PointObstacle
 from utils.segmentTimeTracker import SegmentTimeTracker
@@ -211,9 +212,13 @@ class MyRobot(wpilib.TimedRobot):
     ## Test-Specific init and update
     def testInit(self):
         wpilib.LiveWindow.setEnabled(False)
+        CTREMusicPlayback().play()
 
     def testPeriodic(self):
         pass
+
+    def testExit(self) -> None:
+        CTREMusicPlayback().stop()
 
     #########################################################
     ## Cleanup
