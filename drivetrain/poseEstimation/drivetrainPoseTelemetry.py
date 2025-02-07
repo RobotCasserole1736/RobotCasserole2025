@@ -10,6 +10,7 @@ from choreo.trajectory import SwerveTrajectory
 
 from utils.allianceTransformUtils import transform
 from drivetrain.drivetrainPhysical import ROBOT_TO_FRONT_CAM, ROBOT_TO_LEFTFRONT_CAM, ROBOT_TO_RIGHTFRONT_CAM, ROBOT_TO_RIGHTBACK_CAM, ROBOT_TO_LEFTBACK_CAM, robotToModuleTranslations
+from utils.autonomousTransformUtils import flip
 from wrappers.wrapperedPoseEstPhotonCamera import CameraPoseObservation
 
 
@@ -129,7 +130,7 @@ class DrivetrainPoseTelemetry:
         else:
             self.curTraj = Trajectory()
 
-    def setChoreoTrajectory(self, trajIn: SwerveTrajectory):
+    def setChoreoTrajectory(self, trajIn: SwerveTrajectory | None):
         """Display a specific trajectory on the robot Field2d
 
         Args:
@@ -145,7 +146,7 @@ class DrivetrainPoseTelemetry:
             sampTime = 0
             sampStep = trajIn.get_total_time()/MAX_POINTS_SHOWN
             while sampTime < trajIn.get_total_time():
-                state = transform(trajIn.sample_at(sampTime))
+                state = flip(transform(trajIn.sample_at(sampTime)))
                 if(state is not None):
                     stateList.append(
                         self._choreoToWPIState(state)
@@ -153,7 +154,7 @@ class DrivetrainPoseTelemetry:
                 sampTime += sampStep
 
             # Make sure final pose is in the list
-            stateList.append(self._choreoToWPIState(transform(trajIn.samples[-1])))
+            stateList.append(self._choreoToWPIState(flip(transform(trajIn.samples[-1]))))
 
             self.curTraj = Trajectory(stateList)
         else:
