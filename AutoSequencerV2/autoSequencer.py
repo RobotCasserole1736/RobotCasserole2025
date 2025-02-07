@@ -4,6 +4,7 @@ from AutoSequencerV2.modeList import ModeList
 from AutoSequencerV2.builtInModes.doNothingMode import DoNothingMode
 from AutoSequencerV2.builtInModes.waitMode import WaitMode
 from AutoSequencerV2.sequentialCommandGroup import SequentialCommandGroup
+from Autonomous.modes.driveForwardSlowly import DriveForwardSlowly
 from Autonomous.modes.driveOut import DriveOut
 
 from Autonomous.modes.driveTest1 import driveTest1
@@ -26,6 +27,7 @@ class AutoSequencer(metaclass=Singleton):
         self.mainModeList.addMode(DoNothingMode())
         #right now, DriveOut is all commented out, so we don't need to add it to the list. 
         self.mainModeList.addMode(DriveOut())
+        self.mainModeList.addMode(DriveForwardSlowly())
         self.mainModeList.addMode(driveTest1())
         self.topLevelCmdGroup = SequentialCommandGroup()
         self.startPose = Pose2d()
@@ -88,5 +90,6 @@ class AutoSequencer(metaclass=Singleton):
     def getDelayModeNTTableName(self):
         return self.delayModeList.getModeTopicBase()
 
-    def getStartingPose(self):
+    def getStartingPose(self) -> Pose2d | None:
+        # Returns the initial pose of the auto routine, if it has a defined one.
         return self.startPose

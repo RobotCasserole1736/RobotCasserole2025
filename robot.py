@@ -125,7 +125,9 @@ class MyRobot(wpilib.TimedRobot):
         self.autoSequencer.initialize()
 
         # Use the autonomous rouines starting pose to init the pose estimator
-        self.driveTrain.poseEst.setKnownPose(self.autoSequencer.getStartingPose())
+        startPose = self.autoSequencer.getStartingPose()
+        if(startPose is not None):
+            self.driveTrain.poseEst.setKnownPose(startPose)
 
         # Mark we at least started autonomous
         self.autoHasRun = True

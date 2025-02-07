@@ -18,8 +18,12 @@ class Mode:
     def getCmdGroup(self):
         return SequentialCommandGroup([])
 
-    def getInitialDrivetrainPose(self):
-        return Pose2d(0, 0, 0)
+    def getInitialDrivetrainPose(self) -> Pose2d | None:
+        # Returns the initial pose of the robot for this particular auto mode
+        # Or None, if the auto mode does not have a specific starting pose
+        # If there is no specific starting pose, the only other source of 
+        # starting pose is apriltags
+        return None
 
     def getName(self):
         return self._name
