@@ -109,28 +109,28 @@ FL = 3
 # which is in the center of the chassis on the ground
 ROBOT_TO_LEFTFRONT_CAM = Transform3d(
     Translation3d(
-        inchesToMeters(8.25), inchesToMeters(12.5), inchesToMeters(7.4)  # X  # Y  # Z
+        inchesToMeters(12.14), inchesToMeters(8.3), inchesToMeters(8.07)  # X  # Y  # Z
     ),
     Rotation3d.fromDegrees(0, -5.0, -15.0),  # Roll  # Pitch  # Yaw
 )
 
 ROBOT_TO_RIGHTFRONT_CAM = Transform3d(
     Translation3d(
-        inchesToMeters(8.25), inchesToMeters(-12.5), inchesToMeters(7.4)  # X  # Y  # Z
+        inchesToMeters(12.14), inchesToMeters(-8.3), inchesToMeters(8.07)  # X  # Y  # Z
     ),
     Rotation3d.fromDegrees(0, -5.0, 16.0),  # Roll  # Pitch  # Yaw
 )
 
 ROBOT_TO_LEFTBACK_CAM = Transform3d(
     Translation3d(
-        inchesToMeters(-9.75), inchesToMeters(10.3), inchesToMeters(7.4)  # X  # Y  # Z
+        inchesToMeters(-12.14), inchesToMeters(8.3), inchesToMeters(8.07)  # X  # Y  # Z
     ),
     Rotation3d.fromDegrees(0, -15.0, 170.0),  # Roll  # Pitch  # Yaw
 )
 
 ROBOT_TO_RIGHTBACK_CAM = Transform3d(
     Translation3d(
-        inchesToMeters(-9.75), inchesToMeters(-10.3), inchesToMeters(7.4)  # X  # Y  # Z
+        inchesToMeters(-12.14), inchesToMeters(-8.3), inchesToMeters(8.07)  # X  # Y  # Z
     ),
     Rotation3d.fromDegrees(0,-15,-170),  # Roll  # Pitch  # Yaw
 )
