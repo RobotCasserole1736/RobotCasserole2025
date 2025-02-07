@@ -36,4 +36,4 @@ class DriveForwardSlowCommand(Command):
         return Timer.getFPGATimestamp() - self.startTime >= 3
 
     def end(self,interrupt):
-        pass
+        self.drivetrainControl.setManualCmd(DrivetrainCommand(0,0,0))
