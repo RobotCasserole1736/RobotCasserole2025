@@ -1,6 +1,7 @@
 
 from wpilib import Timer
 from AutoSequencerV2.command import Command
+from Elevatorandmech.ElevatorandMechConstants import CoralManState
 from Elevatorandmech.coralManipulatorControl import CoralManipulatorControl
 
 class IntakeCoralCommand(Command):
@@ -12,7 +13,7 @@ class IntakeCoralCommand(Command):
 
     def execute(self):
         # Intake
-        CoralManipulatorControl().setCoralCommand(False,True,None)
+        CoralManipulatorControl().setCoralCmd(CoralManState.INTAKING)
         
     def maxDuration(self, duration):
         self.duration = duration + 1
@@ -21,7 +22,4 @@ class IntakeCoralCommand(Command):
         return Timer.getFPGATimestamp() - self.startTime >= self.duration
 
     def end(self,interrupt):
-        #set the inputs all to False, we don't want anything ejecting
-        # coralcommandfile().update()
-        CoralManipulatorControl().setCoralCommand(False,False,False)
-        CoralManipulatorControl().update()
+        CoralManipulatorControl().setCoralCmd(CoralManState.DISABLED)
