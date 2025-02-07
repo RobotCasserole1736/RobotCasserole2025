@@ -149,6 +149,8 @@ class AlgeaIntakeControl(metaclass=Singleton):
         self.disconTOFFault = faults.Fault("Singer TOF Sensor is Disconnected")
 
         #addLog("Has Game Piece",lambda:self.hasGamePiece, "Bool")
+        addLog("Algae intake",lambda:self.intakeCommandState,"Bool")
+        addLog("Algae eject",lambda:self.ejectCommandState,"Bool")
 
     def update(self):
         

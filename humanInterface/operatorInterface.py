@@ -29,8 +29,8 @@ class OperatorInterface:
         #addLog("scoreL4",lambda: self.L4,"Bool")
         #addLog("elevManUp", lambda: self.elevManualUp, "Bool")
         #addLog("elevManDown", lambda: self.elevManualDown, "Bool")
-        addLog("intakeAlgae", lambda: self.intakeAlgae, "Bool")
-        addLog("ejectAlgae", lambda: self.ejectAlgae, "Bool")
+        addLog("intakeAlgaeOpCmd", lambda: self.intakeAlgae, "Bool")
+        #addLog("ejectAlgaeOpCmd", lambda: self.ejectAlgae, "Bool")
         #addLog("ejectCoral", lambda: self.ejectCoral, "Bool")
         #addLog("autoIntakeCoral", lambda: self.autoIntakeCoral, "Bool")
 
