@@ -40,6 +40,14 @@ class Dashboard:
             AutoChooser(
                 50,
                 20,
+                AutoSequencer().getFlipModeNTTableName(),
+                AutoSequencer().getFlipModeList(),
+            )
+        )
+        webServer.addDashboardWidget(
+            AutoChooser(
+                50,
+                30,
                 AutoSequencer().getMainModeNTTableName(),
                 AutoSequencer().getMainModeList(),
             )

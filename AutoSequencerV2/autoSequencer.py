@@ -10,6 +10,7 @@ from Autonomous.modes.driveOut import DriveOut
 from Autonomous.modes.driveTest1 import driveTest1
 from utils.singleton import Singleton
 from utils.allianceTransformUtils import onRed
+from utils.autonomousTransformUtils import setFlip
 
 class AutoSequencer(metaclass=Singleton):
     """Top-level implementation of the AutoSequencer"""
@@ -21,6 +22,11 @@ class AutoSequencer(metaclass=Singleton):
         self.delayModeList.addMode(WaitMode(3.0))
         self.delayModeList.addMode(WaitMode(6.0))
         self.delayModeList.addMode(WaitMode(9.0))
+
+        # Create a flip selector
+        self.flipModeList = ModeList("Flip")
+        self.flipModeList.addMode("Left")
+        self.flipModeList.addMode("Right")
 
         # Create a list of every autonomous mode we want
         self.mainModeList = ModeList("Main")
@@ -53,7 +59,9 @@ class AutoSequencer(metaclass=Singleton):
     def updateMode(self, force=False):
         mainChanged = self.mainModeList.updateMode()
         delayChanged = self.delayModeList.updateMode()
-        if mainChanged or delayChanged or force or self._allianceChanged():
+        laneChanged = self.flipModeList.updateMode()
+        if mainChanged or delayChanged or laneChanged or force or self._allianceChanged():
+            setFlip(self.flipModeList.getCurMode() == "Right")
             mainMode = self.mainModeList.getCurMode()
             mainMode.__init__()
             delayMode = self.delayModeList.getCurMode()
@@ -62,7 +70,7 @@ class AutoSequencer(metaclass=Singleton):
             )
             self.startPose = mainMode.getInitialDrivetrainPose()
             print(
-                f"[Auto] New Modes Selected: {DriverStation.getAlliance()} {delayMode.getName()}, {mainMode.getName()}"
+                f"[Auto] New Modes Selected: {DriverStation.getAlliance()} {delayMode.getName()}, {self.flipModeList.getCurMode()} {mainMode.getName()}"
             )
 
     # Call this once during autonmous init to init the current command sequence
@@ -89,6 +97,12 @@ class AutoSequencer(metaclass=Singleton):
 
     def getDelayModeNTTableName(self):
         return self.delayModeList.getModeTopicBase()
+
+    def getFlipModeList(self):
+        return self.flipModeList.getNames()
+
+    def getFlipModeNTTableName(self):
+        return self.flipModeList.getModeTopicBase()
 
     def getStartingPose(self) -> Pose2d | None:
         # Returns the initial pose of the auto routine, if it has a defined one.
