@@ -43,8 +43,8 @@ class ElevatorControl(metaclass=Singleton):
         # Only for protection, not for initializing the elevator height
         # TODO - on right or left motor
         #Also, the limit switches we're using are "normally open," which is the default, so we should be good on that. 
-        self.revLimitSwitchVal = self.Rmotor.getRevLimitSwitch().get()
-        self.fwdLimitSwitchVal = self.Rmotor.getFwdLimitSwitch().get()
+        self.revLimitSwitchVal = self.Rmotor.getRevLimitSwitch()
+        self.fwdLimitSwitchVal = self.Rmotor.getFwdLimitSwitch()
 
         # FF and proportional gain constants
         self.kV = Calibration(name="Elevator kV", default=0.02, units="V/rps")
@@ -107,6 +107,12 @@ class ElevatorControl(metaclass=Singleton):
     def getHeightM(self) -> float:
         return self._RmotorRadToHeight(self.Rmotor.getMotorPositionRad()) 
     
+    def getForwardLimit(self) -> bool:
+        return self.fwdLimitSwitchVal
+    
+    def getReverseLimit(self) -> bool:
+        return self.revLimitSwitchVal
+    
     #return the height of the elevator as measured by the absolute sensor in meters
     def _getAbsHeight(self) -> float:
         return self.heightAbsSen.getRange() / 1000.0 - self.ABS_SENSOR_READING_AT_ELEVATOR_BOTTOM_M
@@ -166,6 +172,9 @@ class ElevatorControl(metaclass=Singleton):
                 + self.kG.get()
 
             self.Rmotor.setPosCmd(motorPosCmd, vFF)
+
+        self.revLimitSwitchVal = self.Rmotor.getRevLimitSwitch()
+        self.fwdLimitSwitchVal = self.Rmotor.getFwdLimitSwitch()
 
     # API to set current height goal
     def setHeightGoal(self, presetHeightCmd:ElevatorLevelCmd) -> None:
