@@ -5,11 +5,13 @@ from Elevatorandmech.ElevatorandMechConstants import CoralManState
 from Elevatorandmech.coralManipulatorControl import CoralManipulatorControl
 
 class EjectCoralCommand(Command):
-    def __init__(self):
+    def __init__(self, goingToL1=False):
         self.duration = 3
+        self.atL1 = goingToL1
 
     def initialize(self):
         self.startTime = Timer.getFPGATimestamp()
+        CoralManipulatorControl().setAtL1(self.atL1)
 
     def execute(self):
         # Eject

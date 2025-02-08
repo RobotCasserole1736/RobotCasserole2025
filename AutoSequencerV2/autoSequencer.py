@@ -4,6 +4,8 @@ from AutoSequencerV2.modeList import ModeList
 from AutoSequencerV2.builtInModes.doNothingMode import DoNothingMode
 from AutoSequencerV2.builtInModes.waitMode import WaitMode
 from AutoSequencerV2.sequentialCommandGroup import SequentialCommandGroup
+from Autonomous.modes.lCycleL1P4 import LCycleL1
+from Autonomous.modes.center1CoralL1 import Center1CoralL1
 from Autonomous.modes.driveForwardSlowly import DriveForwardSlowly
 from Autonomous.modes.driveOut import DriveOut
 
@@ -29,6 +31,8 @@ class AutoSequencer(metaclass=Singleton):
         self.mainModeList.addMode(DriveOut())
         self.mainModeList.addMode(DriveForwardSlowly())
         self.mainModeList.addMode(driveTest1())
+        self.mainModeList.addMode(Center1CoralL1())
+        self.mainModeList.addMode(LCycleL1())
         self.topLevelCmdGroup = SequentialCommandGroup()
         self.startPose = Pose2d()
 

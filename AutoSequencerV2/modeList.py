@@ -2,6 +2,7 @@ import ntcore as nt
 from AutoSequencerV2.mode import Mode
 
 
+
 # A mode list is the set of autonomous modes that the drive team must pick from before a match
 # Networktables is used to read the user's current selection
 class ModeList:
