@@ -47,8 +47,7 @@ class DrivePathCommand(Command):
         curState = self.path.sample_at(curTime)
 
         if(curState is not None):
-            curState = transform(curState) # red/blue alliance
-            curState = flip(curState)      # left/right mirroring
+            curState = flip(transform(curState))
             self.trajCtrl.setCmd(curState)
         else: 
             self.trajCtrl.setCmd(None)

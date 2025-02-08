@@ -15,6 +15,9 @@ from utils.constants import FIELD_X_M, FIELD_Y_M
 
 _flipToRight = False
 
+def _shouldFlipToRight() -> bool:
+    return _flipToRight and wpilib.DriverStation.isAutonomous()
+
 # Sets whether we are flipped to the right or not
 def setFlip(toRight: bool):
     global _flipToRight
@@ -65,19 +68,19 @@ def flip(valIn):
         return None
     
     elif isinstance(valIn, Rotation2d):
-        if _flipToRight:
+        if _shouldFlipToRight():
             return Rotation2d.fromDegrees(0) - valIn
         else:
             return valIn
 
     elif isinstance(valIn, Translation2d):
-        if _flipToRight:
+        if _shouldFlipToRight():
             return Translation2d(flipX(valIn.X()), flipY(valIn.Y()))
         else:
             return valIn
 
     elif isinstance(valIn, Transform2d):
-        if _flipToRight:
+        if _shouldFlipToRight():
             trans = flip(valIn.translation())
             rot = flip(valIn.rotation())
             return Transform2d(trans, rot)
@@ -85,7 +88,7 @@ def flip(valIn):
             return valIn
 
     elif isinstance(valIn, Pose2d):
-        if _flipToRight:
+        if _shouldFlipToRight():
             trans = flip(valIn.translation())
             rot = flip(valIn.rotation())
             return Pose2d(trans, rot)
@@ -93,7 +96,7 @@ def flip(valIn):
             return valIn
 
     elif isinstance(valIn, SwerveSample):
-        if _flipToRight:
+        if _shouldFlipToRight():
             return SwerveSample(
                 valIn.timestamp,
                 flipX(valIn.x),

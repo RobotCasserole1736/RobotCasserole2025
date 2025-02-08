@@ -1,9 +1,9 @@
 from wpilib import Timer
 from wpimath.geometry import Pose2d, Translation2d
-from wpimath.trajectory import Trajectory
 from drivetrain.controlStrategies.holonomicDriveController import HolonomicDriveController
 from drivetrain.drivetrainCommand import DrivetrainCommand
 from navigation.obstacleDetector import ObstacleDetector
+from utils.autonomousTransformUtils import flip
 from utils.signalLogging import addLog
 from utils.singleton import Singleton
 from navigation.repulsorFieldPlanner import RepulsorFieldPlanner
@@ -80,7 +80,7 @@ class AutoDrive(metaclass=Singleton):
             #bestGoal should return the best goal side. It should be an integer. 
             bestGoal = self.possibleRotList.index(min(self.possibleRotList))
             target = curPose.nearest(goalListTot[bestGoal])
-            self.rfp.setGoal(transform(target))
+            self.rfp.setGoal(flip(transform(target)))
         else:
             self.rfp.setGoal(None)
         """
@@ -89,11 +89,11 @@ class AutoDrive(metaclass=Singleton):
         #version 3 - just based on only distance. I kind of like this one
         if (self._autoDrive):
             for goal in goalListTot:
-                self.goalListTotwTransform.append(transform(goal))
+                self.goalListTotwTransform.append(flip(transform(goal)))
             pose = curPose.nearest(self.goalListTotwTransform)
             self.rfp.setGoal(pose)
         else:
-            self.rfp.setGoal(transform(None))
+            self.rfp.setGoal(flip(transform(None)))
         """
         #version 2 - this is based on distance, then rotation if the distances are too close
         #but it's not really working. 
@@ -104,17 +104,17 @@ class AutoDrive(metaclass=Singleton):
         elif(self._autoDrive and not self._autoPrevEnabled):
             # First loop of auto drive, calc a new goal based on current position
             for goalOption in goalListTot:
-                goalWTransform = transform(goalOption.translation())
+                goalWTransform = flip(transform(goalOption.translation()))
                 self.LenList.append(goalWTransform.distance(curPose.translation()))
 
             #find the nearest one
             primeTargetIndex = self.LenList.index(min(self.LenList))
-            primeTarget = transform(goalListTot[primeTargetIndex])
+            primeTarget = flip(transform(goalListTot[primeTargetIndex]))
             #pop the nearest in order to find the second nearest
             self.LenList.pop(primeTargetIndex)
             #second nearest
             secondTargetIndex = self.LenList.index(min(self.LenList))
-            secondTarget = transform(goalListTot[secondTargetIndex])
+            secondTarget = flip(transform(goalListTot[secondTargetIndex]))
             #if they're close enough, look at rotation 
             closeEnough = abs(secondTarget.translation().distance(curPose.translation()) - primeTarget.translation().distance(curPose.translation())) <= 1.0
             difAngle = abs(secondTarget.rotation().degrees() - primeTarget.rotation().degrees()) >= 10
@@ -133,7 +133,7 @@ class AutoDrive(metaclass=Singleton):
             self.rfp.setGoal(target)
         """
         if self._autoDrive:
-            target = transform(goalListTot[10])
+            target = flip(transform(goalListTot[10]))
             self.rfp.setGoal(target)
         else:
             self.rfp.setGoal(None)
