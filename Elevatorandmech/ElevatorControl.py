@@ -38,6 +38,14 @@ class ElevatorControl(metaclass=Singleton):
         #we don't know if we want to invert LMotor (left) or not when we follow RMotor (right), automatically assumed False
         self.LMotor.setFollow(ELEV_RM_CANID)
 
+        #limit switches...
+        # Limit switch code; bottom for resetting offset and ensuring it starts correctly, top for saftey to stop from spinning
+        # Only for protection, not for initializing the elevator height
+        # TODO - on right or left motor
+        #Also, the limit switches we're using are "normally open," which is the default, so we should be good on that. 
+        self.revLimitSwitchVal = self.Rmotor.getRevLimitSwitch().get()
+        self.fwdLimitSwitchVal = self.Rmotor.getFwdLimitSwitch().get()
+
         # FF and proportional gain constants
         self.kV = Calibration(name="Elevator kV", default=0.02, units="V/rps")
         self.kS = Calibration(name="Elevator kS", default=0.1, units="V")
@@ -55,10 +63,6 @@ class ElevatorControl(metaclass=Singleton):
 
         self.actualPos = 0
         self.stopped = False
-
-        # Limit switch code; bottom for resetting offset and ensuring it starts correctly, top for saftey to stop from spinning
-        # Only for protection, not for initializing the elevator height
-        # TODO - implement limit switches here
 
         # Playing with Fusion time of flight sensor for initalizing elevator height
         self.heightAbsSen = TimeOfFlight(ELEV_TOF_CANID)
@@ -84,11 +88,12 @@ class ElevatorControl(metaclass=Singleton):
         addLog("Elevator Goal Height", lambda: self.heightGoal, "m")
         addLog("Elevator Stopped", lambda: self.stopped, "bool")
         addLog("Elevator Profiled Height", lambda: self.curState.position, "m")
+        addLog("Elevator Fwd Limit Value", lambda: self.fwdLimitSwitchVal, "bool")
+        addLog("Elevator Rev Limit Value", lambda: self.revLimitSwitchVal, "bool")
+
 
         # Finally, one-time init the relative sensor offsets from the absolute sensors
         self.initFromAbsoluteSensor()
-
-        # TODO - limit switch config?
 
     def _RmotorRadToHeight(self, RmotorRad: float) -> float:
         return RmotorRad * 1/ELEV_GEARBOX_GEAR_RATIO * (ELEV_SPOOL_RADIUS_M) - self.relEncOffsetM
