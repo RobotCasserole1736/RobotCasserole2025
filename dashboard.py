@@ -1,7 +1,9 @@
 import wpilib
 from AutoSequencerV2.autoSequencer import AutoSequencer
-from Elevatorandmech import coralManipulatorControl
+from Elevatorandmech import coralManipulatorControl, algaeManipulatorControl
+from Elevatorandmech.ElevatorControl import ElevatorControl
 from dashboardWidgets.autoChooser import AutoChooser
+from dashboardWidgets.circularGauge import CircularGauge
 from dashboardWidgets.swerveState import SwerveState
 from dashboardWidgets.reefIndicator import ReefIndicator
 from dashboardWidgets.icon import Icon
@@ -25,6 +27,10 @@ class Dashboard:
         webServer.addDashboardWidget(Icon(45, 45, "/SmartDashboard/isRedIconState", "#FF0000", "allianceRed"))
         webServer.addDashboardWidget(Icon(55, 45, "/SmartDashboard/isBlueIconState", "#0000FF", "allianceBlue"))
         webServer.addDashboardWidget(Icon(65, 45, "/SmartDashboard/PE Vision Targets Seen", "#00FF00", "vision"))
+
+        webServer.addDashboardWidget(
+            CircularGauge(15, 55, "/SmartDashboard/ElevatorHeight", 0, 2.5, -.5, 3))
+
 
         webServer.addDashboardWidget(Text(50, 75, "/SmartDashboard/faultDescription"))
         webServer.addDashboardWidget(SwerveState(85, 15))
@@ -52,12 +58,14 @@ class Dashboard:
             else Icon.kOFF)
         )
 
-        """addLog("hasAlgae",  
+        addLog("hasAlgae",  
                lambda: (
-            Icon.kON if put has algae here
+            Icon.kON if algaeManipulatorControl.AlgeaIntakeControl().getHasGamePiece()
             else Icon.kOFF)
+        )
 
-        )"""
+        addLog("ElevatorHeight", lambda: (ElevatorControl().getHeightM())
+               )
 
         addLog("hasCoral",  
                lambda: (
