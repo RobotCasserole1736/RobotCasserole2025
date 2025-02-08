@@ -16,7 +16,7 @@ from utils.constants import FIELD_X_M, FIELD_Y_M
 _flipToRight = False
 
 def _shouldFlipToRight() -> bool:
-    return _flipToRight and wpilib.DriverStation.isAutonomous()
+    return _flipToRight and (wpilib.DriverStation.isAutonomous() or wpilib.DriverStation.isDisabled())
 
 # Sets whether we are flipped to the right or not
 def setFlip(toRight: bool):
