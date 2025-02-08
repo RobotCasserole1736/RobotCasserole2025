@@ -1,13 +1,14 @@
-from Elevatorandmech.ElevatorandMechConstants import ALGAE_ANGLE_ABS_POS_ENC_OFFSET, ALGAE_GEARBOX_GEAR_RATIO, AlgaeWristState
 from math import cos
 from playingwithfusion import TimeOfFlight
+from wpimath.trajectory import TrapezoidProfile
+from Elevatorandmech.ElevatorandMechConstants import ALGAE_ANGLE_ABS_POS_ENC_OFFSET, \
+    ALGAE_GEARBOX_GEAR_RATIO, AlgaeWristState
 from utils.signalLogging import addLog
 from utils import faults
 from utils.calibration import Calibration
 from utils.constants import ALGAE_INT_CANID, ALGAE_WRIST_CANID, ALGAE_GAMEPIECE_CANID, ALGAE_ENC_PORT
 from utils.singleton import Singleton
 from utils.units import m2in, rad2Deg, deg2Rad, sign
-from wpimath.trajectory import TrapezoidProfile
 from wrappers.wrapperedSparkMax import WrapperedSparkMax
 from wrappers.wrapperedThroughBoreHexEncoder import WrapperedThroughBoreHexEncoder
 
@@ -15,7 +16,8 @@ from wrappers.wrapperedThroughBoreHexEncoder import WrapperedThroughBoreHexEncod
 #the same button-type thing will be pressed to bring the algae manipulator up to angle, then start spinning it
 class AlgaeWristControl(metaclass=Singleton):
     def __init__(self):
-        #one important assumption we're making right now is that we don't need limits on the algae manipulator based on elevator height
+        #one important assumption we're making right now is that we don't need limits on the algae \
+        # manipulator based on elevator height
 
         #motor and encoder
         self.wristMotor = WrapperedSparkMax(ALGAE_WRIST_CANID, "AlgaeWristMotor", True)
@@ -39,6 +41,7 @@ class AlgaeWristControl(metaclass=Singleton):
         #positions
         self.curPosCmdSt = AlgaeWristState.STOW
         self.desState = TrapezoidProfile.State(self.changePos(AlgaeWristState.STOW),0)
+        self.actualPos = 0
 
         #Profiler
         self.maxV = Calibration(name="Algae Max Velocity", default=90.0, units="deg/sec")
@@ -85,10 +88,10 @@ class AlgaeWristControl(metaclass=Singleton):
     def initFromAbsoluteSensor(self) -> None:
         self.relEncOffsetRad = self.getAbsAngleMeas() - self.getAngleRad()
 
-    def changePos(self, Pos: AlgaeWristState) -> float:
-        if(Pos == AlgaeWristState.INTAKEOFFGROUND):
+    def changePos(self, pos: AlgaeWristState) -> float:
+        if(pos == AlgaeWristState.INTAKEOFFGROUND):
             return self.inPos.get()
-        elif(Pos == AlgaeWristState.REEF):
+        elif(pos == AlgaeWristState.REEF):
             return self.reefPos.get()
         else:
             return self.stowPos.get()

@@ -60,7 +60,7 @@ class DrivePathCommand(Command):
     def isDone(self):
         return self.done
 
-    def end(self,interrupt):
+    def end(self,interrupted):
         self.trajCtrl.setCmd(None)
         self.poseTelem.setChoreoTrajectory(None)
 

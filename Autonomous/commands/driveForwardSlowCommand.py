@@ -1,7 +1,6 @@
+from wpilib import Timer
 from AutoSequencerV2.command import Command
 from drivetrain.drivetrainCommand import DrivetrainCommand
-from wpilib import Timer
-
 from drivetrain.drivetrainControl import DrivetrainControl
 
 #this is just a mechanical drive forward command, not using a Choreo path
@@ -35,5 +34,5 @@ class DriveForwardSlowCommand(Command):
         #when time we've spent running is greater than or equal to 3, we're done, so it returns true
         return Timer.getFPGATimestamp() - self.startTime >= 3
 
-    def end(self,interrupt):
+    def end(self,interrupted):
         self.drivetrainControl.setManualCmd(DrivetrainCommand(0,0,0))

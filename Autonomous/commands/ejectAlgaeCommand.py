@@ -21,7 +21,7 @@ class EjectAlgaeCommand(Command):
     def isDone(self):
         return Timer.getFPGATimestamp() - self.startTime >= self.duration
 
-    def end(self,interrupt):
+    def end(self,interrupted):
         #set the inputs all to False, we don't want anything ejecting
         AlgeaIntakeControl().setInput(False,False)
         AlgeaIntakeControl().update()

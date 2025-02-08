@@ -1,12 +1,13 @@
+from wpimath.trajectory import TrapezoidProfile
 from playingwithfusion import TimeOfFlight
-from Elevatorandmech.ElevatorandMechConstants import MAX_ELEV_ACCEL_MPS2, MAX_ELEV_VEL_MPS, ELEV_GEARBOX_GEAR_RATIO, ELEV_SPOOL_RADIUS_M, ElevatorLevelCmd
+from Elevatorandmech.ElevatorandMechConstants import MAX_ELEV_ACCEL_MPS2, MAX_ELEV_VEL_MPS, \
+    ELEV_GEARBOX_GEAR_RATIO, ELEV_SPOOL_RADIUS_M, ElevatorLevelCmd
 from utils.calibration import Calibration
 from utils.units import sign
 from utils.signalLogging import addLog
 from utils.constants import ELEV_LM_CANID, ELEV_RM_CANID, ELEV_TOF_CANID
 from utils.singleton import Singleton
 from wrappers.wrapperedSparkMax import WrapperedSparkMax
-from wpimath.trajectory import TrapezoidProfile
 
 REEF_L1_HEIGHT_M = 0.5842
 REEF_L2_HEIGHT_M = 0.9398
@@ -18,10 +19,14 @@ class ElevatorControl(metaclass=Singleton):
     def __init__(self):
 
         # Coral Scoring Heights in meters
-        self.L1_Height = Calibration(name="Elevator Preset Height L1", units="m", default=REEF_L1_HEIGHT_M - ELEV_MIN_HEIGHT_M)
-        self.L2_Height = Calibration(name="Elevator Preset Height L2", units="m", default=REEF_L2_HEIGHT_M - ELEV_MIN_HEIGHT_M)
-        self.L3_Height = Calibration(name="Elevator Preset Height L3", units="m", default=REEF_L3_HEIGHT_M - ELEV_MIN_HEIGHT_M)
-        self.L4_Height = Calibration(name="Elevator Preset Height L4", units="m", default=REEF_L4_HEIGHT_M - ELEV_MIN_HEIGHT_M)
+        self.L1_Height = Calibration(name="Elevator Preset Height L1", units="m",
+                                     default=REEF_L1_HEIGHT_M - ELEV_MIN_HEIGHT_M)
+        self.L2_Height = Calibration(name="Elevator Preset Height L2", units="m",
+                                     default=REEF_L2_HEIGHT_M - ELEV_MIN_HEIGHT_M)
+        self.L3_Height = Calibration(name="Elevator Preset Height L3", units="m", 
+                                     default=REEF_L3_HEIGHT_M - ELEV_MIN_HEIGHT_M)
+        self.L4_Height = Calibration(name="Elevator Preset Height L4", units="m", 
+                                     default=REEF_L4_HEIGHT_M - ELEV_MIN_HEIGHT_M)
 
         self.manAdjMaxVoltage = Calibration(name="Elevator Manual Adj Max Voltage", default=1.0, units="V")
 
@@ -33,10 +38,10 @@ class ElevatorControl(metaclass=Singleton):
         self.desState = TrapezoidProfile.State(self.heightGoal,0)
 
         # Elevator Motors
-        self.Rmotor = WrapperedSparkMax(ELEV_RM_CANID, "ElevatorMotorRight", brakeMode=True)
-        self.LMotor = WrapperedSparkMax(ELEV_LM_CANID, "ElevatorMotorLeft", brakeMode=True)
+        self.rMotor = WrapperedSparkMax(ELEV_RM_CANID, "ElevatorMotorRight", brakeMode=True)
+        self.lMotor = WrapperedSparkMax(ELEV_LM_CANID, "ElevatorMotorLeft", brakeMode=True)
         #we don't know if we want to invert LMotor (left) or not when we follow RMotor (right), automatically assumed False
-        self.LMotor.setFollow(ELEV_RM_CANID)
+        self.lMotor.setFollow(ELEV_RM_CANID)
 
         # FF and proportional gain constants
         self.kV = Calibration(name="Elevator kV", default=0.02, units="V/rps")
@@ -45,7 +50,7 @@ class ElevatorControl(metaclass=Singleton):
         self.kP = Calibration(name="Elevator kP", default=0.05, units="V/rad error")
 
         # Set P gain on motor
-        self.Rmotor.setPID(self.kP.get(), 0.0, 0.0)
+        self.rMotor.setPID(self.kP.get(), 0.0, 0.0)
 
         # Profiler
         self.maxV = Calibration(name="Elevator Max Vel", default=MAX_ELEV_VEL_MPS, units="mps")
@@ -90,8 +95,8 @@ class ElevatorControl(metaclass=Singleton):
 
         # TODO - limit switch config?
 
-    def _RmotorRadToHeight(self, RmotorRad: float) -> float:
-        return RmotorRad * 1/ELEV_GEARBOX_GEAR_RATIO * (ELEV_SPOOL_RADIUS_M) - self.relEncOffsetM
+    def _RmotorRadToHeight(self, rMotorRad: float) -> float:
+        return rMotorRad * 1/ELEV_GEARBOX_GEAR_RATIO * (ELEV_SPOOL_RADIUS_M) - self.relEncOffsetM
     
     def _heightToMotorRad(self, elevLin: float) -> float:
         return ((elevLin + self.relEncOffsetM)*1/(ELEV_SPOOL_RADIUS_M) * ELEV_GEARBOX_GEAR_RATIO)
@@ -100,7 +105,7 @@ class ElevatorControl(metaclass=Singleton):
         return (elevLinVel *1/(ELEV_SPOOL_RADIUS_M) * ELEV_GEARBOX_GEAR_RATIO)
     
     def getHeightM(self) -> float:
-        return self._RmotorRadToHeight(self.Rmotor.getMotorPositionRad()) 
+        return self._RmotorRadToHeight(self.rMotor.getMotorPositionRad()) 
     
     #return the height of the elevator as measured by the absolute sensor in meters
     def _getAbsHeight(self) -> float:
@@ -142,14 +147,14 @@ class ElevatorControl(metaclass=Singleton):
 
         # Update motor closed-loop calibration
         if(self.kP.isChanged()):
-            self.Rmotor.setPID(self.kP.get(), 0.0, 0.0)
+            self.rMotor.setPID(self.kP.get(), 0.0, 0.0)
 
         if(self.stopped):
             # Handle stopped by just holding mechanism in place with gravity offset, no closed loop.
             # TODO - do we need a more gentle stop here?
             manAdjVoltage = self.manAdjMaxVoltage.get() * self.manualAdjCmd
 
-            self.Rmotor.setVoltage(self.kG.get() + manAdjVoltage)
+            self.rMotor.setVoltage(self.kG.get() + manAdjVoltage)
             self.curState = TrapezoidProfile.State(self.actualPos,0)
         else:
             self.curState = self.profiler.calculate(0.02, self.curState, self.desState)
@@ -160,7 +165,7 @@ class ElevatorControl(metaclass=Singleton):
             vFF = self.kV.get() * motorVelCmd  + self.kS.get() * sign(motorVelCmd) \
                 + self.kG.get()
 
-            self.Rmotor.setPosCmd(motorPosCmd, vFF)
+            self.rMotor.setPosCmd(motorPosCmd, vFF)
 
     # API to set current height goal
     def setHeightGoal(self, presetHeightCmd:ElevatorLevelCmd) -> None:

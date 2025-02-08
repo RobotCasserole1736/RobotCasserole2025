@@ -1,19 +1,20 @@
 import sys
 # from phoenix6 import SignalLogger
+import wpilib
+from wpimath.geometry import Translation2d, Pose2d, Rotation2d
 from AutoSequencerV2.autoSequencer import AutoSequencer
 from dashboard import Dashboard
 from drivetrain.controlStrategies.autoDrive import AutoDrive
 from drivetrain.controlStrategies.autoSteer import AutoSteer
 from drivetrain.controlStrategies.trajectory import Trajectory
-from drivetrain.drivetrainCommand import DrivetrainCommand
 from drivetrain.drivetrainControl import DrivetrainControl
 from Elevatorandmech.algaeManipulatorControl import AlgeaIntakeControl, AlgaeWristControl
 from Elevatorandmech.coralManipulatorControl import CoralManipulatorControl
 from Elevatorandmech.ElevatorControl import ElevatorControl
 from humanInterface.driverInterface import DriverInterface
 from humanInterface.ledControl import LEDControl
-from memes.ctreMusicPlayback import CTREMusicPlayback
 from humanInterface.operatorInterface import OperatorInterface
+from memes.ctreMusicPlayback import CTREMusicPlayback
 from navigation.forceGenerators import PointObstacle
 from utils.segmentTimeTracker import SegmentTimeTracker
 from utils.calibration import CalibrationWrangler
@@ -24,8 +25,6 @@ from utils.rioMonitor import RIOMonitor
 from utils.signalLogging import logUpdate
 from utils.singleton import destroyAllSingletonInstances
 from webserver.webserver import Webserver
-import wpilib
-from wpimath.geometry import Translation2d, Pose2d, Rotation2d
 
 class MyRobot(wpilib.TimedRobot):
 

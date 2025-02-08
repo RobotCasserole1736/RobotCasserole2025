@@ -7,8 +7,8 @@ from enum import Enum
 
 class ElevatorHeightCommand(Command):
 
-    def __init__(self, ElvLvlCmd):
-        self.ElevLevel = ElvLvlCmd
+    def __init__(self, elvLvlCmd:ElevatorLevelCmd):
+        self.elevLevel = elvLvlCmd
         self.duration = 3
 
     def initialize(self):
@@ -16,7 +16,7 @@ class ElevatorHeightCommand(Command):
     
     def execute(self):
 
-        ElevatorControl().setHeightGoal(self.ElevLevel)
+        ElevatorControl().setHeightGoal(self.elevLevel)
     
     def maxDuration(self,duration):
         self.duration = duration + 1

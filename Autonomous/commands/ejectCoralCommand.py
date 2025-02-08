@@ -22,5 +22,5 @@ class EjectCoralCommand(Command):
         # TODO - should this be done right away once the coral is ejected? Even if the timeout hasn't expired?
         return Timer.getFPGATimestamp() - self.startTime >= self.duration
 
-    def end(self,interrupt):
+    def end(self,interrupted):
         CoralManipulatorControl().setCoralCmd(CoralManState.DISABLED)
