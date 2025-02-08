@@ -21,13 +21,9 @@ class OperatorInterface:
 
         self.algaeManipCmd = AlgaeWristState.STOW
 
-        #addLog("scoreL1",lambda: self.L1,"Bool")
-        #addLog("scoreL2",lambda: self.L2,"Bool")
-        #addLog("scoreL3",lambda: self.L3,"Bool")
-        #addLog("scoreL4",lambda: self.L4,"Bool")
         #addLog("elevManUp", lambda: self.elevManualUp, "Bool")
         #addLog("elevManDown", lambda: self.elevManualDown, "Bool")
-        addLog("intakeAlgaeOpCmd", lambda: self.intakeAlgae, "Bool")
+        #addLog("intakeAlgaeOpCmd", lambda: self.intakeAlgae, "Bool")
         #addLog("ejectAlgaeOpCmd", lambda: self.ejectAlgae, "Bool")
         #addLog("ejectCoral", lambda: self.ejectCoral, "Bool")
         #addLog("autoIntakeCoral", lambda: self.autoIntakeCoral, "Bool")
