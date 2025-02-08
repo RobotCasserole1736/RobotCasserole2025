@@ -10,6 +10,7 @@ from utils.faults import FaultWrangler
 from utils.signalLogging import addLog
 from webserver.webserver import Webserver
 from drivetrain.controlStrategies.autoSteer import AutoSteer
+from drivetrain.controlStrategies.autoDrive import AutoDrive
 
 
 class Dashboard:
@@ -92,7 +93,7 @@ class Dashboard:
         # Test Only.
         # TODO: Real data
         addLog("reefGoalPosIdx",
-                lambda: 2
+                lambda: (AutoDrive().getDashTargetPositionIndex()) #Bottom is the side facing our driver station.
         )
 
 

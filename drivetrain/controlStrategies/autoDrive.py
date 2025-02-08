@@ -28,11 +28,13 @@ class AutoDrive(metaclass=Singleton):
         self._prevCmd:DrivetrainCommand|None = None
         self._plannerDur:float = 0.0
         self._autoPrevEnabled = False #This name might be a wee bit confusing. It just keeps track if we were in auto targeting the speaker last refresh.
+        self.targetIndexNumber = 0
         self.stuckTracker = 0 
         self.prevPose = Pose2d()
         self.LenList = []
         self.goalListTotwTransform = []
-
+        self.dashboardConversionList = [9, 11, 6, 8, 3, 5, 0, 2, 15, 17, 12, 14] #used by getDashTargetPositionIndex() to convert the target numbers from the python standard to the dashboard/JS standard
+        #^ Bottom is the side facing our driver station.
         addLog("AutoDrive Proc Time", lambda:(self._plannerDur * 1000.0), "ms")
 
     def getGoal(self) -> Pose2d | None:
@@ -42,6 +44,8 @@ class AutoDrive(metaclass=Singleton):
         self._autoPrevEnabled = self._autoDrive
         self._autoDrive = autoDrive
 
+    def getDashTargetPositionIndex(self) -> int: #Only use this for the dashboard. This Automatically converts the python standard for goals to the JS standard. 
+        return self.dashboardConversionList[self.targetIndexNumber] 
         
     def updateTelemetry(self) -> None:        
         self._telemTraj = self.rfp.getLookaheadTraj()
@@ -126,10 +130,13 @@ class AutoDrive(metaclass=Singleton):
                 secondTargetDiff = abs(secondTarget.rotation().degrees() - curRot)
                 if primeTargetDiff <= secondTargetDiff:
                     target = primeTarget
+                    self.targetIndexNumber = primeTargetIndex
                 else:
                     target = secondTarget
+                    self.targetIndexNumber = secondTargetIndex
             else:
                 target = primeTarget
+                self.targetIndexNumber = primeTargetIndex
             self.rfp.setGoal(target)
         """
         if self._autoDrive:
@@ -167,3 +174,4 @@ class AutoDrive(metaclass=Singleton):
 
 
         return retCmd
+    
