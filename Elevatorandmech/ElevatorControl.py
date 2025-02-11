@@ -135,7 +135,7 @@ class ElevatorControl(metaclass=Singleton):
         else:
             # Coral blocks motion, must get it out of the way first.
             self.stopped=True
-
+ 
         # Update profiler desired state based on any change in height goal
         self.desState = TrapezoidProfile.State(self.heightGoal,0)
 
@@ -172,3 +172,9 @@ class ElevatorControl(metaclass=Singleton):
 
     def setManualAdjCmd(self, cmd:float) -> None:
         self.manualAdjCmd = cmd
+
+    def getAtHeight(self):
+        #if our actual height is close enough (arbitrarily .05m), we done and at height.
+        #this is for auto
+        dif = abs(self.getHeightM()-self.heightGoal)
+        return dif < .05
