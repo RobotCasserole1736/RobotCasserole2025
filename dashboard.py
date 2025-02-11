@@ -117,11 +117,8 @@ class Dashboard:
                 lambda: (Icon.kBLINK_FAST if FaultWrangler().hasActiveFaults() else Icon.kOFF)
         )
 
-
         # Test Only.
         # TODO: Real data
         addLog("reefGoalPosIdx",
                 lambda: (AutoDrive().getDashTargetPositionIndex()) #Bottom is the side facing our driver station.
         )
-
-
