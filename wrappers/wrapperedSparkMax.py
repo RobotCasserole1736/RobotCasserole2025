@@ -80,6 +80,12 @@ class WrapperedSparkMax:
             self.ctrl.configure(self.cfg,
                                 SparkBase.ResetMode.kNoResetSafeParameters, 
                                 SparkBase.PersistMode.kPersistParameters)
+    
+    def getFwdLimitSwitch(self):
+        return self.ctrl.getForwardLimitSwitch().get() #This will return true/false
+
+    def getRevLimitSwitch(self):
+        return self.ctrl.getReverseLimitSwitch().get() #This will return true/false
 
     def setPID(self, kP, kI, kD, persist=SparkBase.PersistMode.kPersistParameters):
         if self.configSuccess:
