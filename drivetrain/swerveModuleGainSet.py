@@ -1,7 +1,5 @@
 from drivetrain.drivetrainPhysical import MAX_DT_MOTOR_SPEED_RPS
 from utils.calibration import Calibration
-from utils.units import RPM2RadPerSec
-
 
 class SwerveModuleGainSet:
     """Helper class to house all calibrated gains for one swerve drive module.

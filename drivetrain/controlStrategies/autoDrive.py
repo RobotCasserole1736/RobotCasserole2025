@@ -10,7 +10,6 @@ from navigation.repulsorFieldPlanner import RepulsorFieldPlanner
 from navigation.navConstants import goalListTot
 from drivetrain.drivetrainPhysical import MAX_DT_LINEAR_SPEED_MPS
 from utils.allianceTransformUtils import transform
-import math
 
 # Maximum speed that we'll attempt to path plan at. Needs to be at least 
 # slightly less than the maximum physical speed, so the robot can "catch up" 
@@ -48,9 +47,11 @@ class AutoDrive(metaclass=Singleton):
         self._autoPrevEnabled = self._autoDrive
         self._autoDrive = autoDrive
 
-    def getDashTargetPositionIndex(self) -> int: #Only use this for the dashboard. This Automatically converts the python standard for goals to the JS standard. 
+    # Only use this for the dashboard
+    # This Automatically converts the python standard for goals to the JS standard
+    def getDashTargetPositionIndex(self) -> int:
         return self.dashboardConversionList[self.targetIndexNumber] 
-        
+
     def updateTelemetry(self) -> None:        
         self._telemTraj = self.rfp.getLookaheadTraj()
 

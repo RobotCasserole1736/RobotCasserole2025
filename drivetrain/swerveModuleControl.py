@@ -1,25 +1,18 @@
 import random
-
-from wpimath.controller import SimpleMotorFeedforwardMeters
-from wpimath.controller import PIDController
+from wpilib import TimedRobot
+from wpimath.controller import SimpleMotorFeedforwardMeters, PIDController
+from wpimath.filter import SlewRateLimiter
 from wpimath.kinematics import SwerveModuleState
 from wpimath.kinematics import SwerveModulePosition
 from wpimath.geometry import Rotation2d
-from wpimath.filter import SlewRateLimiter
-from wpilib import TimedRobot
-
-
+from dashboardWidgets.swerveState import getAzmthDesTopicName, getAzmthActTopicName
+from dashboardWidgets.swerveState import getSpeedDesTopicName, getSpeedActTopicName
+from drivetrain.drivetrainPhysical import dtMotorRotToLinear, dtLinearToMotorRot, MAX_FWD_REV_SPEED_MPS
 from drivetrain.swerveModuleGainSet import SwerveModuleGainSet
 from wrappers.wrapperedKraken import WrapperedKraken
 from wrappers.wrapperedSparkMax import WrapperedSparkMax
 from wrappers.wrapperedSRXMagEncoder import WrapperedSRXMagEncoder
-from dashboardWidgets.swerveState import getAzmthDesTopicName, getAzmthActTopicName
-from dashboardWidgets.swerveState import getSpeedDesTopicName, getSpeedActTopicName
 from utils.signalLogging import addLog
-from drivetrain.drivetrainPhysical import dtMotorRotToLinear
-from drivetrain.drivetrainPhysical import dtLinearToMotorRot
-from drivetrain.drivetrainPhysical import MAX_FWD_REV_SPEED_MPS
-
 
 class SwerveModuleControl:
     """
@@ -199,7 +192,9 @@ class SwerveModuleControl:
 
         # Send voltage and speed commands to the wheel motor
         motorDesSpd = dtLinearToMotorRot(self.optimizedDesiredState.speed)
-        motorVoltageFF = self.wheelMotorFF.calculate(self._prevMotorDesSpeed, motorDesSpd) #This is the problem child of the new non-backwards compatable Robotpy update. actualstate.speed is "prev" and motorDesSpd is "cur"
+        # This is the problem child of the new non-backwards compatable Robotpy update.
+        # Actualstate.speed is "prev" and motorDesSpd is "cur"
+        motorVoltageFF = self.wheelMotorFF.calculate(self._prevMotorDesSpeed, motorDesSpd)
         self.wheelMotor.setVelCmd(motorDesSpd, motorVoltageFF)                            
 
         self._prevMotorDesSpeed = motorDesSpd  # save for next loop
