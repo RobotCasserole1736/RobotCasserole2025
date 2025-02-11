@@ -142,7 +142,14 @@ class DrivetrainPoseEstimator:
             Pose2d: The most recent estimate of where the robot is at
         """
         return self._curEstPose
-    
+
+    def getTelemetry(self)->DrivetrainPoseTelemetry:
+        """
+        Returns:
+            DrivetrainPoseTelemetry: The most recent telemetry
+        """
+        return self._telemetry
+
     def setUseAprilTags(self, use:bool):
         """
         Enables or disables pose estimate correction based on apriltag readings.
