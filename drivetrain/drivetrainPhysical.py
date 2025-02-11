@@ -1,12 +1,11 @@
-import math
-from wpimath.units import inchesToMeters
-from wpimath.system.plant import DCMotor
 from wpimath.geometry import Translation2d, Transform3d, Translation3d, Rotation3d
 from wpimath.kinematics import SwerveDrive4Kinematics
+from wpimath.system.plant import DCMotor
+from wpimath.units import inchesToMeters
+from utils.robotIdentification import RobotIdentification, RobotTypes
 from utils.units import lbsToKg
 from utils.units import deg2Rad
 from utils.units import in2m
-from utils.robotIdentification import RobotIdentification, RobotTypes
 
 """
 Defines the physical dimensions and characteristics of the drivetrain

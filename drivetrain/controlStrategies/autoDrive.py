@@ -27,13 +27,17 @@ class AutoDrive(metaclass=Singleton):
         self._olCmd = DrivetrainCommand()
         self._prevCmd:DrivetrainCommand|None = None
         self._plannerDur:float = 0.0
-        self._autoPrevEnabled = False #This name might be a wee bit confusing. It just keeps track if we were in auto targeting the speaker last refresh.
+        # This name might be a wee bit confusing. It just keeps track if we were in auto
+        # targeting the speaker last refresh.
+        self._autoPrevEnabled = False
         self.targetIndexNumber = 0
         self.stuckTracker = 0 
         self.prevPose = Pose2d()
-        self.LenList = []
+        self.lenList = []
         self.goalListTotwTransform = []
-        self.dashboardConversionList = [9, 11, 6, 8, 3, 5, 0, 2, 15, 17, 12, 14] #used by getDashTargetPositionIndex() to convert the target numbers from the python standard to the dashboard/JS standard
+        # Used by getDashTargetPositionIndex() to convert the target numbers from the 
+        # python standard to the dashboard/JS standard
+        self.dashboardConversionList = [9, 11, 6, 8, 3, 5, 0, 2, 15, 17, 12, 14]
         #^ Bottom is the side facing our driver station.
         addLog("AutoDrive Proc Time", lambda:(self._plannerDur * 1000.0), "ms")
 
@@ -63,7 +67,7 @@ class AutoDrive(metaclass=Singleton):
         
         startTime = Timer.getFPGATimestamp()
 
-        self.LenList.clear()
+        self.lenList.clear()
 
         self.goalListTotwTransform.clear()
 
@@ -109,18 +113,19 @@ class AutoDrive(metaclass=Singleton):
             # First loop of auto drive, calc a new goal based on current position
             for goalOption in goalListTot:
                 goalWTransform = flip(transform(goalOption.translation()))
-                self.LenList.append(goalWTransform.distance(curPose.translation()))
+                self.lenList.append(goalWTransform.distance(curPose.translation()))
 
             #find the nearest one
-            primeTargetIndex = self.LenList.index(min(self.LenList))
+            primeTargetIndex = self.lenList.index(min(self.lenList))
             primeTarget = flip(transform(goalListTot[primeTargetIndex]))
             #pop the nearest in order to find the second nearest
-            self.LenList.pop(primeTargetIndex)
+            self.lenList.pop(primeTargetIndex)
             #second nearest
-            secondTargetIndex = self.LenList.index(min(self.LenList))
+            secondTargetIndex = self.lenList.index(min(self.lenList))
             secondTarget = flip(transform(goalListTot[secondTargetIndex]))
             #if they're close enough, look at rotation 
-            closeEnough = abs(secondTarget.translation().distance(curPose.translation()) - primeTarget.translation().distance(curPose.translation())) <= 1.0
+            closeEnough = abs(secondTarget.translation().distance(curPose.translation()) \
+                              - primeTarget.translation().distance(curPose.translation())) <= 1.0
             difAngle = abs(secondTarget.rotation().degrees() - primeTarget.rotation().degrees()) >= 10
             if (closeEnough and difAngle):
                 #checking rotation
