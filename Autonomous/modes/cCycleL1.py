@@ -1,13 +1,9 @@
 
-from wpilib import Timer
-from AutoSequencerV2.command import Command
 from AutoSequencerV2.mode import Mode
 from AutoSequencerV2.sequentialCommandGroup import SequentialCommandGroup
-from Autonomous.commands.elevatorHeightCommand import ElevatorHeightCommand
 from Autonomous.commands.intakeCoralCommand import IntakeCoralCommand
 from Autonomous.commands.drivePathCommand import DrivePathCommand
 from Autonomous.commands.ejectCoralCommand import EjectCoralCommand
-from Elevatorandmech.ElevatorandMechConstants import ElevatorLevelCmd
 from utils.allianceTransformUtils import transform
 
 class CCycleL1(Mode):
