@@ -20,7 +20,9 @@ class IntakeAlgaeCommand(Command):
         self.duration = duration + 1
 
     def isDone(self):
-        return Timer.getFPGATimestamp() - self.startTime >= self.duration
+       # return Timer.getFPGATimestamp() - self.startTime >= self.duration
+
+        return AlgeaIntakeControl().checkHasGamePiece()
 
     def end(self,interrupt):
         AlgeaIntakeControl().setInput(False,False)

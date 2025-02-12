@@ -22,8 +22,9 @@ class ElevatorHeightCommand(Command):
         self.duration = duration + 1
 
     def isDone(self):
-        return Timer.getFPGATimestamp() - self.startTime >= self.duration
-
+       # return Timer.getFPGATimestamp() - self.startTime >= self.duration
+        return ElevatorControl().getAtHeight()
+    
     def end(self,interrupt):
         ElevatorControl().setHeightGoal(ElevatorLevelCmd.NO_CMD)
         ElevatorControl().update()

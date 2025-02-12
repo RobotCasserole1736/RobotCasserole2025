@@ -5,8 +5,7 @@ from Elevatorandmech.algaeManipulatorControl import AlgeaIntakeControl
 
 class EjectAlgaeCommand(Command):
     def __init__(self):
-        self.duration = 3
-
+        pass
     def initialize(self):
         self.startTime = Timer.getFPGATimestamp()
 
@@ -19,7 +18,9 @@ class EjectAlgaeCommand(Command):
         self.duration = duration + 1
 
     def isDone(self):
-        return Timer.getFPGATimestamp() - self.startTime >= self.duration
+        #return Timer.getFPGATimestamp() - self.startTime >= self.duration
+       
+        return not AlgeaIntakeControl().checkHasGamePiece()
 
     def end(self,interrupt):
         #set the inputs all to False, we don't want anything ejecting
