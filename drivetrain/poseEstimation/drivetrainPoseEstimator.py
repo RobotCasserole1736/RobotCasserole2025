@@ -153,4 +153,5 @@ class DrivetrainPoseEstimator:
 
     # Local helper to wrap the real hardware angle into a Rotation2d
     def _getGyroAngle(self)->Rotation2d:
-        return Rotation2d().fromDegrees(self._gyro.getAngle(self._gyro.getYawAxis()))
+        #ha, the rio (and consequently gyro) is mounted vertically
+        return Rotation2d().fromDegrees(self._gyro.getAngle(self._gyro.getPitchAxis()))
