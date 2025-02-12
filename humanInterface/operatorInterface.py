@@ -19,6 +19,8 @@ class OperatorInterface:
         self.elevatorLevelCmd = ElevatorLevelCmd.NO_CMD
         self.elevManAdjCmd = 0.0
 
+        self.autoIntakeCoral = False
+
         self.algaeManipCmd = AlgaeWristState.STOW
 
         #addLog("scoreL1",lambda: self.L1,"Bool")
@@ -30,7 +32,7 @@ class OperatorInterface:
         addLog("intakeAlgaeOpCmd", lambda: self.intakeAlgae, "Bool")
         #addLog("ejectAlgaeOpCmd", lambda: self.ejectAlgae, "Bool")
         #addLog("ejectCoral", lambda: self.ejectCoral, "Bool")
-        #addLog("autoIntakeCoral", lambda: self.autoIntakeCoral, "Bool")
+        addLog("autoIntakeCoral", lambda: self.autoIntakeCoral, "Bool")
 
     def update(self) -> None:
         # value of controller buttons
@@ -77,6 +79,10 @@ class OperatorInterface:
             else:
                 self.algaeManipCmd = AlgaeWristState.STOW
 
+            #"Enable auto intake toggle" on controller diagram 
+            if self.ctrl.getStartButtonPressed():
+                self.autoIntakeCoral = not self.autoIntakeCoral
+
             self.connectedFault.setNoFault()
 
         else:
@@ -103,6 +109,9 @@ class OperatorInterface:
 
     def getElevCmd(self) -> ElevatorLevelCmd:
         return self.elevatorLevelCmd
+    
+    def getAutoCoralIntakeEnabled(self) -> bool:
+        return self.autoIntakeCoral
 
     # Returns a manual offset to the elevator height
     # -1.0 is full down motion, 1.0 is full up motion

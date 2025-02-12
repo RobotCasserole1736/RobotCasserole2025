@@ -5,6 +5,7 @@ from utils.singleton import Singleton
 from utils.signalLogging import addLog
 from wpilib import DigitalInput
 from wrappers.wrapperedSparkMax import WrapperedSparkMax
+from humanInterface.operatorInterface import OperatorInterface
 
 class CoralManipulatorControl(metaclass=Singleton):
 
@@ -21,6 +22,8 @@ class CoralManipulatorControl(metaclass=Singleton):
         self.motorEjectVoltage =  Calibration("MotorEject", 11.0, "V")
         self.RMotorEjectVoltageL1 = Calibration("MotorEjectRForL1", 5.0, "V")
         self.atL1 = False
+        self.automaticIntake = False
+        self.operatorInterface = OperatorInterface()
 
         addLog("Coral Enum", lambda:self.coralCurState.value, "state")
         addLog("Has Game Piece", self.getCheckGamePiece, "Bool")
@@ -28,8 +31,11 @@ class CoralManipulatorControl(metaclass=Singleton):
     def update(self) -> None:
         # Always disable if commanded to disable
         if self.coralCurState == CoralManState.DISABLED:
-            self.coralMotorL.setVoltage(0)
-            self.coralMotorR.setVoltage(0)
+            if self.operatorInterface.getAutoCoralIntakeEnabled():
+                self.coralCurState = CoralManState.INTAKING
+            else:
+                self.coralMotorL.setVoltage(0)
+                self.coralMotorR.setVoltage(0)
         # Eject or hold if it has a game piece
         elif self.getCheckGamePiece():
             if self.coralCurState == CoralManState.EJECTING:
