@@ -66,12 +66,13 @@ class ElevatorControl(metaclass=Singleton):
 
         # Playing with Fusion time of flight sensor for initalizing elevator height
         self.heightAbsSen = TimeOfFlight(ELEV_TOF_CANID)
+        self.heightAbsSen.setRangeOfInterest(8,8,8,8) # one pixel region of interest, right in the center. Should bring cone down to ~2 deg (max is 30)
 
         # Absolute Sensor mount offsets
         # After mounting the sensor, these should be tweaked one time
         # in order to adjust whatever the sensor reads into the reference frame
         # of the mechanism
-        self.ABS_SENSOR_READING_AT_ELEVATOR_BOTTOM_M = 0.074 # TODO correct?
+        self.ABS_SENSOR_READING_AT_ELEVATOR_BOTTOM_M = 0.000 # TODO correct?
 
         # Relative Encoder Offsets
         # Releative encoders always start at 0 at power-on
@@ -85,6 +86,7 @@ class ElevatorControl(metaclass=Singleton):
 
         # Add some helpful log values
         addLog("Elevator Actual Height", lambda: self.actualPos, "m")
+        addLog("Elevator TOF Measurment", self._getAbsHeight, "m")
         addLog("Elevator Goal Height", lambda: self.heightGoal, "m")
         addLog("Elevator Stopped", lambda: self.stopped, "bool")
         addLog("Elevator Profiled Height", lambda: self.curState.position, "m")
