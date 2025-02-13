@@ -170,6 +170,9 @@ class MyRobot(wpilib.TimedRobot):
         if self.dInt.getGyroResetCmd():
             self.driveTrain.resetGyro()
 
+        if self.oInt.getElevHeightReset():
+            self.elev.resetHeight()
+
         if self.dInt.getCreateObstacle():
             # For test purposes, inject a series of obstacles around the current pose
             ct = self.driveTrain.poseEst.getCurEstPose().translation()

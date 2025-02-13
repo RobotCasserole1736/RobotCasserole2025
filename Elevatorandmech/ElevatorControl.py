@@ -64,10 +64,6 @@ class ElevatorControl(metaclass=Singleton):
         self.actualPos = 0
         self.stopped = False
 
-        # Playing with Fusion time of flight sensor for initalizing elevator height
-        self.heightAbsSen = TimeOfFlight(ELEV_TOF_CANID)
-        self.heightAbsSen.setRangeOfInterest(8,8,8,8) # one pixel region of interest, right in the center. Should bring cone down to ~2 deg (max is 30)
-
         # Absolute Sensor mount offsets
         # After mounting the sensor, these should be tweaked one time
         # in order to adjust whatever the sensor reads into the reference frame
@@ -80,13 +76,12 @@ class ElevatorControl(metaclass=Singleton):
         # These variables store an offset which is calculated from the absolute sensors
         # to make sure the relative sensors inside the encoders accurately reflect
         # the actual position of the mechanism
-        self.relEncOffsetM = 0.0
+        self.offsetM = 0.0
         # Create a motion profile with the given maximum velocity and maximum
         # acceleration constraints for the next setpoint.
 
         # Add some helpful log values
         addLog("Elevator Actual Height", lambda: self.actualPos, "m")
-        addLog("Elevator TOF Measurment", self._getAbsHeight, "m")
         addLog("Elevator Goal Height", lambda: self.heightGoal, "m")
         addLog("Elevator Stopped", lambda: self.stopped, "bool")
         addLog("Elevator Profiled Height", lambda: self.curState.position, "m")
@@ -94,41 +89,36 @@ class ElevatorControl(metaclass=Singleton):
         addLog("Elevator Rev Limit Value", lambda: self.revLimitSwitchVal, "bool")
 
 
-        # Finally, one-time init the relative sensor offsets from the absolute sensors
-        self.initFromAbsoluteSensor()
+        # reset the offset
+        self.resetHeight()
 
     def _RmotorRadToHeight(self, RmotorRad: float) -> float:
-        return RmotorRad * 1/ELEV_GEARBOX_GEAR_RATIO * (ELEV_SPOOL_RADIUS_M) - self.relEncOffsetM
+        return RmotorRad * 1/ELEV_GEARBOX_GEAR_RATIO * (ELEV_SPOOL_RADIUS_M) - self.offsetM
     
     def _heightToMotorRad(self, elevLin: float) -> float:
-        return ((elevLin + self.relEncOffsetM)*1/(ELEV_SPOOL_RADIUS_M) * ELEV_GEARBOX_GEAR_RATIO)
+        return ((elevLin + self.offsetM)*1/(ELEV_SPOOL_RADIUS_M) * ELEV_GEARBOX_GEAR_RATIO)
     
     def _heightVeltoMotorVel(self, elevLinVel: float) -> float:
         return (elevLinVel *1/(ELEV_SPOOL_RADIUS_M) * ELEV_GEARBOX_GEAR_RATIO)
     
     def getHeightM(self) -> float:
-        return self._RmotorRadToHeight(self.Rmotor.getMotorPositionRad()) 
+        return self._RmotorRadToHeight(self.Rmotor.getMotorPositionRad())
     
     def getForwardLimit(self) -> bool:
         return self.fwdLimitSwitchVal
     
     def getReverseLimit(self) -> bool:
         return self.revLimitSwitchVal
-    
-    #return the height of the elevator as measured by the absolute sensor in meters
-    def _getAbsHeight(self) -> float:
-        return self.heightAbsSen.getRange() / 1000.0 - self.ABS_SENSOR_READING_AT_ELEVATOR_BOTTOM_M
 
-    # This routine uses the absolute sensors to adjust the offsets for the relative sensors
-    # so that the relative sensors match reality.
-    # It should be called.... infrequently. Likely once shortly after robot init.
-    def initFromAbsoluteSensor(self) -> None:
+    # This routine uses adjusts the offsets for the relative sensors if the button is pressed
+    def resetHeight(self) -> None:
         # Reset offsets to zero, so the relative sensor get functions return
         # just whatever offset the relative sensor currently has.
-        self.relEncOffsetM = 0.0
+        self.offsetM = 0.0
 
-        # New Offset = real height - what height says?? 
-        self.relEncOffsetM = self._getAbsHeight() - self.getHeightM()
+        # New Offset = whatever we say height is
+        # this will set height to 0 
+        self.offsetM = self.getHeightM()
 
     def update(self) -> None:
         self.actualPos = self.getHeightM()
