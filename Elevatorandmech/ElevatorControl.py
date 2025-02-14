@@ -14,6 +14,17 @@ REEF_L3_HEIGHT_M = 1.397
 REEF_L4_HEIGHT_M = 1.6
 ELEV_MIN_HEIGHT_M = REEF_L1_HEIGHT_M  # TODO - is elevator's bottom position actually L1?
 
+# The interfence zone exists between the heights where the coral makes contact with the elevator while
+# not fully into the intake. To tune these:
+# 1. move the elevator to the top
+# 2. put coral sticking out the back of the intake
+# 3. Slowly lower the elevator until the coral makes contact, note the height. This is the TOP
+# 4. Remove the coral, move to the bottom.
+# 5. raise the elevator slowly until the coral makes contact, note the height. This is the BOTTOM
+ELEV_CORAL_INTERFERENCE_ZONE_TOP_M = 1.2 # Guesses for now
+ELEV_CORAL_INTERFERENCE_ZONE_BOTTOM_M = 0.7
+ELEV_CORAL_INTERFERENCE_ZONE_CENTER_M = (ELEV_CORAL_INTERFERENCE_ZONE_TOP_M + ELEV_CORAL_INTERFERENCE_ZONE_BOTTOM_M) / 2.0
+
 class ElevatorControl(metaclass=Singleton):
     def __init__(self):
 
@@ -135,21 +146,36 @@ class ElevatorControl(metaclass=Singleton):
     def update(self) -> None:
         self.actualPos = self.getHeightM()
 
-        if self.coralSafe:
-            self.stopped = (self.curHeightGoal == ElevatorLevelCmd.NO_CMD)
+        # Assign nominal goals
+        self.stopped = (self.curHeightGoal == ElevatorLevelCmd.NO_CMD)
+        if self.curHeightGoal == ElevatorLevelCmd.L1:
+            self.heightGoal = self.L1_Height.get()
+        elif self.curHeightGoal == ElevatorLevelCmd.L2:
+            self.heightGoal = self.L2_Height.get()
+        elif self.curHeightGoal == ElevatorLevelCmd.L3:
+            self.heightGoal = self.L3_Height.get()
+        elif self.curHeightGoal == ElevatorLevelCmd.L4:
+            self.heightGoal = self.L4_Height.get()
+           
+        if not self.coralSafe:
+            # Coral blocks motion. Modify goals/commands as needed.
 
-            if self.curHeightGoal == ElevatorLevelCmd.L1:
-                self.heightGoal = self.L1_Height.get()
-            elif self.curHeightGoal == ElevatorLevelCmd.L2:
-                self.heightGoal = self.L2_Height.get()
-            elif self.curHeightGoal == ElevatorLevelCmd.L3:
-                self.heightGoal = self.L3_Height.get()
-            elif self.curHeightGoal == ElevatorLevelCmd.L4:
-                self.heightGoal = self.L4_Height.get()
-            # Else, no change to height goal
-        else:
-            # Coral blocks motion, must get it out of the way first.
-            self.stopped=True
+            # Limit profiled motion
+            if self.actualPos > ELEV_CORAL_INTERFERENCE_ZONE_CENTER_M:
+                # We're currently on the "top" of the range of travel
+                # Limit to have goals no lower than the top of the interference zone
+                self.heightGoal = max(self.heightGoal, ELEV_CORAL_INTERFERENCE_ZONE_TOP_M) 
+            elif self.actualPos <= ELEV_CORAL_INTERFERENCE_ZONE_CENTER_M:
+                # We're currently on the "bottom" of the range of travel
+                self.heightGoal = min(self.heightGoal, ELEV_CORAL_INTERFERENCE_ZONE_BOTTOM_M)
+
+            # Limit manual command to not go into interference zone
+            if ELEV_CORAL_INTERFERENCE_ZONE_TOP_M > self.actualPos > ELEV_CORAL_INTERFERENCE_ZONE_CENTER_M:
+                # We're currently in the top-half of the interference zone
+                self.manualAdjCmd = min(self.manualAdjCmd, 0) # only allow positive/up commands
+            elif ELEV_CORAL_INTERFERENCE_ZONE_CENTER_M > self.actualPos > ELEV_CORAL_INTERFERENCE_ZONE_BOTTOM_M:
+                # We're currently in the bottom-half of the interference zone
+                self.manualAdjCmd = max(self.manualAdjCmd, 0) # only allow negative/down commands
 
         # Update profiler desired state based on any change in height goal
         self.desState = TrapezoidProfile.State(self.heightGoal,0)

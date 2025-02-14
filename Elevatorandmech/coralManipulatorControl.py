@@ -58,14 +58,17 @@ class CoralManipulatorControl(metaclass=Singleton):
         """We think the back sensor (the one the coral hits first) needs to be clear to have a game piece.
         And the front sensor needs to be tripped.
         For now, we want to assume we don't need to feed back.   """
-        #Update 2/12 - they both return "True" when they're not sensing anything. So I'm going to flip values
-        return not self.gamepieceSensorF.get() and self.gamepieceSensorB.get()
+        return self._frontSeesCoral() and not self._backSeesCoral()
 
     def getCoralSafeToMove(self) -> bool:
-        #I think this is just a function that is going to be used by elevator control.
-        # theoretically, As long as the back gamepiece sensor isn't being tripped, the robot is good to up because a coral isn't in the way.
-        #Update 2/12 - they both return "True" when they're not sensing anything. So I'm going to flip values
-        return self.gamepieceSensorB.get()
+        # inhibit elevator motion until the back sensor sees no coral
+        return not self._backSeesCoral()
+    
+    def _frontSeesCoral(self) -> bool:
+        return not self.gamepieceSensorF.get() # True means no coral seen. False means sensor sees some coral.
+    
+    def _backSeesCoral(self) -> bool:
+        return not self.gamepieceSensorB.get() # True means no coral seen. False means sensor sees some coral.
 
     def setCoralCmd(self, cmdStateIn: CoralManState) -> None:
         #we need commands to tell us what the coral motors should be doing
