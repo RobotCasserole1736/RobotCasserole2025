@@ -169,7 +169,7 @@ class MyRobot(wpilib.TimedRobot):
         # TODO - this is technically one loop delayed, which could induce lag
         driverCmd = self.dInt.getCmd()
         driverCmd.scaleBy(self.elev.getDtSpeedLimitFactor())
-        self.driveTrain.setManualCmd(self.dInt.getCmd())
+        self.driveTrain.setManualCmd(driverCmd)
 
         self.algaeIntake.setInput(self.oInt.getIntakeAlgae(),self.oInt.getEjectAlgae())
 

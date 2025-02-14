@@ -20,7 +20,7 @@ class CoralManState(Enum):
     EJECTING = 2 
     HOLDING = 3
 
-ALGAE_ANGLE_ABS_POS_ENC_OFFSET = 0
+ALGAE_ANGLE_ABS_POS_ENC_OFFSET = 11.62
 ALGAE_GEARBOX_GEAR_RATIO = 1#the max speed/acceleration the elevator can go
 
 #All Numbers are placeholders for now (numbers used last year)

@@ -22,7 +22,7 @@ class AlgaeWristControl(metaclass=Singleton):
 
         #motor and encoder
         self.wristMotor = WrapperedSparkMax(ALGAE_WRIST_CANID, "AlgaeWristMotor", True)
-        self.algaeAbsEnc = WrapperedThroughBoreHexEncoder(port=ALGAE_ENC_PORT, name="AlgaeEncOffset", mountOffsetRad=deg2Rad(ALGAE_ANGLE_ABS_POS_ENC_OFFSET))
+        self.algaeAbsEnc = WrapperedThroughBoreHexEncoder(port=ALGAE_ENC_PORT, name="AlgaeEncOffset", mountOffsetRad=deg2Rad(ALGAE_ANGLE_ABS_POS_ENC_OFFSET), dirInverted=True)
 
         #PID stuff calibrations
         self.kG = Calibration(name="Algae kG", default=0, units="V/cos(deg)")
@@ -66,7 +66,8 @@ class AlgaeWristControl(metaclass=Singleton):
 
         addLog("Algae Wrist State",lambda:self.pos.value,"enum")
         addLog("Algae Profiled Angle", lambda: self.curState.position, "deg")
-        addLog("Algae Actual Angle", lambda: self.actualPos, "deg")
+        #addLog("Algae Actual Angle", lambda: self.actualPos, "deg")
+        addLog("Algae Actual Angle", self.getAngleRad, "rad")
 
     def setDesPos(self, desState : AlgaeWristState):
         #this is called in teleop periodic to set the desired pos of algae manipulator
@@ -78,7 +79,7 @@ class AlgaeWristControl(metaclass=Singleton):
 
     def _motorRadToAngleRad(self, motorRev):
         #get angle of algae manipulator arm using the motor sensor
-        return motorRev * 1/ALGAE_GEARBOX_GEAR_RATIO - self.relEncOffsetRad
+        return motorRev * 1/ALGAE_GEARBOX_GEAR_RATIO +self.relEncOffsetRad
 
     def getAngleRad(self):
         return self._motorRadToAngleRad(self.wristMotor.getMotorPositionRad())
@@ -105,6 +106,7 @@ class AlgaeWristControl(metaclass=Singleton):
 
     def update(self):
 
+        self.algaeAbsEnc.update()
         self.actualPos = self.getAbsAngleMeas()
 
         # Update profiler desired state based on any change in algae angle goal

@@ -103,8 +103,8 @@ class ElevatorControl(metaclass=Singleton):
         # Limits the drivetrain speed by a factor depending on elevator height
         self.dtSpeedLimitMap = MapLookup2D([
             (0.0, 1.0),
-            (0.25, 1.0),
-            (0.50, 0.5),
+            (0.1, 0.8),
+            (0.15, 0.5),
             (1.0, 0.2) # TODO - tweak and tune as needed, these were randomly chosen by Chris
         ])
 
