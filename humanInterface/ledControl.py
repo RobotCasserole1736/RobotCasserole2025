@@ -6,6 +6,7 @@ from wpimath.filter import Debouncer
 BLINK = -1.0
 GREEN = 0.35
 RED = 0.03
+YELLOW = 0.15
 BLUE = 0.75
 OFF = 0.0
 
@@ -38,7 +39,10 @@ class LEDControl(metaclass=Singleton):
             else:
                 pwmVal = BLUE
         else:
-            pwmVal = GREEN
+            if(self._coralInterfers):
+                pwmVal = YELLOW * BLINK
+            else:
+                pwmVal = GREEN
 
         self.ledPWMOutput.set(pwmVal)
 
@@ -53,3 +57,9 @@ class LEDControl(metaclass=Singleton):
         Set whether the LED should change color to indicate we are stuck while auto-driving
         """
         self._isStuck = isStuck
+
+    def setCoralInterferencePossible(self, isPossible:bool):
+        """
+        Set whether the LED should change color to indicate coral will prohibit elevator motion
+        """
+        self._coralInterfers = isPossible
