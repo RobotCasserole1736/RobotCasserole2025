@@ -24,6 +24,7 @@ class LEDControl(metaclass=Singleton):
 
         self._isAutoDrive = False
         self._isStuck = False
+        self._coralInterfers = False
         self.stuckDebounce = Debouncer(0.3, Debouncer.DebounceType.kFalling)
         self.ledPWMOutput = PWMMotorController("LEDCtrl", LED_STACK_LIGHT_CTRL_PWM)
 
