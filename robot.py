@@ -160,7 +160,8 @@ class MyRobot(wpilib.TimedRobot):
     def teleopPeriodic(self):
 
         # TODO - this is technically one loop delayed, which could induce lag
-        # Probably not noticeable, but should be corrected.
+        driverCmd = self.dInt.getCmd()
+        driverCmd.scaleBy(self.elev.getDtSpeedLimitFactor())
         self.driveTrain.setManualCmd(self.dInt.getCmd())
 
         self.algaeIntake.setInput(self.oInt.getIntakeAlgae(),self.oInt.getEjectAlgae())
@@ -170,21 +171,21 @@ class MyRobot(wpilib.TimedRobot):
         if self.dInt.getGyroResetCmd():
             self.driveTrain.resetGyro()
 
-        if self.dInt.getCreateObstacle():
-            # For test purposes, inject a series of obstacles around the current pose
-            ct = self.driveTrain.poseEst.getCurEstPose().translation()
-            tfs = [
-                #Translation2d(1.7, -0.5),
-                #Translation2d(0.75, -0.75),
-                #Translation2d(1.7, 0.5),
-                Translation2d(0.75, 0.75),
-                Translation2d(2.0, 0.0),
-                Translation2d(0.0, 1.0),
-                Translation2d(0.0, -1.0),
-            ]
-            for tf in tfs:
-                obs = PointObstacle(location=(ct+tf), strength=0.5)
-                self.autodrive.rfp.addObstacleObservation(obs)
+        #if self.dInt.getCreateObstacle():
+        #    # For test purposes, inject a series of obstacles around the current pose
+        #    ct = self.driveTrain.poseEst.getCurEstPose().translation()
+        #    tfs = [
+        #        #Translation2d(1.7, -0.5),
+        #        #Translation2d(0.75, -0.75),
+        #        #Translation2d(1.7, 0.5),
+        #        Translation2d(0.75, 0.75),
+        #        Translation2d(2.0, 0.0),
+        #        Translation2d(0.0, 1.0),
+        #        Translation2d(0.0, -1.0),
+        #    ]
+        #    for tf in tfs:
+        #        obs = PointObstacle(location=(ct+tf), strength=0.5)
+        #        self.autodrive.rfp.addObstacleObservation(obs)
 
         self.autosteer.setReefAutoSteerCmd(self.dInt.getAutoSteer())
         self.autodrive.setRequest(self.dInt.getAutoDrive())
