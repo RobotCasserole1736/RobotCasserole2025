@@ -100,7 +100,7 @@ class ElevatorControl(metaclass=Singleton):
         self.initFromAbsoluteSensor()
 
     def _RmotorRadToHeight(self, RmotorRad: float) -> float:
-        return RmotorRad * 1/ELEV_GEARBOX_GEAR_RATIO * (ELEV_SPOOL_RADIUS_M) - self.relEncOffsetM
+        return RmotorRad * 1/ELEV_GEARBOX_GEAR_RATIO * (ELEV_SPOOL_RADIUS_M) + self.relEncOffsetM
     
     def _heightToMotorRad(self, elevLin: float) -> float:
         return ((elevLin + self.relEncOffsetM)*1/(ELEV_SPOOL_RADIUS_M) * ELEV_GEARBOX_GEAR_RATIO)
