@@ -1,6 +1,7 @@
 from playingwithfusion import TimeOfFlight
 from Elevatorandmech.ElevatorandMechConstants import MAX_ELEV_ACCEL_MPS2, MAX_ELEV_VEL_MPS, ELEV_GEARBOX_GEAR_RATIO, ELEV_SPOOL_RADIUS_M, ElevatorLevelCmd
 from utils.calibration import Calibration
+from utils.mapLookup2d import MapLookup2D
 from utils.units import sign
 from utils.signalLogging import addLog
 from utils.constants import ELEV_LM_CANID, ELEV_RM_CANID, ELEV_TOF_CANID
@@ -96,6 +97,16 @@ class ElevatorControl(metaclass=Singleton):
         self.relEncOffsetM = 0.0
         # Create a motion profile with the given maximum velocity and maximum
         # acceleration constraints for the next setpoint.
+
+        # Drivetrain limit factor
+        # Based on elevator height, limit the max speed of the drivetrain
+        # Limits the drivetrain speed by a factor depending on elevator height
+        self.dtSpeedLimitMap = MapLookup2D([
+            (0.0, 1.0),
+            (0.25, 1.0),
+            (0.50, 0.5),
+            (1.0, 0.2) # TODO - tweak and tune as needed, these were randomly chosen by Chris
+        ])
 
         # Add some helpful log values
         addLog("Elevator Actual Height", lambda: self.actualPos, "m")
@@ -221,3 +232,7 @@ class ElevatorControl(metaclass=Singleton):
 
     def setManualAdjCmd(self, cmd:float) -> None:
         self.manualAdjCmd = cmd
+
+    # Returns a limit factor to apply to drivetrain speed commands based on elevator height
+    def getDtSpeedLimitFactor(self) -> float:
+        return self.dtSpeedLimitMap.lookup(self.actualPos)
