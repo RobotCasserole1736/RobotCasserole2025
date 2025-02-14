@@ -21,7 +21,7 @@ ELEV_MIN_HEIGHT_M = REEF_L1_HEIGHT_M  # TODO - is elevator's bottom position act
 # 3. Slowly lower the elevator until the coral makes contact, note the height. This is the TOP
 # 4. Remove the coral, move to the bottom.
 # 5. raise the elevator slowly until the coral makes contact, note the height. This is the BOTTOM
-ELEV_CORAL_INTERFERENCE_ZONE_TOP_M = .9 # Guesses for now
+ELEV_CORAL_INTERFERENCE_ZONE_TOP_M = .9
 ELEV_CORAL_INTERFERENCE_ZONE_BOTTOM_M = 0.05
 ELEV_CORAL_INTERFERENCE_ZONE_CENTER_M = (ELEV_CORAL_INTERFERENCE_ZONE_TOP_M + ELEV_CORAL_INTERFERENCE_ZONE_BOTTOM_M) / 2.0
 
@@ -29,10 +29,10 @@ class ElevatorControl(metaclass=Singleton):
     def __init__(self):
 
         # Coral Scoring Heights in meters
-        self.L1_Height = Calibration(name="Elevator Preset Height L1", units="m", default=REEF_L1_HEIGHT_M - ELEV_MIN_HEIGHT_M)
-        self.L2_Height = Calibration(name="Elevator Preset Height L2", units="m", default=REEF_L2_HEIGHT_M - ELEV_MIN_HEIGHT_M)
-        self.L3_Height = Calibration(name="Elevator Preset Height L3", units="m", default=REEF_L3_HEIGHT_M - ELEV_MIN_HEIGHT_M)
-        self.L4_Height = Calibration(name="Elevator Preset Height L4", units="m", default=REEF_L4_HEIGHT_M - ELEV_MIN_HEIGHT_M)
+        self.L1_Height = Calibration(name="Elevator Preset Height L1", units="m", default=0.0)
+        self.L2_Height = Calibration(name="Elevator Preset Height L2", units="m", default=.1843)
+        self.L3_Height = Calibration(name="Elevator Preset Height L3", units="m", default=.6023)
+        self.L4_Height = Calibration(name="Elevator Preset Height L4", units="m", default=1.285)
 
         self.manAdjMaxVoltage = Calibration(name="Elevator Manual Adj Max Voltage", default=1.0, units="V")
 
