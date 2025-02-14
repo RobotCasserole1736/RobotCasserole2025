@@ -98,11 +98,18 @@ class MyRobot(wpilib.TimedRobot):
         self.oInt.update()
         self.stt.mark("Operator Interface")
 
+        self.coralMan.update()
+        self.stt.mark("Coral Manipulator")
+
+        self.elev.setSafeToLeaveL1(self.coralMan.getCoralSafeToMove())
+        self.ledCtrl.setCoralInterferencePossible(not self.coralMan.getCoralSafeToMove())
+
         self.elev.update()
         self.stt.mark("Elevator")
 
-        self.coralMan.update()
-        self.stt.mark("Coral Manipulator")
+        # TODO
+        #self.coralMan.setAtL1()
+
 
         self.autodrive.updateTelemetry()
         self.driveTrain.poseEst._telemetry.setCurAutoDriveWaypoints(self.autodrive.getWaypoints())
