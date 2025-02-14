@@ -4,6 +4,7 @@ from AutoSequencerV2.modeList import ModeList
 from AutoSequencerV2.builtInModes.doNothingMode import DoNothingMode
 from AutoSequencerV2.builtInModes.waitMode import WaitMode
 from AutoSequencerV2.sequentialCommandGroup import SequentialCommandGroup
+
 from Autonomous.modes.cCycleL1 import CCycleL1
 from Autonomous.modes.cCycleL2 import CCycleL2
 from Autonomous.modes.cCycleL4 import CCycleL4
@@ -15,6 +16,8 @@ from Autonomous.modes.driveOut import DriveOut
 from Autonomous.modes.driveTest1 import driveTest1
 from Autonomous.modes.lCycleL2 import LCycleL2
 from Autonomous.modes.lCycleL4 import LCycleL4
+from Autonomous.modes.scoreOneL1 import scoreOneL1
+from Autonomous.modes.scoreOneL2 import scoreOneL2
 from utils.singleton import Singleton
 from utils.allianceTransformUtils import onRed
 
@@ -43,6 +46,8 @@ class AutoSequencer(metaclass=Singleton):
         self.mainModeList.addMode(CCycleL1())
         self.mainModeList.addMode(CCycleL2())
         self.mainModeList.addMode(CCycleL4())
+        self.mainModeList.addMode(scoreOneL1())
+        self.mainModeList.addMode(scoreOneL2())
         self.topLevelCmdGroup = SequentialCommandGroup()
         self.startPose = Pose2d()
 
