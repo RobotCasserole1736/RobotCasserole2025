@@ -11,7 +11,7 @@ from wpimath.trajectory import TrapezoidProfile
 REEF_L1_HEIGHT_M = 0.5842
 REEF_L2_HEIGHT_M = 0.9398
 REEF_L3_HEIGHT_M = 1.397 
-REEF_L4_HEIGHT_M = 2.159 
+REEF_L4_HEIGHT_M = 1.6
 ELEV_MIN_HEIGHT_M = REEF_L1_HEIGHT_M  # TODO - is elevator's bottom position actually L1?
 
 class ElevatorControl(metaclass=Singleton):
@@ -36,7 +36,8 @@ class ElevatorControl(metaclass=Singleton):
         self.Rmotor = WrapperedSparkMax(ELEV_RM_CANID, "ElevatorMotorRight", brakeMode=True)
         self.LMotor = WrapperedSparkMax(ELEV_LM_CANID, "ElevatorMotorLeft", brakeMode=True)
         #we don't know if we want to invert LMotor (left) or not when we follow RMotor (right), automatically assumed False
-        self.LMotor.setFollow(ELEV_RM_CANID)
+        self.LMotor.setInverted(False)
+        self.Rmotor.setInverted(True)
 
         #limit switches...
         # Limit switch code; bottom for resetting offset and ensuring it starts correctly, top for saftey to stop from spinning
@@ -47,13 +48,14 @@ class ElevatorControl(metaclass=Singleton):
         self.fwdLimitSwitchVal = self.Rmotor.getFwdLimitSwitch()
 
         # FF and proportional gain constants
-        self.kV = Calibration(name="Elevator kV", default=0.02, units="V/rps")
+        self.kV = Calibration(name="Elevator kV", default=0.013, units="V/rps")
         self.kS = Calibration(name="Elevator kS", default=0.1, units="V")
-        self.kG = Calibration(name="Elevator kG", default=0.25, units="V")
-        self.kP = Calibration(name="Elevator kP", default=0.05, units="V/rad error")
+        self.kG = Calibration(name="Elevator kG", default=0.6, units="V")
+        self.kP = Calibration(name="Elevator kP", default=0.1, units="V/rad error")
 
         # Set P gain on motor
         self.Rmotor.setPID(self.kP.get(), 0.0, 0.0)
+        self.LMotor.setPID(self.kP.get(), 0.0, 0.0)
 
         # Profiler
         self.maxV = Calibration(name="Elevator Max Vel", default=MAX_ELEV_VEL_MPS, units="mps")
@@ -72,7 +74,7 @@ class ElevatorControl(metaclass=Singleton):
         # After mounting the sensor, these should be tweaked one time
         # in order to adjust whatever the sensor reads into the reference frame
         # of the mechanism
-        self.ABS_SENSOR_READING_AT_ELEVATOR_BOTTOM_M = 0.000 # TODO correct?
+        self.ABS_SENSOR_READING_AT_ELEVATOR_BOTTOM_M = 0.184
 
         # Relative Encoder Offsets
         # Releative encoders always start at 0 at power-on
@@ -107,7 +109,7 @@ class ElevatorControl(metaclass=Singleton):
         return (elevLinVel *1/(ELEV_SPOOL_RADIUS_M) * ELEV_GEARBOX_GEAR_RATIO)
     
     def getHeightM(self) -> float:
-        return self._RmotorRadToHeight(self.Rmotor.getMotorPositionRad()) 
+        return (self._RmotorRadToHeight(self.Rmotor.getMotorPositionRad()))
     
     def getForwardLimit(self) -> bool:
         return self.fwdLimitSwitchVal
@@ -117,7 +119,7 @@ class ElevatorControl(metaclass=Singleton):
     
     #return the height of the elevator as measured by the absolute sensor in meters
     def _getAbsHeight(self) -> float:
-        return self.heightAbsSen.getRange() / 1000.0 - self.ABS_SENSOR_READING_AT_ELEVATOR_BOTTOM_M
+        return (self.heightAbsSen.getRange() / 1000.0 - self.ABS_SENSOR_READING_AT_ELEVATOR_BOTTOM_M)
 
     # This routine uses the absolute sensors to adjust the offsets for the relative sensors
     # so that the relative sensors match reality.
@@ -156,6 +158,7 @@ class ElevatorControl(metaclass=Singleton):
         # Update motor closed-loop calibration
         if(self.kP.isChanged()):
             self.Rmotor.setPID(self.kP.get(), 0.0, 0.0)
+            self.LMotor.setPID(self.kP.get(), 0.0, 0.0)
 
         if(self.stopped):
             # Handle stopped by just holding mechanism in place with gravity offset, no closed loop.
@@ -163,6 +166,7 @@ class ElevatorControl(metaclass=Singleton):
             manAdjVoltage = self.manAdjMaxVoltage.get() * self.manualAdjCmd
 
             self.Rmotor.setVoltage(self.kG.get() + manAdjVoltage)
+            self.LMotor.setVoltage(self.kG.get() + manAdjVoltage)
             self.curState = TrapezoidProfile.State(self.actualPos,0)
         else:
             self.curState = self.profiler.calculate(0.02, self.curState, self.desState)
@@ -174,6 +178,9 @@ class ElevatorControl(metaclass=Singleton):
                 + self.kG.get()
 
             self.Rmotor.setPosCmd(motorPosCmd, vFF)
+            #self.LMotor.setPosCmd(motorPosCmd, vFF)
+            self.LMotor.setVoltage(vFF)
+
 
         self.revLimitSwitchVal = self.Rmotor.getRevLimitSwitch()
         self.fwdLimitSwitchVal = self.Rmotor.getFwdLimitSwitch()

@@ -25,10 +25,10 @@ class AlgaeWristControl(metaclass=Singleton):
         self.algaeAbsEnc = WrapperedThroughBoreHexEncoder(port=ALGAE_ENC_PORT, name="AlgaeEncOffset", mountOffsetRad=deg2Rad(ALGAE_ANGLE_ABS_POS_ENC_OFFSET))
 
         #PID stuff calibrations
-        self.kG = Calibration(name="Algae kG", default=0.1, units="V/cos(deg)")
-        self.kS = Calibration(name="Algae kS", default=0.1, units="V")
-        self.kV = Calibration(name="Algae kV", default=0.1, units="V/rps")
-        self.kP = Calibration(name="Algae kP", default=0.1, units="V/degErr")
+        self.kG = Calibration(name="Algae kG", default=0, units="V/cos(deg)")
+        self.kS = Calibration(name="Algae kS", default=0, units="V")
+        self.kV = Calibration(name="Algae kV", default=0, units="V/rps")
+        self.kP = Calibration(name="Algae kP", default=0, units="V/degErr")
 
         #position calibrations... an angle in degrees. Assumingt 0 is horizontal, - is down, etc.  
         self.inPos = Calibration(name="Intake Position", default = 0, units="deg")

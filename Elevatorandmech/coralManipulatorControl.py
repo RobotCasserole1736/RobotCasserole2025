@@ -10,8 +10,8 @@ class CoralManipulatorControl(metaclass=Singleton):
 
     def __init__(self) -> None:
         self.coralCurState = CoralManState.DISABLED
-        self.coralMotorL = WrapperedSparkMax(CORAL_L_CANID, "CoralMotorL", True, 10)
-        self.coralMotorR = WrapperedSparkMax(CORAL_R_CANID, "CoralMotorR", True, 10)
+        self.coralMotorL = WrapperedSparkMax(CORAL_L_CANID, "CoralMotorL", False, 10)
+        self.coralMotorR = WrapperedSparkMax(CORAL_R_CANID, "CoralMotorR", False, 10)
         self.coralMotorR.setInverted(True)
         #we're assuming B is the one that hits first (it's closer to the intake side), while F is closer to front of eject side
         self.gamepieceSensorF = DigitalInput(CORAL_GAME_PIECE_F_PORT)
