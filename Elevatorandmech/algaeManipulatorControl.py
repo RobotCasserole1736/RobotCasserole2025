@@ -23,18 +23,19 @@ class AlgaeWristControl(metaclass=Singleton):
         self.algaeAbsEnc = WrapperedThroughBoreHexEncoder(port=ALGAE_ENC_PORT, name="Algae Wrist Enc", mountOffsetRad=deg2Rad(ALGAE_ANGLE_ABS_POS_ENC_OFFSET), dirInverted=True)
 
         #PID stuff calibrations
-        self.kP = Calibration(name="Algae Wrist kP", default=0, units="V/degErr")
-        self.maxV = Calibration(name="Algae Wrist maxV", default=3.0, units="V")
-        self.deadzone = Calibration(name="Algae Wrist deadzone", default=5.0, units="deg")
+        self.kP = Calibration(name="Algae Wrist kP", default=.75, units="V/degErr")
+        self.maxV = Calibration(name="Algae Wrist maxV", default=4.0, units="V")
+        self.deadzone = Calibration(name="Algae Wrist deadzone", default=8.0, units="deg")
 
         #position calibrations... an angle in degrees. Assumingt 0 is horizontal, - is down, etc.  
-        self.inPos = Calibration(name="Algae Wrist Intake Position", default = 0, units="deg")
+        self.inPos = Calibration(name="Algae Wrist Intake Position", default = -15, units="deg")
         self.stowPos = Calibration(name="Algae Wrist Stow Position", default = -90, units="deg")
-        self.reefPos = Calibration(name="Algae Wrist Reef Position", default = -45, units="deg")
+        self.reefPos = Calibration(name="Algae Wrist Reef Position", default = 0, units="deg")
         
         #positions
         self.actualPos = 0
         self.curPosCmdDeg = self.stowPos.get()
+        self.pos = AlgaeWristState.NOTHING
 
         addLog("Algae Wrist Desired Angle",lambda: self.curPosCmdDeg, "deg")
         addLog("Algae Wrist Actual Angle", lambda: rad2Deg(self.getAngleRad()), "deg")
@@ -44,10 +45,11 @@ class AlgaeWristControl(metaclass=Singleton):
         self.curPosCmdDeg = self._posToDegrees(desState)
 
     def getAngleRad(self):
-        return rad2Deg(self.algaeAbsEnc.getAngleRad())
+        return (self.algaeAbsEnc.getAngleRad())
 
     # Might optimize to accept 1 enum parameter for new position
     def _posToDegrees(self,pos:AlgaeWristState) -> float:
+        self.pos = pos
         if(pos == AlgaeWristState.INTAKEOFFGROUND):
             return self.inPos.get()
         elif(pos == AlgaeWristState.REEF):
@@ -58,7 +60,7 @@ class AlgaeWristControl(metaclass=Singleton):
     def update(self):
 
         self.algaeAbsEnc.update()
-        self.actualPos = self.getAngleRad()
+        self.actualPos = rad2Deg(self.getAngleRad())
 
         if(self.algaeAbsEnc.isFaulted()):
             vCmd = 0.0 # faulted, so stop
@@ -67,6 +69,8 @@ class AlgaeWristControl(metaclass=Singleton):
             err = self.curPosCmdDeg - self.actualPos
             if(abs(err) < self.deadzone.get()):
                 # in deadzone, no command
+                vCmd = 0
+            elif self.pos == AlgaeWristState.NOTHING:
                 vCmd = 0
             else:
                 # outside deadzone, P control with limit
