@@ -18,6 +18,7 @@ from Autonomous.modes.lCycleL2 import LCycleL2
 from Autonomous.modes.lCycleL4 import LCycleL4
 from Autonomous.modes.scoreOneL1 import scoreOneL1
 from Autonomous.modes.scoreOneL2 import scoreOneL2
+from Autonomous.modes.scoreTwoL1 import scoreTwoL1
 from utils.singleton import Singleton
 from utils.allianceTransformUtils import onRed
 
@@ -48,6 +49,7 @@ class AutoSequencer(metaclass=Singleton):
         self.mainModeList.addMode(CCycleL4())
         self.mainModeList.addMode(scoreOneL1())
         self.mainModeList.addMode(scoreOneL2())
+        self.mainModeList.addMode(scoreTwoL1())
         self.topLevelCmdGroup = SequentialCommandGroup()
         self.startPose = Pose2d()
 
