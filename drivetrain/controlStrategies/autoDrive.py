@@ -40,8 +40,11 @@ class AutoDrive(metaclass=Singleton):
     def getGoal(self) -> Pose2d | None:
         return self.rfp.goal
     
-    def getAtGoal(self, pos) -> bool:
-        return self.rfp.atGoal(pos)
+    def getAtGoal(self) -> bool:
+        if self.rfp.goal: #rfp.goal returns None if no goal is set, so don't try atGoal unless it has a value
+            return self.rfp.atGoal(self.rfp.goal)
+        else:
+            return False
 
     def setRequest(self, autoDrive) -> None:
         self._autoPrevEnabled = self._autoDrive

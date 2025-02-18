@@ -10,6 +10,7 @@ from drivetrain.drivetrainControl import DrivetrainControl
 from Elevatorandmech.algaeManipulatorControl import AlgeaIntakeControl, AlgaeWristControl
 from Elevatorandmech.coralManipulatorControl import CoralManipulatorControl
 from Elevatorandmech.ElevatorControl import ElevatorControl
+from Elevatorandmech.mechSuperstructure import MechSuperstructure
 from humanInterface.driverInterface import DriverInterface
 from humanInterface.ledControl import LEDControl
 from memes.ctreMusicPlayback import CTREMusicPlayback
@@ -70,6 +71,8 @@ class MyRobot(wpilib.TimedRobot):
         self.elev = ElevatorControl()
 
         self.algaeManip = AlgaeWristControl()
+
+        self.mechSuperStruct = MechSuperstructure()
 
         # Normal robot code updates every 20ms, but not everything needs to be that fast.
         # Register slower-update periodic functions
@@ -189,12 +192,15 @@ class MyRobot(wpilib.TimedRobot):
         self.autosteer.setReefAutoSteerCmd(self.dInt.getAutoSteer())
         self.autodrive.setRequest(self.dInt.getAutoDrive())
 
+        self.mechSuperStruct.update()
+
+        """ I moved these to mechSuperStruct to prevent commands from overwriting each other. -2/17/2025
         self.coralMan.setCoralCmd(self.oInt.getCoralCmd())
         self.coralMan.setAtL1(self.elev.getHeightM() < (self.elev.L1_Height.get() + 0.1))
 
         self.elev.setSafeToLeaveL1(self.coralMan.getCoralSafeToMove())
         self.elev.setManualAdjCmd(self.oInt.getElevManAdjCmd())
-        self.elev.setHeightGoal(self.oInt.getElevCmd())
+        self.elev.setHeightGoal(self.oInt.getElevCmd())"""
 
         # No trajectory in Teleop
         Trajectory().setCmd(None)
