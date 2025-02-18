@@ -5,6 +5,7 @@ class AlgaeWristState(Enum):
     INTAKEOFFGROUND = 0
     STOW = 1
     REEF = 2
+    NOTHING = 3
 
 # Enum for all four Level height commands for the elevator
 class ElevatorLevelCmd(Enum):
@@ -20,7 +21,7 @@ class CoralManState(Enum):
     EJECTING = 2 
     HOLDING = 3
 
-ALGAE_ANGLE_ABS_POS_ENC_OFFSET = 11.62
+ALGAE_ANGLE_ABS_POS_ENC_OFFSET = 12.22
 ALGAE_GEARBOX_GEAR_RATIO = 1#the max speed/acceleration the elevator can go
 
 #All Numbers are placeholders for now (numbers used last year)

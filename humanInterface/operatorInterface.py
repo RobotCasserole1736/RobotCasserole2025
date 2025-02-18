@@ -54,8 +54,8 @@ class OperatorInterface:
                 self.coralCmd = CoralManState.DISABLED
 
             # Intake/Eject Algae
-            self.intakeAlgae = self.ctrl.getLeftY() > 0.3
-            self.ejectAlgae = self.ctrl.getLeftY() < -0.3
+            self.intakeAlgae = self.ctrl.getRightY() > 0.3
+            self.ejectAlgae = self.ctrl.getRightY() < -0.3
 
             # Set Algae Manipulator command
             # Dpad right = Ground Position
@@ -71,7 +71,7 @@ class OperatorInterface:
             # Could we just free up Dpad down since we always return to Stow?
             # We may change anyway based on human operator feedback
             else:
-                self.algaeManipCmd = AlgaeWristState.STOW
+                self.algaeManipCmd = AlgaeWristState.NOTHING
 
             self.connectedFault.setNoFault()
 
