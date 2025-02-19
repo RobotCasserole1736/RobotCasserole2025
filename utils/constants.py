@@ -2,14 +2,17 @@
 # Just starting with the minimum stuff we need
 # The math conversions are under units.py
 
+from wpimath.geometry import Translation2d
+
 #######################################################################################
 ## FIELD DIMENSIONS
 #######################################################################################
 
 FIELD_X_M = 17.548 # "Length"
 FIELD_Y_M = 8.062  # "Width"
-REEF_LOC_X_M = 4.5747
-REEF_LOC_Y_M = 4.0363
+_REEF_LOC_X_M = 4.5747
+_REEF_LOC_Y_M = 4.0363
+reefLocation = Translation2d(_REEF_LOC_X_M, _REEF_LOC_Y_M)
 
 #######################################################################################
 ## CAN ID'S
