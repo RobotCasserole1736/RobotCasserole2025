@@ -6,7 +6,7 @@ from navigation.obstacleDetector import ObstacleDetector
 from utils.autonomousTransformUtils import flip
 from utils.signalLogging import addLog
 from utils.singleton import Singleton
-from navigation.repulsorFieldPlanner import RepulsorFieldPlanner
+from navigation.repulsorFieldPlanner import RepulsorFieldPlanner, RepulsorFieldPlannerState
 from navigation.navConstants import goalListTot
 from drivetrain.drivetrainPhysical import MAX_DT_LINEAR_SPEED_MPS
 from utils.allianceTransformUtils import transform
@@ -36,6 +36,8 @@ class AutoDrive(metaclass=Singleton):
         self.dashboardConversionList = [9, 11, 6, 8, 3, 5, 0, 2, 15, 17, 12, 14] #used by getDashTargetPositionIndex() to convert the target numbers from the python standard to the dashboard/JS standard
         #^ Bottom is the side facing our driver station.
         addLog("AutoDrive Proc Time", lambda:(self._plannerDur * 1000.0), "ms")
+        addLog("AutoDrive Running", self.isRunning, "bool")
+        addLog("AutoDrive At Goal", self.isAtGoal, "bool")
 
     def getGoal(self) -> Pose2d | None:
         return self.rfp.goal
@@ -58,6 +60,9 @@ class AutoDrive(metaclass=Singleton):
     
     def isRunning(self)->bool:
         return self.rfp.goal != None
+    
+    def isAtGoal(self)->bool:
+        return  self.isRunning() and self.rfp.curState == RepulsorFieldPlannerState.ATGOAL
 
     def update(self, cmdIn: DrivetrainCommand, curPose: Pose2d) -> DrivetrainCommand:
         

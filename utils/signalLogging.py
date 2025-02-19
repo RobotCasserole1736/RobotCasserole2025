@@ -86,7 +86,7 @@ def logUpdate():
     """
     SignalWrangler().update()
 
-def addLog(alias: str, valueGetter: Callable[[], float], units=None) -> None:
+def addLog(alias: str, valueGetter: Callable[[], float|bool|int], units=None) -> None:
     """
     Register some value to be logged
 
