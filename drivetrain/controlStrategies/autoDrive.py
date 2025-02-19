@@ -23,7 +23,7 @@ class AutoDrive(metaclass=Singleton):
         self.rfp = RepulsorFieldPlanner()
         self._trajCtrl = HolonomicDriveController("AutoDrive")
         self._telemTraj = []
-        self._obsDet = ObstacleDetector()
+        #self._obsDet = ObstacleDetector()
         self._olCmd = DrivetrainCommand()
         self._prevCmd:DrivetrainCommand|None = None
         self._plannerDur:float = 0.0
@@ -69,8 +69,9 @@ class AutoDrive(metaclass=Singleton):
 
         retCmd = cmdIn # default - no auto driving
 
-        for obs in self._obsDet.getObstacles(curPose):
-            self.rfp.addObstacleObservation(obs)
+        # TODO obstacle camera
+        #for obs in self._obsDet.getObstacles(curPose):
+        #    self.rfp.addObstacleObservation(obs)
 
         self.rfp._decayObservations()
 
