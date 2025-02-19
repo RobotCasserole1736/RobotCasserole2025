@@ -67,14 +67,23 @@ class AlgaeWristControl(metaclass=Singleton):
         else:
             # Limited-output P control with deadzone
             err = self.curPosCmdDeg - self.actualPos
-            if(abs(err) < self.deadzone.get()):
+            if(abs(err) <= self.deadzone.get()):
                 # in deadzone, no command
                 vCmd = 0
             elif self.pos == AlgaeWristState.NOTHING:
+                # No command, so keep voltage at zero
                 vCmd = 0
             else:
-                # outside deadzone, P control with limit
-                vCmd = self.kP.get() * (self.curPosCmdDeg - self.actualPos)
+                # Command and outside deadzone
+                # P control with limit
+                
+                # Adjust error so that it's offset by the deadzone
+                if(err>0):
+                    err = err - self.deadzone.get()
+                else:
+                    err = err + self.deadzone.get()
+
+                vCmd = self.kP.get() * err
                 vCmd = min(self.maxV.get(), max(-self.maxV.get(), vCmd))
 
         self.wristMotor.setVoltage(vCmd)
@@ -88,8 +97,8 @@ class AlgeaIntakeControl(metaclass=Singleton):
         self.ejectCommandState = False
         self.algaeMotor = WrapperedSparkMax(ALGAE_INT_CANID, "AlgaeIntakeMotor", True)
 
-        self.intakeVoltageCal = Calibration("Algae Manipulator IntakeVoltage", 12, "V")
-        self.ejectVoltageCal = Calibration("Algae Manipulator EjectVoltage", -12, "V")
+        self.intakeVoltageCal = Calibration("Algae Manipulator IntakeVoltage", -12, "V")
+        self.ejectVoltageCal = Calibration("Algae Manipulator EjectVoltage", 12, "V")
         self.holdVoltageCal = Calibration("Algae Manipulator HoldVoltage", 5, "V")
 
         self.hasGamePiece = False
