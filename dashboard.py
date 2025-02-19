@@ -87,12 +87,6 @@ class Dashboard:
             else Icon.kOFF)
         )
 
-        addLog("hasAlgae",
-               lambda: (
-            Icon.kON if algaeManipulatorControl.AlgeaIntakeControl().getHasGamePiece()
-            else Icon.kOFF)
-        )
-
         addLog("ElevatorHeight", lambda: (m2ft(ElevatorControl().getHeightM())))
 
         addLog("hasCoral",  

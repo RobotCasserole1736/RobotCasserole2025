@@ -92,76 +92,52 @@ class AlgaeWristControl(metaclass=Singleton):
 
 class AlgeaIntakeControl(metaclass=Singleton):
     def __init__(self):
-        #initialize all of your variables, spark maxes, etc. 
         self.intakeCommandState = False
         self.ejectCommandState = False
+        self.flip = False
+        #self.flip will flip the intake/eject voltages if the algae wrist is at a high angle
+        
         self.algaeMotor = WrapperedSparkMax(ALGAE_INT_CANID, "AlgaeIntakeMotor", True)
 
         self.intakeVoltageCal = Calibration("Algae Manipulator IntakeVoltage", -12, "V")
         self.ejectVoltageCal = Calibration("Algae Manipulator EjectVoltage", 12, "V")
-        self.holdVoltageCal = Calibration("Algae Manipulator HoldVoltage", 5, "V")
 
-        self.hasGamePiece = False
-
-        self.tofSensor = TimeOfFlight(ALGAE_GAMEPIECE_CANID)
-        self.tofSensor.setRangingMode(TimeOfFlight.RangingMode.kShort, 24)
-        self.tofSensor.setRangeOfInterest(6, 6, 10, 10)  # fov for sensor # game piece sensor empty for now
-        #TODO: LOOK AT THIS LATER YOU SOFTWARE PEOPLE YOU BETTER LOOK AT THIS
-
-        self.gamePiecePresentCal = Calibration("AlgaePresentThresh", 24, "in")
-
-        self.disconTOFFault = faults.Fault("Algae Intake TOF Sensor is Disconnected")
-
-        #addLog("Has Game Piece",lambda:self.hasGamePiece, "Bool")
         addLog("Algae Manipulator intake cmd",lambda:self.intakeCommandState,"Bool")
         addLog("Algae Manipulator  cmd",lambda:self.ejectCommandState,"Bool")
         #addLog("Has Game Piece", self.getHasGamePiece, "Bool")
 
-    
-    def getHasGamePiece(self):
-        gamepieceDistSensorMeas = m2in(self.tofSensor.getRange() / 1000.0)
-        self.disconTOFFault.set(self.tofSensor.getFirmwareVersion() == 0)
-        #update TOF (is it faulted? Is there a gamepiece being seen (see checkGamePiece function)?)
-        if(self.disconTOFFault.isActive):
-            # Gamepiece Sensor Faulted - assume we don't have a gamepiece
-            return False
-        else:
-            if gamepieceDistSensorMeas < self.gamePiecePresentCal.get():
-                return True
-            else: 
-                return False
-
     def update(self):
-        self.hasGamePiece = self.getHasGamePiece()
 
-        if self.intakeCommandState and not self.hasGamePiece:
-            self.updateIntake(True)
+        if self.intakeCommandState:
+            self.updateIntake(True, self.flip)
         elif self.ejectCommandState:
-            self.updateEject(True)
-        elif self.hasGamePiece:
-            self.updateHold(True)
-
+            self.updateEject(True, self.flip)
         else:
             self.algaeMotor.setVoltage(0)
 
-    def setInput(self, intakeBool, ejectBool):
+    def setInput(self, intakeBool, ejectBool, algaeAngle):
         self.intakeCommandState = intakeBool
         self.ejectCommandState = ejectBool
+        self.flip = (algaeAngle > -45)
 
-    def updateIntake(self, run):
+    def updateIntake(self, run, flip):
+        if flip:
+            voltage = self.intakeVoltageCal.get() * -1
+        else:
+            voltage = self.intakeVoltageCal.get()
+
         if run:
-            self.algaeMotor.setVoltage(self.intakeVoltageCal.get())
+            self.algaeMotor.setVoltage(voltage)
         else: 
             self.algaeMotor.setVoltage(0)
     
-    def updateEject(self, run):
-        if run:
-            self.algaeMotor.setVoltage(self.ejectVoltageCal.get())
+    def updateEject(self, run, flip):
+        if flip:
+            voltage = self.ejectVoltageCal.get() * -1
         else:
-            self.algaeMotor.setVoltage(0)
+            voltage = self.ejectVoltageCal.get()
 
-    def updateHold(self, run):
         if run:
-            self.algaeMotor.setVoltage(self.holdVoltageCal.get())
+            self.algaeMotor.setVoltage(voltage)
         else:
             self.algaeMotor.setVoltage(0)

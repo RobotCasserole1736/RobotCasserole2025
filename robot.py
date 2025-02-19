@@ -171,7 +171,7 @@ class MyRobot(wpilib.TimedRobot):
         driverCmd.scaleBy(self.elev.getDtSpeedLimitFactor())
         self.driveTrain.setManualCmd(driverCmd)
 
-        self.algaeIntake.setInput(self.oInt.getIntakeAlgae(),self.oInt.getEjectAlgae())
+        self.algaeIntake.setInput(self.oInt.getIntakeAlgae(),self.oInt.getEjectAlgae(), self.algaeWrist.getAngleRad())
 
         self.algaeManip.setDesPos(self.oInt.getAlgaeManipCmd())
 
