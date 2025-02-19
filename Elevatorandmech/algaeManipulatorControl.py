@@ -23,14 +23,14 @@ class AlgaeWristControl(metaclass=Singleton):
         self.algaeAbsEnc = WrapperedThroughBoreHexEncoder(port=ALGAE_ENC_PORT, name="Algae Wrist Enc", mountOffsetRad=deg2Rad(ALGAE_ANGLE_ABS_POS_ENC_OFFSET), dirInverted=True)
 
         #PID stuff calibrations
-        self.kP = Calibration(name="Algae Wrist kP", default=.75, units="V/degErr")
+        self.kP = Calibration(name="Algae Wrist kP", default=.6, units="V/degErr")
         self.maxV = Calibration(name="Algae Wrist maxV", default=4.0, units="V")
         self.deadzone = Calibration(name="Algae Wrist deadzone", default=8.0, units="deg")
 
         #position calibrations... an angle in degrees. Assumingt 0 is horizontal, - is down, etc.  
         self.inPos = Calibration(name="Algae Wrist Intake Position", default = -15, units="deg")
         self.stowPos = Calibration(name="Algae Wrist Stow Position", default = -90, units="deg")
-        self.reefPos = Calibration(name="Algae Wrist Reef Position", default = 0, units="deg")
+        self.reefPos = Calibration(name="Algae Wrist Reef Position", default = -70, units="deg")
         
         #positions
         self.actualPos = 0

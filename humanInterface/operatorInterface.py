@@ -46,9 +46,9 @@ class OperatorInterface:
                 self.elevatorLevelCmd = ElevatorLevelCmd.L4
             self.elevManAdjCmd = self.ctrl.getRightTriggerAxis() - self.ctrl.getLeftTriggerAxis()
 
-            if self.ctrl.getLeftBumper() and not self.ctrl.getBackButton():
+            if self.ctrl.getLeftBumper():
                 self.coralCmd = CoralManState.INTAKING
-            elif not self.ctrl.getLeftBumper() and self.ctrl.getBackButton():
+            elif self.ctrl.getRightBumper():
                 self.coralCmd = CoralManState.EJECTING
             else:
                 self.coralCmd = CoralManState.DISABLED
@@ -64,12 +64,14 @@ class OperatorInterface:
             # Dpad down = Stow Position
             elif 135 < self.ctrl.getPOV() < 225:
                 self.algaeManipCmd = AlgaeWristState.STOW
+                self.elevatorLevelCmd = ElevatorLevelCmd.L1
             # Dpad left = Reef Position
             elif 225 < self.ctrl.getPOV() < 315:
                 self.algaeManipCmd = AlgaeWristState.REEF
-            # Always return to stow if other positions are not commanded
-            # Could we just free up Dpad down since we always return to Stow?
-            # We may change anyway based on human operator feedback
+                self.elevatorLevelCmd = ElevatorLevelCmd.AL2
+            elif 315 < self.ctrl.getPOV() < 360 or 0 <= self.ctrl.getPOV() < 45:
+                self.algaeManipCmd = AlgaeWristState.REEF
+                self.elevatorLevelCmd = ElevatorLevelCmd.AL3
             else:
                 self.algaeManipCmd = AlgaeWristState.NOTHING
 

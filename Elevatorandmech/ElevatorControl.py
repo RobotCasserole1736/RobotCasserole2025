@@ -31,9 +31,12 @@ class ElevatorControl(metaclass=Singleton):
 
         # Coral Scoring Heights in meters
         self.L1_Height = Calibration(name="Elevator Preset Height L1", units="m", default=0.0)
-        self.L2_Height = Calibration(name="Elevator Preset Height L2", units="m", default=.1843)
+        self.L2_Height = Calibration(name="Elevator Preset Height L2", units="m", default=.2338)
         self.L3_Height = Calibration(name="Elevator Preset Height L3", units="m", default=.6023)
-        self.L4_Height = Calibration(name="Elevator Preset Height L4", units="m", default=1.285)
+        self.L4_Height = Calibration(name="Elevator Preset Height L4", units="m", default=1.300)
+        self.AL2_Height = Calibration(name="Elevator Preset Height Algae L2", units="m", default=.638)
+        self.AL3_Height = Calibration(name="Elevator Preset Height Algae L3", units="m", default=1.075)
+
 
         self.manAdjMaxVoltage = Calibration(name="Elevator Manual Adj Max Voltage", default=1.0, units="V")
 
@@ -62,7 +65,7 @@ class ElevatorControl(metaclass=Singleton):
         # FF and proportional gain constants
         self.kV = Calibration(name="Elevator kV", default=0.013, units="V/rps")
         self.kS = Calibration(name="Elevator kS", default=0.1, units="V")
-        self.kG = Calibration(name="Elevator kG", default=0.6, units="V")
+        self.kG = Calibration(name="Elevator kG", default=0.55, units="V")
         self.kP = Calibration(name="Elevator kP", default=0.1, units="V/rad error")
 
         # Set P gain on motor
@@ -167,6 +170,10 @@ class ElevatorControl(metaclass=Singleton):
             self.heightGoal = self.L3_Height.get()
         elif self.curHeightGoal == ElevatorLevelCmd.L4:
             self.heightGoal = self.L4_Height.get()
+        elif self.curHeightGoal == ElevatorLevelCmd.AL2:
+            self.heightGoal = self.AL2_Height.get()
+        elif self.curHeightGoal == ElevatorLevelCmd.AL3:
+            self.heightGoal = self.AL3_Height.get()
            
         if not self.coralSafe:
             # Coral blocks motion. Modify goals/commands as needed.
