@@ -97,8 +97,8 @@ class AlgeaIntakeControl(metaclass=Singleton):
         self.ejectCommandState = False
         self.algaeMotor = WrapperedSparkMax(ALGAE_INT_CANID, "AlgaeIntakeMotor", True)
 
-        self.intakeVoltageCal = Calibration("Algae Manipulator IntakeVoltage", 12, "V")
-        self.ejectVoltageCal = Calibration("Algae Manipulator EjectVoltage", -12, "V")
+        self.intakeVoltageCal = Calibration("Algae Manipulator IntakeVoltage", -12, "V")
+        self.ejectVoltageCal = Calibration("Algae Manipulator EjectVoltage", 12, "V")
         self.holdVoltageCal = Calibration("Algae Manipulator HoldVoltage", 5, "V")
 
         self.hasGamePiece = False

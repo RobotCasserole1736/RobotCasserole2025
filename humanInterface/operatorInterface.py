@@ -44,7 +44,7 @@ class OperatorInterface:
                 self.elevatorLevelCmd = ElevatorLevelCmd.L3
             elif(self.ctrl.getYButton()):
                 self.elevatorLevelCmd = ElevatorLevelCmd.L4
-            self.elevManAdjCmd = ((self.ctrl.getLeftY() > 0.1) - (self.ctrl.getLeftY() < -0.1)) * 1 #If the left Y is greater than .1 then go up 1 else go down one. This is what Lucas wants for some reason.
+            self.elevManAdjCmd = ((self.ctrl.getLeftY() > 0.1) - (self.ctrl.getLeftY() < -0.1)) * -1 #If the left Y is greater than .1 then go up 1 else go down one. This is what Lucas wants for some reason.
 
             if self.ctrl.getRightTriggerAxis() > .2: #Currently Prioritizes right trigger 
                 self.coralCmd = CoralManState.EJECTING
@@ -65,17 +65,18 @@ class OperatorInterface:
 
 
             # Set Algae Manipulator command
-            # Dpad right = Ground Position
-            if 45 < self.ctrl.getPOV() < 135:
+            # Dpad down = Intake off ground Position
+            if 135 < self.ctrl.getPOV() < 225:
                 self.algaeManipCmd = AlgaeWristState.INTAKEOFFGROUND
-            # Dpad down = Stow Position
-            elif 135 < self.ctrl.getPOV() < 225:
-                self.algaeManipCmd = AlgaeWristState.STOW
                 self.elevatorLevelCmd = ElevatorLevelCmd.L1
-            # Dpad left = Reef Position
+            # Dpad right = Stow Position
+            elif 45 < self.ctrl.getPOV() < 135:
+                self.algaeManipCmd = AlgaeWristState.STOW
+            # Dpad left = Reef Position, L2
             elif 225 < self.ctrl.getPOV() < 315:
                 self.algaeManipCmd = AlgaeWristState.REEF
                 self.elevatorLevelCmd = ElevatorLevelCmd.AL2
+            #Dpad up = Reef position, L3
             elif 315 < self.ctrl.getPOV() < 360 or 0 <= self.ctrl.getPOV() < 45:
                 self.algaeManipCmd = AlgaeWristState.REEF
                 self.elevatorLevelCmd = ElevatorLevelCmd.AL3
