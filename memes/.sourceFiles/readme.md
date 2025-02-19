@@ -1,3 +1,5 @@
+# FUN IS A CORE VALUE
+
 Original midi file yoinked from https://onlinesequencer.net/2921017#
 
 Heavily modified and fixed up using http://www.midieditor.org/
