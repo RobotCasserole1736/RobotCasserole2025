@@ -44,18 +44,25 @@ class OperatorInterface:
                 self.elevatorLevelCmd = ElevatorLevelCmd.L3
             elif(self.ctrl.getYButton()):
                 self.elevatorLevelCmd = ElevatorLevelCmd.L4
-            self.elevManAdjCmd = self.ctrl.getRightTriggerAxis() - self.ctrl.getLeftTriggerAxis()
+            self.elevManAdjCmd = ((self.ctrl.getLeftY() > 0.1) - (self.ctrl.getLeftY() < -0.1)) * 1 #If the left Y is greater than .1 then go up 1 else go down one. This is what Lucas wants for some reason.
 
-            if self.ctrl.getLeftBumper():
-                self.coralCmd = CoralManState.INTAKING
-            elif self.ctrl.getRightBumper():
+            if self.ctrl.getRightTriggerAxis() > .2: #Currently Prioritizes right trigger 
                 self.coralCmd = CoralManState.EJECTING
+            elif self.ctrl.getLeftTriggerAxis() > .2:
+                self.coralCmd = CoralManState.INTAKING
             else:
                 self.coralCmd = CoralManState.DISABLED
 
-            # Intake/Eject Algae
-            self.intakeAlgae = self.ctrl.getRightY() > 0.3
-            self.ejectAlgae = self.ctrl.getRightY() < -0.3
+            if self.ctrl.getRightBumper():
+                self.ejectAlgae = True
+                self.intakeAlgae = False
+            elif self.ctrl.getLeftBumper():
+                self.intakeAlgae = True 
+                self.ejectAlgae = False
+            else:
+                self.intakeAlgae = False 
+                self.ejectAlgae = False
+
 
             # Set Algae Manipulator command
             # Dpad right = Ground Position
