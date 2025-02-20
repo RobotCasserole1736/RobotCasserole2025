@@ -60,6 +60,8 @@ class DrivetrainControl(metaclass=Singleton):
         self.curManCmd = DrivetrainCommand()
         self.curCmd = DrivetrainCommand()
 
+        self.elevSpeedLimit = 1.0
+
         self.gains = SwerveModuleGainSet()
 
         self.poseEst = DrivetrainPoseEstimator(self.getModulePositions())
@@ -87,6 +89,8 @@ class DrivetrainControl(metaclass=Singleton):
         self.curCmd = Trajectory().update(self.curCmd, curEstPose)
         self.curCmd = AutoDrive().update(self.curCmd, curEstPose)
         self.curCmd = AutoSteer().update(self.curCmd, curEstPose)
+
+        self.curCmd.scaleBy(self.elevSpeedLimit)
 
         # Transform the current command to be robot relative
         tmp = ChassisSpeeds.fromFieldRelativeSpeeds(
@@ -155,7 +159,9 @@ class DrivetrainControl(metaclass=Singleton):
     def getCurEstPose(self) -> Pose2d:
         # Return the current best-guess at our pose on the field.
         return self.poseEst.getCurEstPose()
-
+    
+    def setElevLimiter(self, elevLimit):
+        self.elevSpeedLimit = elevLimit
 
 def _discretizeChSpd(chSpd):
     """See https://www.chiefdelphi.com/t/whitepaper-swerve-drive-skew-and-second-order-kinematics/416964/30

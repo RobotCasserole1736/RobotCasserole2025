@@ -167,9 +167,10 @@ class MyRobot(wpilib.TimedRobot):
     def teleopPeriodic(self):
 
         # TODO - this is technically one loop delayed, which could induce lag
-        driverCmd = self.dInt.getCmd()
-        driverCmd.scaleBy(self.elev.getDtSpeedLimitFactor())
-        self.driveTrain.setManualCmd(driverCmd)
+        self.driveTrain.setElevLimiter(self.elev.getDtSpeedLimitFactor())
+        self.driveTrain.setManualCmd(self.dInt.getCmd())
+        self.autosteer.setReefAutoSteerCmd(self.dInt.getAutoSteer())
+        self.autodrive.setRequest(self.dInt.getAutoDrive())
 
         self.algaeIntake.setInput(self.oInt.getIntakeAlgae(),self.oInt.getEjectAlgae(), self.algaeWrist.getAngleRad())
 
@@ -193,9 +194,6 @@ class MyRobot(wpilib.TimedRobot):
         #    for tf in tfs:
         #        obs = PointObstacle(location=(ct+tf), strength=0.5)
         #        self.autodrive.rfp.addObstacleObservation(obs)
-
-        self.autosteer.setReefAutoSteerCmd(self.dInt.getAutoSteer())
-        self.autodrive.setRequest(self.dInt.getAutoDrive())
 
         self.coralMan.setCoralCmd(self.oInt.getCoralCmd())
         self.coralMan.setAtL1(self.elev.getHeightM() < (self.elev.L1_Height.get() + 0.1))

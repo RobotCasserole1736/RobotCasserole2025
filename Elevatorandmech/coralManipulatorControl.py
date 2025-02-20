@@ -18,7 +18,7 @@ class CoralManipulatorControl(metaclass=Singleton):
         self.gamepieceSensorB = DigitalInput(CORAL_GAME_PIECE_B_PORT)
         self.motorHoldingVoltage = Calibration("MotorHolding", 0.0, "V")
         self.motorIntakeVoltage =  Calibration("MotorIntake", 5.0, "V")
-        self.motorEjectVoltage =  Calibration("MotorEject", 11.0, "V")
+        self.motorEjectVoltage =  Calibration("MotorEject", 12.0, "V")
         self.RMotorEjectVoltageL1 = Calibration("MotorEjectRForL1", 5.0, "V")
         self.atL1 = False
 
@@ -31,19 +31,17 @@ class CoralManipulatorControl(metaclass=Singleton):
             self.coralMotorL.setVoltage(0)
             self.coralMotorR.setVoltage(0)
         # Eject or hold if it has a game piece
-        elif self.getCheckGamePiece():
-            if self.coralCurState == CoralManState.EJECTING:
-                EVoltage = self.motorEjectVoltage.get()
-                self.coralMotorL.setVoltage(EVoltage)
-                if self.atL1:
-                    self.coralMotorR.setVoltage(self.RMotorEjectVoltageL1.get())
-                else:
-                    self.coralMotorR.setVoltage(EVoltage)
-            # Hold otherwise
+        elif self.coralCurState == CoralManState.EJECTING:
+            EVoltage = self.motorEjectVoltage.get()
+            self.coralMotorL.setVoltage(EVoltage)
+            if self.atL1:
+                self.coralMotorR.setVoltage(self.RMotorEjectVoltageL1.get())
             else:
-                self.coralCurState = CoralManState.HOLDING
-                self.coralMotorL.setVoltage(self.motorHoldingVoltage.get())
-                self.coralMotorR.setVoltage(self.motorHoldingVoltage.get())
+                self.coralMotorR.setVoltage(EVoltage)        
+        elif self.getCheckGamePiece():
+            self.coralCurState = CoralManState.HOLDING
+            self.coralMotorL.setVoltage(self.motorHoldingVoltage.get())
+            self.coralMotorR.setVoltage(self.motorHoldingVoltage.get())
         # Can intake if there is no game piece
         else:
             if self.coralCurState == CoralManState.INTAKING:
