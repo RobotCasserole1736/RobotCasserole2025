@@ -40,7 +40,7 @@ class ModeList:
         return self.modes[self.curModeIdx]
 
     def getNames(self):
-        return [x.getName() for x in self.modes]
+        return [str(x) for x in self.modes]
 
     def getDesModeTopicName(self):
         return self.getModeTopicBase() + "/des"

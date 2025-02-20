@@ -92,17 +92,17 @@ MAX_ROTATE_ACCEL_RAD_PER_SEC_2 = (
 # 5 - Redeploy code, verify that the  encoder readings are correct as each module is manually rotated
 
 
-FR_ENCODER_MOUNT_OFFSET_RAD = deg2Rad(201.05)
-FL_ENCODER_MOUNT_OFFSET_RAD = deg2Rad(-90.11)
-BR_ENCODER_MOUNT_OFFSET_RAD = deg2Rad(-80.96)
-BL_ENCODER_MOUNT_OFFSET_RAD = deg2Rad(1.40)
+FR_ENCODER_MOUNT_OFFSET_RAD = deg2Rad(-155.9)
+FL_ENCODER_MOUNT_OFFSET_RAD = deg2Rad(-88.59)
+BR_ENCODER_MOUNT_OFFSET_RAD = deg2Rad(-77.69)
+BL_ENCODER_MOUNT_OFFSET_RAD = deg2Rad(2.246)
 
 
 # Module Indices (for ease of array manipulation)
-FR = 0
-BR = 1
+FL = 0
+FR = 1
 BL = 2
-FL = 3
+BR = 3
 
 # Camera Mount Offsets
 # These are relative to the robot origin
@@ -146,23 +146,23 @@ ROBOT_TO_FRONT_CAM = Transform3d(
 
 # Array of translations from robot's origin (center bottom, on floor) to the module's contact patch with the ground
 robotToModuleTranslations = []
-robotToModuleTranslations.append(
+robotToModuleTranslations.append( #FL
+    Translation2d(WHEEL_BASE_HALF_WIDTH_M, WHEEL_BASE_HALF_LENGTH_M)
+)
+robotToModuleTranslations.append( #FR
     Translation2d(WHEEL_BASE_HALF_WIDTH_M, -WHEEL_BASE_HALF_LENGTH_M)
 )
-robotToModuleTranslations.append(
-    Translation2d(-WHEEL_BASE_HALF_WIDTH_M, -WHEEL_BASE_HALF_LENGTH_M)
-)
-robotToModuleTranslations.append(
+robotToModuleTranslations.append( #BL
     Translation2d(-WHEEL_BASE_HALF_WIDTH_M, WHEEL_BASE_HALF_LENGTH_M)
 )
-robotToModuleTranslations.append(
-    Translation2d(WHEEL_BASE_HALF_WIDTH_M, WHEEL_BASE_HALF_LENGTH_M)
+robotToModuleTranslations.append( #BR
+    Translation2d(-WHEEL_BASE_HALF_WIDTH_M, -WHEEL_BASE_HALF_LENGTH_M)
 )
 
 # WPILib Kinematics object
 kinematics = SwerveDrive4Kinematics(
-    robotToModuleTranslations[FR],
-    robotToModuleTranslations[BR],
-    robotToModuleTranslations[BL],
     robotToModuleTranslations[FL],
+    robotToModuleTranslations[FR],
+    robotToModuleTranslations[BL],
+    robotToModuleTranslations[BR],
 )

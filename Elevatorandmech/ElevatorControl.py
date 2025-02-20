@@ -1,6 +1,7 @@
 from playingwithfusion import TimeOfFlight
 from Elevatorandmech.ElevatorandMechConstants import MAX_ELEV_ACCEL_MPS2, MAX_ELEV_VEL_MPS, ELEV_GEARBOX_GEAR_RATIO, ELEV_SPOOL_RADIUS_M, ElevatorLevelCmd
 from utils.calibration import Calibration
+from utils.mapLookup2d import MapLookup2D
 from utils.units import sign
 from utils.signalLogging import addLog
 from utils.constants import ELEV_LM_CANID, ELEV_RM_CANID, ELEV_TOF_CANID
@@ -11,17 +12,31 @@ from wpimath.trajectory import TrapezoidProfile
 REEF_L1_HEIGHT_M = 0.5842
 REEF_L2_HEIGHT_M = 0.9398
 REEF_L3_HEIGHT_M = 1.397 
-REEF_L4_HEIGHT_M = 2.159 
+REEF_L4_HEIGHT_M = 1.6
 ELEV_MIN_HEIGHT_M = REEF_L1_HEIGHT_M  # TODO - is elevator's bottom position actually L1?
+
+# The interfence zone exists between the heights where the coral makes contact with the elevator while
+# not fully into the intake. To tune these:
+# 1. move the elevator to the top
+# 2. put coral sticking out the back of the intake
+# 3. Slowly lower the elevator until the coral makes contact, note the height. This is the TOP
+# 4. Remove the coral, move to the bottom.
+# 5. raise the elevator slowly until the coral makes contact, note the height. This is the BOTTOM
+ELEV_CORAL_INTERFERENCE_ZONE_TOP_M = .9
+ELEV_CORAL_INTERFERENCE_ZONE_BOTTOM_M = 0.05
+ELEV_CORAL_INTERFERENCE_ZONE_CENTER_M = (ELEV_CORAL_INTERFERENCE_ZONE_TOP_M + ELEV_CORAL_INTERFERENCE_ZONE_BOTTOM_M) / 2.0
 
 class ElevatorControl(metaclass=Singleton):
     def __init__(self):
 
         # Coral Scoring Heights in meters
-        self.L1_Height = Calibration(name="Elevator Preset Height L1", units="m", default=REEF_L1_HEIGHT_M - ELEV_MIN_HEIGHT_M)
-        self.L2_Height = Calibration(name="Elevator Preset Height L2", units="m", default=REEF_L2_HEIGHT_M - ELEV_MIN_HEIGHT_M)
-        self.L3_Height = Calibration(name="Elevator Preset Height L3", units="m", default=REEF_L3_HEIGHT_M - ELEV_MIN_HEIGHT_M)
-        self.L4_Height = Calibration(name="Elevator Preset Height L4", units="m", default=REEF_L4_HEIGHT_M - ELEV_MIN_HEIGHT_M)
+        self.L1_Height = Calibration(name="Elevator Preset Height L1", units="m", default=0.0)
+        self.L2_Height = Calibration(name="Elevator Preset Height L2", units="m", default=.2338)
+        self.L3_Height = Calibration(name="Elevator Preset Height L3", units="m", default=.6023)
+        self.L4_Height = Calibration(name="Elevator Preset Height L4", units="m", default=1.300)
+        self.AL2_Height = Calibration(name="Elevator Preset Height Algae L2", units="m", default=.638)
+        self.AL3_Height = Calibration(name="Elevator Preset Height Algae L3", units="m", default=1.075)
+
 
         self.manAdjMaxVoltage = Calibration(name="Elevator Manual Adj Max Voltage", default=1.0, units="V")
 
@@ -36,16 +51,26 @@ class ElevatorControl(metaclass=Singleton):
         self.Rmotor = WrapperedSparkMax(ELEV_RM_CANID, "ElevatorMotorRight", brakeMode=True)
         self.LMotor = WrapperedSparkMax(ELEV_LM_CANID, "ElevatorMotorLeft", brakeMode=True)
         #we don't know if we want to invert LMotor (left) or not when we follow RMotor (right), automatically assumed False
-        self.LMotor.setFollow(ELEV_RM_CANID)
+        self.LMotor.setInverted(False)
+        self.Rmotor.setInverted(True)
+
+        #limit switches...
+        # Limit switch code; bottom for resetting offset and ensuring it starts correctly, top for saftey to stop from spinning
+        # Only for protection, not for initializing the elevator height
+        # TODO - on right or left motor
+        #Also, the limit switches we're using are "normally open," which is the default, so we should be good on that. 
+        self.revLimitSwitchVal = self.Rmotor.getRevLimitSwitch()
+        self.fwdLimitSwitchVal = self.Rmotor.getFwdLimitSwitch()
 
         # FF and proportional gain constants
-        self.kV = Calibration(name="Elevator kV", default=0.02, units="V/rps")
+        self.kV = Calibration(name="Elevator kV", default=0.013, units="V/rps")
         self.kS = Calibration(name="Elevator kS", default=0.1, units="V")
-        self.kG = Calibration(name="Elevator kG", default=0.25, units="V")
-        self.kP = Calibration(name="Elevator kP", default=0.05, units="V/rad error")
+        self.kG = Calibration(name="Elevator kG", default=0.55, units="V")
+        self.kP = Calibration(name="Elevator kP", default=0.1, units="V/rad error")
 
         # Set P gain on motor
         self.Rmotor.setPID(self.kP.get(), 0.0, 0.0)
+        self.LMotor.setPID(self.kP.get(), 0.0, 0.0)
 
         # Profiler
         self.maxV = Calibration(name="Elevator Max Vel", default=MAX_ELEV_VEL_MPS, units="mps")
@@ -56,18 +81,15 @@ class ElevatorControl(metaclass=Singleton):
         self.actualPos = 0
         self.stopped = False
 
-        # Limit switch code; bottom for resetting offset and ensuring it starts correctly, top for saftey to stop from spinning
-        # Only for protection, not for initializing the elevator height
-        # TODO - implement limit switches here
-
         # Playing with Fusion time of flight sensor for initalizing elevator height
         self.heightAbsSen = TimeOfFlight(ELEV_TOF_CANID)
+        self.heightAbsSen.setRangeOfInterest(8,8,8,8) # one pixel region of interest, right in the center. Should bring cone down to ~2 deg (max is 30)
 
         # Absolute Sensor mount offsets
         # After mounting the sensor, these should be tweaked one time
         # in order to adjust whatever the sensor reads into the reference frame
         # of the mechanism
-        self.ABS_SENSOR_READING_AT_ELEVATOR_BOTTOM_M = 0.074 # TODO correct?
+        self.ABS_SENSOR_READING_AT_ELEVATOR_BOTTOM_M = .170 
 
         # Relative Encoder Offsets
         # Releative encoders always start at 0 at power-on
@@ -79,19 +101,29 @@ class ElevatorControl(metaclass=Singleton):
         # Create a motion profile with the given maximum velocity and maximum
         # acceleration constraints for the next setpoint.
 
+        # Drivetrain limit factor
+        # Based on elevator height, limit the max speed of the drivetrain
+        # Limits the drivetrain speed by a factor depending on elevator height
+        self.dtSpeedLimitMap = MapLookup2D([
+            (0.0, 1.0),
+            (1.0, 0.2) # TODO - tweak and tune as needed, these were randomly chosen by Chris
+        ])
+
         # Add some helpful log values
         addLog("Elevator Actual Height", lambda: self.actualPos, "m")
+        addLog("Elevator TOF Measurment", self._getAbsHeight, "m")
         addLog("Elevator Goal Height", lambda: self.heightGoal, "m")
         addLog("Elevator Stopped", lambda: self.stopped, "bool")
         addLog("Elevator Profiled Height", lambda: self.curState.position, "m")
+        addLog("Elevator Fwd Limit Value", lambda: self.fwdLimitSwitchVal, "bool")
+        addLog("Elevator Rev Limit Value", lambda: self.revLimitSwitchVal, "bool")
+
 
         # Finally, one-time init the relative sensor offsets from the absolute sensors
         self.initFromAbsoluteSensor()
 
-        # TODO - limit switch config?
-
     def _RmotorRadToHeight(self, RmotorRad: float) -> float:
-        return RmotorRad * 1/ELEV_GEARBOX_GEAR_RATIO * (ELEV_SPOOL_RADIUS_M) - self.relEncOffsetM
+        return RmotorRad * 1/ELEV_GEARBOX_GEAR_RATIO * (ELEV_SPOOL_RADIUS_M) + self.relEncOffsetM
     
     def _heightToMotorRad(self, elevLin: float) -> float:
         return ((elevLin + self.relEncOffsetM)*1/(ELEV_SPOOL_RADIUS_M) * ELEV_GEARBOX_GEAR_RATIO)
@@ -100,11 +132,17 @@ class ElevatorControl(metaclass=Singleton):
         return (elevLinVel *1/(ELEV_SPOOL_RADIUS_M) * ELEV_GEARBOX_GEAR_RATIO)
     
     def getHeightM(self) -> float:
-        return self._RmotorRadToHeight(self.Rmotor.getMotorPositionRad()) 
+        return (self._RmotorRadToHeight(self.Rmotor.getMotorPositionRad()))
+    
+    def getForwardLimit(self) -> bool:
+        return self.fwdLimitSwitchVal
+    
+    def getReverseLimit(self) -> bool:
+        return self.revLimitSwitchVal
     
     #return the height of the elevator as measured by the absolute sensor in meters
     def _getAbsHeight(self) -> float:
-        return self.heightAbsSen.getRange() / 1000.0 - self.ABS_SENSOR_READING_AT_ELEVATOR_BOTTOM_M
+        return (self.heightAbsSen.getRange() / 1000.0 - self.ABS_SENSOR_READING_AT_ELEVATOR_BOTTOM_M)
 
     # This routine uses the absolute sensors to adjust the offsets for the relative sensors
     # so that the relative sensors match reality.
@@ -120,22 +158,41 @@ class ElevatorControl(metaclass=Singleton):
     def update(self) -> None:
         self.actualPos = self.getHeightM()
 
-        if self.coralSafe:
-            self.stopped = (self.curHeightGoal == ElevatorLevelCmd.NO_CMD)
+        # Assign nominal goals
+        self.stopped = (self.curHeightGoal == ElevatorLevelCmd.NO_CMD)
+        if self.curHeightGoal == ElevatorLevelCmd.L1:
+            self.heightGoal = self.L1_Height.get()
+        elif self.curHeightGoal == ElevatorLevelCmd.L2:
+            self.heightGoal = self.L2_Height.get()
+        elif self.curHeightGoal == ElevatorLevelCmd.L3:
+            self.heightGoal = self.L3_Height.get()
+        elif self.curHeightGoal == ElevatorLevelCmd.L4:
+            self.heightGoal = self.L4_Height.get()
+        elif self.curHeightGoal == ElevatorLevelCmd.AL2:
+            self.heightGoal = self.AL2_Height.get()
+        elif self.curHeightGoal == ElevatorLevelCmd.AL3:
+            self.heightGoal = self.AL3_Height.get()
+           
+        if not self.coralSafe:
+            # Coral blocks motion. Modify goals/commands as needed.
 
-            if self.curHeightGoal == ElevatorLevelCmd.L1:
-                self.heightGoal = self.L1_Height.get()
-            elif self.curHeightGoal == ElevatorLevelCmd.L2:
-                self.heightGoal = self.L2_Height.get()
-            elif self.curHeightGoal == ElevatorLevelCmd.L3:
-                self.heightGoal = self.L3_Height.get()
-            elif self.curHeightGoal == ElevatorLevelCmd.L4:
-                self.heightGoal = self.L4_Height.get()
-            # Else, no change to height goal
-        else:
-            # Coral blocks motion, must get it out of the way first.
-            self.stopped=True
- 
+            # Limit profiled motion
+            if self.actualPos > ELEV_CORAL_INTERFERENCE_ZONE_CENTER_M:
+                # We're currently on the "top" of the range of travel
+                # Limit to have goals no lower than the top of the interference zone
+                self.heightGoal = max(self.heightGoal, ELEV_CORAL_INTERFERENCE_ZONE_TOP_M) 
+            elif self.actualPos <= ELEV_CORAL_INTERFERENCE_ZONE_CENTER_M:
+                # We're currently on the "bottom" of the range of travel
+                self.heightGoal = min(self.heightGoal, ELEV_CORAL_INTERFERENCE_ZONE_BOTTOM_M)
+
+            # Limit manual command to not go into interference zone
+            if ELEV_CORAL_INTERFERENCE_ZONE_TOP_M > self.actualPos > ELEV_CORAL_INTERFERENCE_ZONE_CENTER_M:
+                # We're currently in the top-half of the interference zone
+                self.manualAdjCmd = max(self.manualAdjCmd, 0) # only allow positive/up commands
+            elif ELEV_CORAL_INTERFERENCE_ZONE_CENTER_M > self.actualPos > ELEV_CORAL_INTERFERENCE_ZONE_BOTTOM_M:
+                # We're currently in the bottom-half of the interference zone
+                self.manualAdjCmd = min(self.manualAdjCmd, 0) # only allow negative/down commands
+
         # Update profiler desired state based on any change in height goal
         self.desState = TrapezoidProfile.State(self.heightGoal,0)
 
@@ -143,6 +200,7 @@ class ElevatorControl(metaclass=Singleton):
         # Update motor closed-loop calibration
         if(self.kP.isChanged()):
             self.Rmotor.setPID(self.kP.get(), 0.0, 0.0)
+            self.LMotor.setPID(self.kP.get(), 0.0, 0.0)
 
         if(self.stopped):
             # Handle stopped by just holding mechanism in place with gravity offset, no closed loop.
@@ -150,6 +208,7 @@ class ElevatorControl(metaclass=Singleton):
             manAdjVoltage = self.manAdjMaxVoltage.get() * self.manualAdjCmd
 
             self.Rmotor.setVoltage(self.kG.get() + manAdjVoltage)
+            self.LMotor.setVoltage(self.kG.get() + manAdjVoltage)
             self.curState = TrapezoidProfile.State(self.actualPos,0)
         else:
             self.curState = self.profiler.calculate(0.02, self.curState, self.desState)
@@ -161,6 +220,12 @@ class ElevatorControl(metaclass=Singleton):
                 + self.kG.get()
 
             self.Rmotor.setPosCmd(motorPosCmd, vFF)
+            #self.LMotor.setPosCmd(motorPosCmd, vFF)
+            self.LMotor.setVoltage(vFF)
+
+
+        self.revLimitSwitchVal = self.Rmotor.getRevLimitSwitch()
+        self.fwdLimitSwitchVal = self.Rmotor.getFwdLimitSwitch()
 
     # API to set current height goal
     def setHeightGoal(self, presetHeightCmd:ElevatorLevelCmd) -> None:
@@ -173,8 +238,6 @@ class ElevatorControl(metaclass=Singleton):
     def setManualAdjCmd(self, cmd:float) -> None:
         self.manualAdjCmd = cmd
 
-    def getAtHeight(self):
-        #if our actual height is close enough (arbitrarily .05m), we done and at height.
-        #this is for auto
-        dif = abs(self.getHeightM()-self.heightGoal)
-        return dif < .05
+    # Returns a limit factor to apply to drivetrain speed commands based on elevator height
+    def getDtSpeedLimitFactor(self) -> float:
+        return self.dtSpeedLimitMap.lookup(self.actualPos)

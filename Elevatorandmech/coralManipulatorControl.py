@@ -16,8 +16,8 @@ class CoralManipulatorControl(metaclass=Singleton):
         #we're assuming B is the one that hits first (it's closer to the intake side), while F is closer to front of eject side
         self.gamepieceSensorF = DigitalInput(CORAL_GAME_PIECE_F_PORT)
         self.gamepieceSensorB = DigitalInput(CORAL_GAME_PIECE_B_PORT)
-        self.motorHoldingVoltage = Calibration("MotorHolding", 1.0, "V")
-        self.motorIntakeVoltage =  Calibration("MotorIntake", 8.0, "V")
+        self.motorHoldingVoltage = Calibration("MotorHolding", 0.0, "V")
+        self.motorIntakeVoltage =  Calibration("MotorIntake", 5.0, "V")
         self.motorEjectVoltage =  Calibration("MotorEject", 11.0, "V")
         self.RMotorEjectVoltageL1 = Calibration("MotorEjectRForL1", 5.0, "V")
         self.atL1 = False
@@ -58,13 +58,17 @@ class CoralManipulatorControl(metaclass=Singleton):
         """We think the back sensor (the one the coral hits first) needs to be clear to have a game piece.
         And the front sensor needs to be tripped.
         For now, we want to assume we don't need to feed back.   """
-        return self.gamepieceSensorF.get() and not self.gamepieceSensorB.get()
-        #return True
+        return self._frontSeesCoral() and not self._backSeesCoral()
 
     def getCoralSafeToMove(self) -> bool:
-        #I think this is just a function that is going to be used by elevator control.
-        # theoretically, As long as the back gamepiece sensor isn't being tripped, the robot is good to up because a coral isn't in the way.
-        return not self.gamepieceSensorB.get()
+        # inhibit elevator motion until the back sensor sees no coral
+        return not self._backSeesCoral()
+    
+    def _frontSeesCoral(self) -> bool:
+        return not self.gamepieceSensorF.get() # True means no coral seen. False means sensor sees some coral.
+    
+    def _backSeesCoral(self) -> bool:
+        return not self.gamepieceSensorB.get() # True means no coral seen. False means sensor sees some coral.
 
     def setCoralCmd(self, cmdStateIn: CoralManState) -> None:
         #we need commands to tell us what the coral motors should be doing

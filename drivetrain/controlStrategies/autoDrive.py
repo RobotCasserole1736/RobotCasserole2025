@@ -1,9 +1,9 @@
 from wpilib import Timer
 from wpimath.geometry import Pose2d, Translation2d
-from wpimath.trajectory import Trajectory
 from drivetrain.controlStrategies.holonomicDriveController import HolonomicDriveController
 from drivetrain.drivetrainCommand import DrivetrainCommand
 from navigation.obstacleDetector import ObstacleDetector
+from utils.autonomousTransformUtils import flip
 from utils.signalLogging import addLog
 from utils.singleton import Singleton
 from navigation.repulsorFieldPlanner import RepulsorFieldPlanner
@@ -23,16 +23,18 @@ class AutoDrive(metaclass=Singleton):
         self.rfp = RepulsorFieldPlanner()
         self._trajCtrl = HolonomicDriveController("AutoDrive")
         self._telemTraj = []
-        self._obsDet = ObstacleDetector()
+        #self._obsDet = ObstacleDetector()
         self._olCmd = DrivetrainCommand()
         self._prevCmd:DrivetrainCommand|None = None
         self._plannerDur:float = 0.0
         self._autoPrevEnabled = False #This name might be a wee bit confusing. It just keeps track if we were in auto targeting the speaker last refresh.
+        self.targetIndexNumber = 0
         self.stuckTracker = 0 
         self.prevPose = Pose2d()
         self.LenList = []
         self.goalListTotwTransform = []
-
+        self.dashboardConversionList = [9, 11, 6, 8, 3, 5, 0, 2, 15, 17, 12, 14] #used by getDashTargetPositionIndex() to convert the target numbers from the python standard to the dashboard/JS standard
+        #^ Bottom is the side facing our driver station.
         addLog("AutoDrive Proc Time", lambda:(self._plannerDur * 1000.0), "ms")
 
     def getGoal(self) -> Pose2d | None:
@@ -42,6 +44,8 @@ class AutoDrive(metaclass=Singleton):
         self._autoPrevEnabled = self._autoDrive
         self._autoDrive = autoDrive
 
+    def getDashTargetPositionIndex(self) -> int: #Only use this for the dashboard. This Automatically converts the python standard for goals to the JS standard. 
+        return self.dashboardConversionList[self.targetIndexNumber] 
         
     def updateTelemetry(self) -> None:        
         self._telemTraj = self.rfp.getLookaheadTraj()
@@ -65,8 +69,9 @@ class AutoDrive(metaclass=Singleton):
 
         retCmd = cmdIn # default - no auto driving
 
-        for obs in self._obsDet.getObstacles(curPose):
-            self.rfp.addObstacleObservation(obs)
+        # TODO obstacle camera
+        #for obs in self._obsDet.getObstacles(curPose):
+        #    self.rfp.addObstacleObservation(obs)
 
         self.rfp._decayObservations()
 
@@ -80,7 +85,7 @@ class AutoDrive(metaclass=Singleton):
             #bestGoal should return the best goal side. It should be an integer. 
             bestGoal = self.possibleRotList.index(min(self.possibleRotList))
             target = curPose.nearest(goalListTot[bestGoal])
-            self.rfp.setGoal(transform(target))
+            self.rfp.setGoal(flip(transform(target)))
         else:
             self.rfp.setGoal(None)
         """
@@ -89,11 +94,11 @@ class AutoDrive(metaclass=Singleton):
         #version 3 - just based on only distance. I kind of like this one
         if (self._autoDrive):
             for goal in goalListTot:
-                self.goalListTotwTransform.append(transform(goal))
+                self.goalListTotwTransform.append(flip(transform(goal)))
             pose = curPose.nearest(self.goalListTotwTransform)
             self.rfp.setGoal(pose)
         else:
-            self.rfp.setGoal(transform(None))
+            self.rfp.setGoal(flip(transform(None)))
         """
         #version 2 - this is based on distance, then rotation if the distances are too close
         #but it's not really working. 
@@ -104,17 +109,17 @@ class AutoDrive(metaclass=Singleton):
         elif(self._autoDrive and not self._autoPrevEnabled):
             # First loop of auto drive, calc a new goal based on current position
             for goalOption in goalListTot:
-                goalWTransform = transform(goalOption.translation())
+                goalWTransform = flip(transform(goalOption.translation()))
                 self.LenList.append(goalWTransform.distance(curPose.translation()))
 
             #find the nearest one
             primeTargetIndex = self.LenList.index(min(self.LenList))
-            primeTarget = transform(goalListTot[primeTargetIndex])
+            primeTarget = flip(transform(goalListTot[primeTargetIndex]))
             #pop the nearest in order to find the second nearest
             self.LenList.pop(primeTargetIndex)
             #second nearest
             secondTargetIndex = self.LenList.index(min(self.LenList))
-            secondTarget = transform(goalListTot[secondTargetIndex])
+            secondTarget = flip(transform(goalListTot[secondTargetIndex]))
             #if they're close enough, look at rotation 
             closeEnough = abs(secondTarget.translation().distance(curPose.translation()) - primeTarget.translation().distance(curPose.translation())) <= 1.0
             difAngle = abs(secondTarget.rotation().degrees() - primeTarget.rotation().degrees()) >= 10
@@ -126,14 +131,17 @@ class AutoDrive(metaclass=Singleton):
                 secondTargetDiff = abs(secondTarget.rotation().degrees() - curRot)
                 if primeTargetDiff <= secondTargetDiff:
                     target = primeTarget
+                    self.targetIndexNumber = primeTargetIndex
                 else:
                     target = secondTarget
+                    self.targetIndexNumber = secondTargetIndex
             else:
                 target = primeTarget
+                self.targetIndexNumber = primeTargetIndex
             self.rfp.setGoal(target)
         """
         if self._autoDrive:
-            target = transform(goalListTot[10])
+            target = flip(transform(goalListTot[10]))
             self.rfp.setGoal(target)
         else:
             self.rfp.setGoal(None)
@@ -167,3 +175,4 @@ class AutoDrive(metaclass=Singleton):
 
 
         return retCmd
+    

@@ -1,4 +1,3 @@
-from numpy import array
 from wpimath.geometry import Pose2d, Rotation2d
 
 """

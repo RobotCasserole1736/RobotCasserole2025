@@ -3,6 +3,7 @@ import wpilib
 from wpimath.units import feetToMeters, degreesToRadians
 from wpimath.geometry import Pose2d
 from photonlibpy.photonCamera import PhotonCamera
+from photonlibpy.targeting.photonTrackedTarget import PhotonTrackedTarget
 from photonlibpy.photonCamera import setVersionCheckEnabled
 from utils.fieldTagLayout import FieldTagLayout
 from utils.faults import Fault
@@ -13,7 +14,13 @@ class CameraPoseObservation:
     time:float
     estFieldPose:Pose2d
     xyStdDev:float=1.0 # std dev of error in measurment, units of meters.
-    rotStdDev:float=degreesToRadians(50.0) # std dev of measurement, in units of radians
+    rotStdDev:float=degreesToRadians(99999.0) # std dev of measurement, in units of radians
+
+# Sort Tags by location
+REEF_TAG_IDS = [6,7,8,9,10,11,17,18,19,20,21,22]
+BARGE_TAG_IDS = [4,5,14,15]
+PROCESSOR_TAG_IDS = [3,16]
+HUMAN_STATION_TAG_IDS = [1,2,12,13]
 
 # Wrappers photonvision to:
 # 1 - resolve issues with target ambiguity (two possible poses for each observation)
@@ -80,20 +87,21 @@ class WrapperedPoseEstPhotonCamera:
 
                     # Filter candidates in this frame to only the valid ones
                     filteredCandidates:list[Pose2d] = []
-                    for candidate in poseCandidates:
-                        onField = self._poseIsOnField(candidate)
+                    for poseCandidate in poseCandidates:
+                        onField = self._poseIsOnField(poseCandidate)
+                        closeEnough = self._closeEnoughToCamera(target)
                         # Add other filter conditions here
-                        if onField and target.getBestCameraToTarget().translation().norm() <= 4:
-                            filteredCandidates.append(candidate)
+                        if onField and closeEnough:
+                            filteredCandidates.append(poseCandidate)
 
                     # Pick the candidate closest to the last estimate
                     bestCandidate:(Pose2d|None) = None
                     bestCandidateDist = 99999999.0
-                    for candidate in filteredCandidates:
-                        delta = (candidate - prevEstPose).translation().norm()
+                    for poseCandidate in filteredCandidates:
+                        delta = (poseCandidate - prevEstPose).translation().norm()
                         if delta < bestCandidateDist:
                             # This candidate is better, use it
-                            bestCandidate = candidate
+                            bestCandidate = poseCandidate
                             bestCandidateDist = delta
 
                     # Finally, add our best candidate the list of pose observations
@@ -101,8 +109,14 @@ class WrapperedPoseEstPhotonCamera:
                         # TODO: we can probably get better standard deviations than just
                         # assuming the default. Check out what 254 did in 2024:
                         # https://github.com/Team254/FRC-2024-Public/blob/040f653744c9b18182be5f6bc51a7e505e346e59/src/main/java/com/team254/frc2024/subsystems/vision/VisionSubsystem.java#L381
+                        
+                        # First pass - we trust reef tags more
+                        stdDev = 1.0 if tgtID in REEF_TAG_IDS else 3.0
+                        
                         self.poseEstimates.append(
-                            CameraPoseObservation(obsTime, bestCandidate)
+                            CameraPoseObservation(obsTime, 
+                                                  bestCandidate, 
+                                                  xyStdDev=stdDev)
                         )
 
     def getPoseEstimates(self):
@@ -120,3 +134,7 @@ class WrapperedPoseEstPhotonCamera:
         inY = 0.0 <= y <= feetToMeters(27.0)
         inX = 0.0 <= x <= feetToMeters(54.0)
         return inX and inY
+    
+    def _closeEnoughToCamera(self, target: PhotonTrackedTarget):
+        return target.getBestCameraToTarget().translation().norm() <= 3.0
+    

@@ -2,14 +2,17 @@
 # Just starting with the minimum stuff we need
 # The math conversions are under units.py
 
+from wpimath.geometry import Translation2d
+
 #######################################################################################
 ## FIELD DIMENSIONS
 #######################################################################################
 
 FIELD_X_M = 17.548 # "Length"
 FIELD_Y_M = 8.062  # "Width"
-REEF_LOC_X_M = 4.5747
-REEF_LOC_Y_M = 4.0363
+_REEF_LOC_X_M = 4.5747
+_REEF_LOC_Y_M = 4.0363
+reefLocation = Translation2d(_REEF_LOC_X_M, _REEF_LOC_Y_M)
 
 #######################################################################################
 ## CAN ID'S
@@ -31,8 +34,8 @@ DT_BL_AZMTH_CANID = 9
 ELEV_RM_CANID = 10
 ELEV_LM_CANID = 11
 ELEV_TOF_CANID = 12
-CORAL_L_CANID = 13
-CORAL_R_CANID = 14
+CORAL_L_CANID = 14
+CORAL_R_CANID = 13
 ALGAE_INT_CANID = 15
 ALGAE_WRIST_CANID = 16
 ALGAE_GAMEPIECE_CANID = 20
@@ -64,6 +67,6 @@ DT_FL_AZMTH_ENC_PORT = 3
 CORAL_GAME_PIECE_B_PORT = 4
 CORAL_GAME_PIECE_F_PORT = 5
 ELEV_TOF_CANID = 6
-ALGAE_ENC_PORT =7
+HEARTBEAT_LED_PIN = 7
 FIX_ME_LED_PIN = 8
-HEARTBEAT_LED_PIN = 9
+ALGAE_ENC_PORT = 9

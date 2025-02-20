@@ -48,7 +48,7 @@ class DrivetrainPoseEstimator:
         self.cams = [
             WrapperedPoseEstPhotonCamera("ACAM4", ROBOT_TO_LEFTFRONT_CAM),
             WrapperedPoseEstPhotonCamera("ACAM1", ROBOT_TO_RIGHTFRONT_CAM),
-            WrapperedPoseEstPhotonCamera("_ACAM3", ROBOT_TO_LEFTBACK_CAM),
+            WrapperedPoseEstPhotonCamera("ACAM3", ROBOT_TO_LEFTBACK_CAM),
             WrapperedPoseEstPhotonCamera("ACAM2", ROBOT_TO_RIGHTBACK_CAM),
 
         ]

@@ -21,13 +21,9 @@ class OperatorInterface:
 
         self.algaeManipCmd = AlgaeWristState.STOW
 
-        #addLog("scoreL1",lambda: self.L1,"Bool")
-        #addLog("scoreL2",lambda: self.L2,"Bool")
-        #addLog("scoreL3",lambda: self.L3,"Bool")
-        #addLog("scoreL4",lambda: self.L4,"Bool")
         #addLog("elevManUp", lambda: self.elevManualUp, "Bool")
         #addLog("elevManDown", lambda: self.elevManualDown, "Bool")
-        addLog("intakeAlgaeOpCmd", lambda: self.intakeAlgae, "Bool")
+        #addLog("intakeAlgaeOpCmd", lambda: self.intakeAlgae, "Bool")
         #addLog("ejectAlgaeOpCmd", lambda: self.ejectAlgae, "Bool")
         #addLog("ejectCoral", lambda: self.ejectCoral, "Bool")
         #addLog("autoIntakeCoral", lambda: self.autoIntakeCoral, "Bool")
@@ -48,34 +44,44 @@ class OperatorInterface:
                 self.elevatorLevelCmd = ElevatorLevelCmd.L3
             elif(self.ctrl.getYButton()):
                 self.elevatorLevelCmd = ElevatorLevelCmd.L4
-            self.elevManAdjCmd = self.ctrl.getRightTriggerAxis() - self.ctrl.getLeftTriggerAxis()
+            self.elevManAdjCmd = ((self.ctrl.getLeftY() > 0.1) - (self.ctrl.getLeftY() < -0.1)) * -1 #If the left Y is greater than .1 then go up 1 else go down one. This is what Lucas wants for some reason.
 
-            if self.ctrl.getLeftBumper() and not self.ctrl.getBackButton():
-                self.coralCmd = CoralManState.INTAKING
-            elif not self.ctrl.getLeftBumper() and self.ctrl.getBackButton():
+            if self.ctrl.getRightTriggerAxis() > .2: #Currently Prioritizes right trigger 
                 self.coralCmd = CoralManState.EJECTING
+            elif self.ctrl.getLeftTriggerAxis() > .2:
+                self.coralCmd = CoralManState.INTAKING
             else:
                 self.coralCmd = CoralManState.DISABLED
 
-            # Intake/Eject Algae
-            self.intakeAlgae = self.ctrl.getLeftY() > 0.3
-            self.ejectAlgae = self.ctrl.getLeftY() < -0.3
+            if self.ctrl.getRightBumper():
+                self.ejectAlgae = True
+                self.intakeAlgae = False
+            elif self.ctrl.getLeftBumper():
+                self.intakeAlgae = True 
+                self.ejectAlgae = False
+            else:
+                self.intakeAlgae = False 
+                self.ejectAlgae = False
+
 
             # Set Algae Manipulator command
-            # Dpad right = Ground Position
-            if 45 < self.ctrl.getPOV() < 135:
+            # Dpad down = Intake off ground Position
+            if 135 < self.ctrl.getPOV() < 225:
                 self.algaeManipCmd = AlgaeWristState.INTAKEOFFGROUND
-            # Dpad down = Stow Position
-            elif 135 < self.ctrl.getPOV() < 225:
+                self.elevatorLevelCmd = ElevatorLevelCmd.L1
+            # Dpad right = Stow Position
+            elif 45 < self.ctrl.getPOV() < 135:
                 self.algaeManipCmd = AlgaeWristState.STOW
-            # Dpad left = Reef Position
+            # Dpad left = Reef Position, L2
             elif 225 < self.ctrl.getPOV() < 315:
                 self.algaeManipCmd = AlgaeWristState.REEF
-            # Always return to stow if other positions are not commanded
-            # Could we just free up Dpad down since we always return to Stow?
-            # We may change anyway based on human operator feedback
+                self.elevatorLevelCmd = ElevatorLevelCmd.AL2
+            #Dpad up = Reef position, L3
+            elif 315 < self.ctrl.getPOV() < 360 or 0 <= self.ctrl.getPOV() < 45:
+                self.algaeManipCmd = AlgaeWristState.REEF
+                self.elevatorLevelCmd = ElevatorLevelCmd.AL3
             else:
-                self.algaeManipCmd = AlgaeWristState.STOW
+                self.algaeManipCmd = AlgaeWristState.NOTHING
 
             self.connectedFault.setNoFault()
 

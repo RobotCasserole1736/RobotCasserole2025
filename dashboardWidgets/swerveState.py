@@ -68,10 +68,10 @@ class SwerveState(WidgetConfig):
         self.nominalHeight = 20
         self.nominalWidth = 20
         self.isVisible = True
-        self.topicsFR = _ModuleTopicSet("FR", 0)
-        self.topicsBR = _ModuleTopicSet("BR", 1)
+        self.topicsFR = _ModuleTopicSet("FL", 0)
+        self.topicsBR = _ModuleTopicSet("FR", 1)
         self.topicsBL = _ModuleTopicSet("BL", 2)
-        self.topicsFL = _ModuleTopicSet("FL", 3)
+        self.topicsFL = _ModuleTopicSet("BR", 3)
 
     def getJSDeclaration(self):
         return f"var widget{self.idx} = new SwerveState('widget{self.idx}', '{self.name}')\n"

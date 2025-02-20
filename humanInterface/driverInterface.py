@@ -27,6 +27,7 @@ class DriverInterface:
         self.velYSlewRateLimiter = SlewRateLimiter(rateLimit=MAX_TRANSLATE_ACCEL_MPS2)
         self.velTSlewRateLimiter = SlewRateLimiter(rateLimit=MAX_ROTATE_ACCEL_RAD_PER_SEC_2)
 
+
         # Navigation commands
         self.autoDrive = False
         self.autoSteer = False

@@ -27,3 +27,6 @@ class Mode:
 
     def getName(self):
         return self._name
+
+    def __str__(self):
+        return self.getName()

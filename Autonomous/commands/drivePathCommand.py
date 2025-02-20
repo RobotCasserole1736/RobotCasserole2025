@@ -6,6 +6,7 @@ from drivetrain.controlStrategies.trajectory import Trajectory
 from drivetrain.drivetrainControl import DrivetrainControl
 from AutoSequencerV2.command import Command
 from utils.allianceTransformUtils import transform
+from utils.autonomousTransformUtils import flip
 
 
 class DrivePathCommand(Command):
@@ -46,7 +47,7 @@ class DrivePathCommand(Command):
         curState = self.path.sample_at(curTime)
 
         if(curState is not None):
-            curState = transform(curState)
+            curState = flip(transform(curState))
             self.trajCtrl.setCmd(curState)
         else: 
             self.trajCtrl.setCmd(None)

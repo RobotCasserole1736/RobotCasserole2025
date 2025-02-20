@@ -98,11 +98,18 @@ class MyRobot(wpilib.TimedRobot):
         self.oInt.update()
         self.stt.mark("Operator Interface")
 
+        self.coralMan.update()
+        self.stt.mark("Coral Manipulator")
+
+        self.elev.setSafeToLeaveL1(self.coralMan.getCoralSafeToMove())
+        self.ledCtrl.setCoralInterferencePossible(not self.coralMan.getCoralSafeToMove())
+
         self.elev.update()
         self.stt.mark("Elevator")
 
-        self.coralMan.update()
-        self.stt.mark("Coral Manipulator")
+        # TODO
+        #self.coralMan.setAtL1()
+
 
         self.autodrive.updateTelemetry()
         self.driveTrain.poseEst._telemetry.setCurAutoDriveWaypoints(self.autodrive.getWaypoints())
@@ -160,31 +167,32 @@ class MyRobot(wpilib.TimedRobot):
     def teleopPeriodic(self):
 
         # TODO - this is technically one loop delayed, which could induce lag
-        # Probably not noticeable, but should be corrected.
-        self.driveTrain.setManualCmd(self.dInt.getCmd())
+        driverCmd = self.dInt.getCmd()
+        driverCmd.scaleBy(self.elev.getDtSpeedLimitFactor())
+        self.driveTrain.setManualCmd(driverCmd)
 
-        self.algaeIntake.setInput(self.oInt.getIntakeAlgae(),self.oInt.getEjectAlgae())
+        self.algaeIntake.setInput(self.oInt.getIntakeAlgae(),self.oInt.getEjectAlgae(), self.algaeWrist.getAngleRad())
 
         self.algaeManip.setDesPos(self.oInt.getAlgaeManipCmd())
 
         if self.dInt.getGyroResetCmd():
             self.driveTrain.resetGyro()
 
-        if self.dInt.getCreateObstacle():
-            # For test purposes, inject a series of obstacles around the current pose
-            ct = self.driveTrain.poseEst.getCurEstPose().translation()
-            tfs = [
-                #Translation2d(1.7, -0.5),
-                #Translation2d(0.75, -0.75),
-                #Translation2d(1.7, 0.5),
-                Translation2d(0.75, 0.75),
-                Translation2d(2.0, 0.0),
-                Translation2d(0.0, 1.0),
-                Translation2d(0.0, -1.0),
-            ]
-            for tf in tfs:
-                obs = PointObstacle(location=(ct+tf), strength=0.5)
-                self.autodrive.rfp.addObstacleObservation(obs)
+        #if self.dInt.getCreateObstacle():
+        #    # For test purposes, inject a series of obstacles around the current pose
+        #    ct = self.driveTrain.poseEst.getCurEstPose().translation()
+        #    tfs = [
+        #        #Translation2d(1.7, -0.5),
+        #        #Translation2d(0.75, -0.75),
+        #        #Translation2d(1.7, 0.5),
+        #        Translation2d(0.75, 0.75),
+        #        Translation2d(2.0, 0.0),
+        #        Translation2d(0.0, 1.0),
+        #        Translation2d(0.0, -1.0),
+        #    ]
+        #    for tf in tfs:
+        #        obs = PointObstacle(location=(ct+tf), strength=0.5)
+        #        self.autodrive.rfp.addObstacleObservation(obs)
 
         self.autosteer.setReefAutoSteerCmd(self.dInt.getAutoSteer())
         self.autodrive.setRequest(self.dInt.getAutoDrive())
