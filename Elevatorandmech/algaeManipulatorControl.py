@@ -118,7 +118,7 @@ class AlgeaIntakeControl(metaclass=Singleton):
     def setInput(self, intakeBool, ejectBool, algaeAngle):
         self.intakeCommandState = intakeBool
         self.ejectCommandState = ejectBool
-        self.flip = (algaeAngle > -45)
+        self.flip = (rad2Deg(algaeAngle) > -45)
 
     def updateIntake(self, run, flip):
         if flip:
