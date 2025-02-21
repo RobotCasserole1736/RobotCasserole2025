@@ -1,3 +1,4 @@
+from enum import IntEnum
 from wpilib import TimedRobot
 from wpimath.geometry import Pose2d, Translation2d, Rotation2d
 
@@ -61,8 +62,8 @@ Ts = 0.02
 # However, near the goal, we'd like to slow down. This map defines how we ramp down
 # the step-size toward zero as we get closer to the goal. Once we are close enough,
 # we stop taking steps and simply say the desired position is at the goal.
-GOAL_MARGIN_M = 0.05
-SLOW_DOWN_DISTANCE_M = 0.74
+GOAL_MARGIN_M = 0.1
+SLOW_DOWN_DISTANCE_M = 0.75
 GOAL_SLOW_DOWN_MAP = MapLookup2D([
     (9999.0, 1.0),
     (SLOW_DOWN_DISTANCE_M, 1.0),
@@ -80,6 +81,12 @@ LOOKAHEAD_STEP_SIZE = LOOKAHEAD_DIST_M/LOOKAHEAD_STEPS
 
 # If the lookahead routine's end poit is within this, we declare ourselves stuck.
 STUCK_DIST = LOOKAHEAD_DIST_M/4
+
+
+class RepulsorFieldPlannerState(IntEnum):
+    INACTIVE = 0
+    PLANNING = 1
+    ATGOAL = 2
 
 class RepulsorFieldPlanner:
     """
@@ -119,6 +126,8 @@ class RepulsorFieldPlanner:
 
         # Keep things slow right when the goal changes
         self.startSlowFactor = 0.0
+
+        self.curState = RepulsorFieldPlannerState.INACTIVE
 
         #addLog("PotentialField Num Obstacles", lambda: (len(self.fixedObstacles) + len(self.transientObstcales)))
         #addLog("PotentialField Path Active", lambda: (self.goal is not None))
@@ -311,6 +320,8 @@ class RepulsorFieldPlanner:
             if(not self.atGoal(curPose)):
                 # Only calculate a nonzero command if we have a goal and we're not near it.
 
+                self.curState = RepulsorFieldPlannerState.PLANNING
+
                 # Slow down when we're near the goal
                 slowFactor = GOAL_SLOW_DOWN_MAP.lookup(self.distToGo)
 
@@ -362,8 +373,11 @@ class RepulsorFieldPlanner:
                 retVal.velY = 0.0
                 retVal.velT = 0.0
                 retVal.desPose = self.goal
+                self.curState = RepulsorFieldPlannerState.ATGOAL
+
         else:
             self.distToGo = 0.0
+            self.curState = RepulsorFieldPlannerState.INACTIVE
         
         return retVal
     

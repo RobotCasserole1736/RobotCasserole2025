@@ -70,10 +70,13 @@ class PointObstacle(ForceGenerator):
         deltaX =  self.location.x - position.x
         deltaY =  self.location.y - position.y
         dist = math.sqrt((deltaX)**2 + (deltaY)**2)
-        unitX = deltaX/dist
-        unitY = deltaY/dist
-        forceMag = self._distToForceMag(dist)
-        return Force(-1.0*unitX*forceMag, -1.0*unitY*forceMag)
+        if(dist != 0.0):
+            unitX = deltaX/dist
+            unitY = deltaY/dist
+            forceMag = self._distToForceMag(dist)
+            return Force(-1.0*unitX*forceMag, -1.0*unitY*forceMag)
+        else:
+            return Force(0,0) # eeeeh? bad luck mate
 
     def getDist(self, position:Translation2d)->float:
         return (position - self.location).norm()
