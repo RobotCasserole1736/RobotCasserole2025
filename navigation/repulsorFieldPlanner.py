@@ -33,11 +33,10 @@ TRANSIENT_OBS_DECAY_PER_LOOP = 0.01
 
 # Fixed Obstacles - Reef, etc. 
 FIELD_OBSTACLES_2025 = [
-    PointObstacle(location=Translation2d(4.5747,4.0363),strength=1, radius=1.18745),
-    PointObstacle(location=Translation2d(13.0907,4.0363),strength=1, radius=1.18745),
-    PointObstacle(location=Translation2d(8.7630,4.0259),strength=1, radius=0.75),
-    PointObstacle(location=Translation2d(0, 0))
-
+    PointObstacle(location=Translation2d(4.5747,4.0363),strength=0.75, radius=0.8), # Blue Reef
+    PointObstacle(location=Translation2d(13.0907,4.0363),strength=0.75, radius=0.8), # Red Reef
+    PointObstacle(location=Translation2d(8.7630,4.0259),strength=1, radius=1.0), # Center Post
+    # TODO - cages
 ]
 
 # Fixed Obstacles - Outer walls of the field 
@@ -67,7 +66,7 @@ SLOW_DOWN_DISTANCE_M = 0.75
 GOAL_SLOW_DOWN_MAP = MapLookup2D([
     (9999.0, 1.0),
     (SLOW_DOWN_DISTANCE_M, 1.0),
-    (GOAL_MARGIN_M, 0.01),
+    (GOAL_MARGIN_M, 0.075),
     (0.0, 0.001)
 ])
 
