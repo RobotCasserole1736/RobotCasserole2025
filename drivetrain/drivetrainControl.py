@@ -15,6 +15,7 @@ from drivetrain.drivetrainPhysical import (
 from drivetrain.drivetrainCommand import DrivetrainCommand
 from drivetrain.controlStrategies.autoDrive import AutoDrive
 from drivetrain.controlStrategies.trajectory import Trajectory
+from utils.signalLogging import addLog
 from utils.singleton import Singleton
 from utils.allianceTransformUtils import onRed
 from utils.constants import (DT_FL_WHEEL_CANID, 
@@ -65,6 +66,8 @@ class DrivetrainControl(metaclass=Singleton):
         self.gains = SwerveModuleGainSet()
 
         self.poseEst = DrivetrainPoseEstimator(self.getModulePositions())
+
+        addLog("Drivetrain Elevator Speed Limit", lambda: self.elevSpeedLimit, "frac")
 
         self._updateAllCals()
 
@@ -160,8 +163,15 @@ class DrivetrainControl(metaclass=Singleton):
         # Return the current best-guess at our pose on the field.
         return self.poseEst.getCurEstPose()
     
-    def setElevLimiter(self, elevLimit):
-        self.elevSpeedLimit = elevLimit
+    def setElevLimiter(self, elevLimitIn: float):
+        # "return to center" logic. 
+        # Elevator limit can only decrease if there's little to no manual command
+        if(self.curManCmd.velX < 0.5 and self.curManCmd.velY < 0.5):
+            # Small manual commands, we allow the limit to change to whatever the input is
+            self.elevSpeedLimit = elevLimitIn
+        else:
+            # Larger manual commands, we only allow the limit get more aggressive
+            self.elevSpeedLimit = min(self.elevSpeedLimit, elevLimitIn) # Min because a limit of 0.1 is more aggressive than 0.4
 
 def _discretizeChSpd(chSpd):
     """See https://www.chiefdelphi.com/t/whitepaper-swerve-drive-skew-and-second-order-kinematics/416964/30
