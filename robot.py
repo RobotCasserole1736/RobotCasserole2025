@@ -229,6 +229,10 @@ class MyRobot(wpilib.TimedRobot):
     #########################################################
     ## Cleanup
     def endCompetition(self):
+        print("Goodbye!")
+
+        # Stop robot code exectuion first
+        super().endCompetition()
 
         # Sometimes `robopy test pyfrc_test.py` will invoke endCompetition() without completing robotInit(),
         # this will create a confusing exception here because we can reach self.rioMonitor.stopThreads()
@@ -239,7 +243,6 @@ class MyRobot(wpilib.TimedRobot):
             self.rioMonitor.stopThreads()
 
         destroyAllSingletonInstances()
-        super().endCompetition()
 
 def remoteRIODebugSupport():
     if __debug__ and "run" in sys.argv:
