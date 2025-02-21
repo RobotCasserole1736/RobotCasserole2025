@@ -3,7 +3,7 @@ from wpimath.geometry import Pose2d, Rotation2d
 from drivetrain.drivetrainCommand import DrivetrainCommand
 from utils.allianceTransformUtils import transform
 from utils.calibration import Calibration
-from utils.constants import reefLocation
+from utils.constants import blueReefLocation
 from utils.singleton import Singleton
 
 class AutoSteer(metaclass=Singleton):
@@ -34,7 +34,7 @@ class AutoSteer(metaclass=Singleton):
             return cmdIn
 
     def getRotationAngle(self, curPose: Pose2d) -> Rotation2d:
-        targetLocation = transform(reefLocation)
+        targetLocation = transform(blueReefLocation)
         robotToTargetTrans = targetLocation - curPose.translation()
         return Rotation2d(robotToTargetTrans.X(), robotToTargetTrans.Y())
 

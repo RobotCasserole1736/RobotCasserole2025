@@ -2,15 +2,11 @@ from wpilib import Timer
 from wpimath.geometry import Pose2d, Translation2d
 from drivetrain.controlStrategies.holonomicDriveController import HolonomicDriveController
 from drivetrain.drivetrainCommand import DrivetrainCommand
-from navigation.obstacleDetector import ObstacleDetector
-from utils.autonomousTransformUtils import flip
+from navigation.navConstants import getTransformedGoalList
 from utils.signalLogging import addLog
 from utils.singleton import Singleton
 from navigation.repulsorFieldPlanner import RepulsorFieldPlanner, RepulsorFieldPlannerState
-from navigation.navConstants import goalListTot
 from drivetrain.drivetrainPhysical import MAX_DT_LINEAR_SPEED_MPS
-from utils.allianceTransformUtils import transform
-import math
 
 # Maximum speed that we'll attempt to path plan at. Needs to be at least 
 # slightly less than the maximum physical speed, so the robot can "catch up" 
@@ -108,23 +104,27 @@ class AutoDrive(metaclass=Singleton):
         #version 2 - this is based on distance, then rotation if the distances are too close
         #but it's not really working. 
 
+        # NOTE - this function internally transforms to correct red/blue side
+        # No need to apply additional alliance-utils transform to use it.
+        goalListTot = getTransformedGoalList()
+
         if(not self._autoDrive):
             # Driving not requested, set no goal
             self.rfp.setGoal(None)
         elif(self._autoDrive and not self._autoPrevEnabled):
             # First loop of auto drive, calc a new goal based on current position
             for goalOption in goalListTot:
-                goalWTransform = flip(transform(goalOption.translation()))
+                goalWTransform = goalOption.translation()
                 self.LenList.append(goalWTransform.distance(curPose.translation()))
 
             #find the nearest one
             primeTargetIndex = self.LenList.index(min(self.LenList))
-            primeTarget = flip(transform(goalListTot[primeTargetIndex]))
+            primeTarget = goalListTot[primeTargetIndex]
             #pop the nearest in order to find the second nearest
             self.LenList.pop(primeTargetIndex)
             #second nearest
             secondTargetIndex = self.LenList.index(min(self.LenList))
-            secondTarget = flip(transform(goalListTot[secondTargetIndex]))
+            secondTarget = goalListTot[secondTargetIndex]
             #if they're close enough, look at rotation 
             closeEnough = abs(secondTarget.translation().distance(curPose.translation()) - primeTarget.translation().distance(curPose.translation())) <= 1.0
             difAngle = abs(secondTarget.rotation().degrees() - primeTarget.rotation().degrees()) >= 10
@@ -146,7 +146,7 @@ class AutoDrive(metaclass=Singleton):
             self.rfp.setGoal(target)
         """
         if self._autoDrive:
-            target = flip(transform(goalListTot[10]))
+            target = goalListTot[10]
             self.rfp.setGoal(target)
         else:
             self.rfp.setGoal(None)
