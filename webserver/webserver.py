@@ -2,6 +2,7 @@ import socketserver
 import socket
 import threading
 import functools
+from utils.faults import Fault
 from webserver.casseroleWebServerImpl import (
     CasseroleWebServerImpl,
     dashboardWidgetList,
@@ -21,6 +22,9 @@ class Webserver(metaclass=Singleton):
     def __init__(self):
         httpPort = 5805
 
+        self.serverFault = Fault("Webserver Not Running")
+        self.serverRunning = False
+
         # Serve all contents of the webserver/www folder, with special
         # logic to handle filling out template html files
         templatingHttpHandler = functools.partial(
@@ -33,22 +37,35 @@ class Webserver(metaclass=Singleton):
         except socket.gaierror:
             ipAddr = "UNKNOWN"
 
-        self.httpServer = ThreadedTCPServer(("", httpPort), templatingHttpHandler)
+        try:
+            self.httpServer = ThreadedTCPServer(("", httpPort), templatingHttpHandler)
 
-        # Start a thread with the HTTP server -- that thread will then start one
-        # more thread for each request
-        self.serverThread = threading.Thread(target=self.httpServer.serve_forever)
-        # Exit the server thread when the main thread terminates
-        self.serverThread.start()
+            # Start a thread with the HTTP server -- that thread will then start one
+            # more thread for each request
+            self.serverThread = threading.Thread(target=self.httpServer.serve_forever, daemon=True)
+            # Exit the server thread when the main thread terminates
+            self.serverThread.start()
 
-        print(
-            f"Server started on {hostname} at {ipAddr}:{httpPort} "
-            + "in thread { self.serverThread.name}"
-        )
+            self.serverRunning = True
+            print(
+                f"Server started on {hostname} at {ipAddr}:{httpPort} "
+                + f"in thread { self.serverThread.name}"
+            )
+            
+        except Exception as e:
+            self.serverRunning = False
+            print(
+                f"WARNING: Webserver FAILED to start on {hostname} at {ipAddr}:{httpPort}: \n"
+                + str(e)
+            )
+
+        
+        self.serverFault.set(not self.serverRunning)
+
 
     # Ensure we invoke shutdown procedures on the class destruction
     def __del__(self):
-        if(self.serverThread.is_alive()):
+        if(self.serverRunning):
             print("Web Server shutting down...")
             self.shutdown()
 
@@ -56,6 +73,7 @@ class Webserver(metaclass=Singleton):
     def shutdown(self):
         self.httpServer.shutdown()
         self.serverThread.join()
+        self.serverRunning = False
         print("Web Server shutdown complete!")
 
     # public api to submit a new dashboard widget
