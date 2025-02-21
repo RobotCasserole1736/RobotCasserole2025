@@ -37,7 +37,7 @@ class Webserver(metaclass=Singleton):
 
         # Start a thread with the HTTP server -- that thread will then start one
         # more thread for each request
-        self.serverThread = threading.Thread(target=self.httpServer.serve_forever)
+        self.serverThread = threading.Thread(target=self.httpServer.serve_forever, daemon=True)
         # Exit the server thread when the main thread terminates
         self.serverThread.start()
 

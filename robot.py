@@ -22,7 +22,6 @@ from utils.faults import FaultWrangler
 from utils.powerMonitor import PowerMonitor
 from utils.rioMonitor import RIOMonitor
 from utils.signalLogging import logUpdate
-from utils.singleton import destroyAllSingletonInstances
 from webserver.webserver import Webserver
 import wpilib
 from wpimath.geometry import Translation2d, Pose2d, Rotation2d
@@ -238,7 +237,6 @@ class MyRobot(wpilib.TimedRobot):
         if rioMonitorExists is not None:
             self.rioMonitor.stopThreads()
 
-        destroyAllSingletonInstances()
         super().endCompetition()
 
 def remoteRIODebugSupport():

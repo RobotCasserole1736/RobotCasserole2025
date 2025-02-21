@@ -14,13 +14,3 @@ class Singleton(type):
         if cls not in _instances:
             _instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
         return _instances[cls]
-
-
-def destroyAllSingletonInstances():
-    """
-    For unit testing purposes, we will need to simulate the roboRIO power cycling
-    One part of this is to get new instances of all the singletons constructed
-    This should never be called (nor NEED to be called) on the real robot.
-    """
-    global _instances
-    _instances = {}

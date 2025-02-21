@@ -15,6 +15,9 @@
         "header": {
           "open": true
         }
+      },
+      "window": {
+        "visible": false
       }
     },
     "PWM Outputs": {
@@ -179,6 +182,9 @@
         "open": true
       },
       "SmartDashboard": {
+        "DT Pose 2D": {
+          "open": true
+        },
         "open": true
       }
     }
