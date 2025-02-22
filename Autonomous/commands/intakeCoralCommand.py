@@ -21,8 +21,8 @@ class IntakeCoralCommand(Command):
         self.duration = duration + 1
 
     def isDone(self):
-        #return Timer.getFPGATimestamp() - self.startTime >= self.duration
-        return CoralManipulatorControl().getCheckGamePiece()
+        return (Timer.getFPGATimestamp() - self.startTime >= self.duration)
+            or (CoralManipulatorControl().getCheckGamePiece())
 
     def end(self,interrupt):
         ElevatorControl().setHeightGoal(ElevatorLevelCmd.NO_CMD)
