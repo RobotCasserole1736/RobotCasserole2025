@@ -1,5 +1,5 @@
 from enum import IntEnum
-from wpilib import TimedRobot
+from wpilib import TimedRobot, Timer
 from wpimath.geometry import Pose2d, Translation2d, Rotation2d
 
 from utils.mapLookup2d import MapLookup2D
@@ -52,9 +52,6 @@ WALLS = [B_WALL, T_WALL, L_WALL, R_WALL]
 # Rotation Control - we'll command rotation at this fixed rate until we're within margin
 ROT_RAD_PER_SEC = 2.5
 GOAL_MARGIN_DEG = 5.0
-
-# Fixed periodic rate assumed for execution
-Ts = 0.02
 
 # Usually, the path planner assumes we traverse the path at a fixed velocity
 # However, near the goal, we'd like to slow down. This map defines how we ramp down
@@ -288,13 +285,13 @@ class RepulsorFieldPlanner:
 
         return netForce
     
-    def update(self, curCmd:DrivetrainCommand, stepSize_m:float) -> DrivetrainCommand:
+    def update(self, curCmd:DrivetrainCommand, stepSize_m:float, Ts) -> DrivetrainCommand:
 
         # Update the initial "don't start too fast" factor
         self.startSlowFactor += 2.0 * Ts
         self.startSlowFactor = min(self.startSlowFactor, 1.0)
 
-        nextCmd = self._getCmd(curCmd, stepSize_m)
+        nextCmd = self._getCmd(curCmd, stepSize_m, Ts)
 
         if(TimedRobot.isSimulation()):
             # Lookahead is for telemetry and debug only, and is very
@@ -304,7 +301,7 @@ class RepulsorFieldPlanner:
 
         return nextCmd
 
-    def _getCmd(self, curCmd:DrivetrainCommand, stepSize_m:float) -> DrivetrainCommand:
+    def _getCmd(self, curCmd:DrivetrainCommand, stepSize_m:float, Ts) -> DrivetrainCommand:
         """
         Given a starting pose, and a maximum step size to take, produce a drivetrain command which moves the robot in the best direction
         """
@@ -390,7 +387,7 @@ class RepulsorFieldPlanner:
             self.lookaheadTraj.append(cc.desPose)
 
             for _ in range(0,LOOKAHEAD_STEPS):
-                tmp = self._getCmd(cc, LOOKAHEAD_STEP_SIZE)
+                tmp = self._getCmd(cc, LOOKAHEAD_STEP_SIZE, .02)
                 cp = tmp.desPose
                 self.lookaheadTraj.append(cc.desPose)
 

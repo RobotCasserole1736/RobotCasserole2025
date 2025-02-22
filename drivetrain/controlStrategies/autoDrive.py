@@ -26,6 +26,7 @@ class AutoDrive(metaclass=Singleton):
         self._autoPrevEnabled = False #This name might be a wee bit confusing. It just keeps track if we were in auto targeting the speaker last refresh.
         self.targetIndexNumber = 0
         self.stuckTracker = 0 
+        self.prevCallTime = Timer.getFPGATimestamp()
         self.prevPose = Pose2d()
         self.LenList = []
         self.goalListTotwTransform = []
@@ -63,6 +64,10 @@ class AutoDrive(metaclass=Singleton):
     def update(self, cmdIn: DrivetrainCommand, curPose: Pose2d) -> DrivetrainCommand:
         
         startTime = Timer.getFPGATimestamp()
+
+        curTime = Timer.getFPGATimestamp()
+        Ts = curTime - self.prevCallTime
+        self.prevCallTime = curTime
 
         self.LenList.clear()
 
@@ -102,7 +107,6 @@ class AutoDrive(metaclass=Singleton):
             self.rfp.setGoal(flip(transform(None)))
         """
         #version 2 - this is based on distance, then rotation if the distances are too close
-        #but it's not really working. 
 
         # NOTE - this function internally transforms to correct red/blue side
         # No need to apply additional alliance-utils transform to use it.
@@ -159,9 +163,9 @@ class AutoDrive(metaclass=Singleton):
             # repulsor field path planner
             if(self._prevCmd is None):
                 initCmd = DrivetrainCommand(0,0,0,curPose) # TODO - init this from current odometry vel
-                self._olCmd = self.rfp.update(initCmd, MAX_PATHPLAN_SPEED_MPS*0.02)
+                self._olCmd = self.rfp.update(initCmd, MAX_PATHPLAN_SPEED_MPS*0.02, Ts)
             else:
-                self._olCmd = self.rfp.update(self._prevCmd, MAX_PATHPLAN_SPEED_MPS*0.02)
+                self._olCmd = self.rfp.update(self._prevCmd, MAX_PATHPLAN_SPEED_MPS*0.02, Ts=Ts)
 
             # Add closed loop - use the trajectory controller to add in additional 
             # velocity if we're currently far away from the desired pose
