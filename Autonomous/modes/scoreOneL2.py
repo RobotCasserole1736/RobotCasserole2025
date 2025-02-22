@@ -14,7 +14,7 @@ class scoreOneL2(Mode):
     def __init__(self):
         Mode.__init__(self, f"Score One L2")
         
-        self.pathCmd1 = DrivePathCommand("ScoreOne")
+        self.pathCmd1 = DrivePathCommand("scoreOne")
         self.eject = EjectCoralCommand()
         self.elev = ElevatorHeightCommand(ElevatorLevelCmd.L2)
         self.elevRtrn = ElevatorHeightCommand(ElevatorLevelCmd.L1)

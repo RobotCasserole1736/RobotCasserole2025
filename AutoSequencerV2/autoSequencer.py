@@ -56,6 +56,7 @@ class AutoSequencer(metaclass=Singleton):
         self.mainModeList.addMode(scoreOneL1())
         self.mainModeList.addMode(scoreOneL2())
         self.mainModeList.addMode(scoreTwoL1())
+        
         self.topLevelCmdGroup = SequentialCommandGroup()
         self.startPose = Pose2d()
 

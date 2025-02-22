@@ -1,3 +1,4 @@
+from AutoSequencerV2.builtInCommands.waitCommand import WaitCommand
 from AutoSequencerV2.sequentialCommandGroup import SequentialCommandGroup
 from Autonomous.commands.ejectCoralCommand import EjectCoralCommand
 from Autonomous.commands.drivePathCommand import DrivePathCommand
@@ -13,8 +14,9 @@ class Center1CoralL1(Mode):
         #This is setting the path command (pathCmd), which is what we will use. The DrivePathCommand must be 
         #exactly the same as it is in the Choreo name. 
         self.pathCmd = DrivePathCommand("Center 1 Coral L1")
+        self.wait = WaitCommand(1.5)
         self.scoreL1 = EjectCoralCommand(True)
-        self.group = SequentialCommandGroup([self.pathCmd,self.scoreL1])
+        self.group = SequentialCommandGroup([self.pathCmd,self.wait,self.scoreL1])
 
     def getCmdGroup(self):
         # Just return the path command normally, since we're only doing one path. 

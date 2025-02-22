@@ -88,7 +88,7 @@ class ElevatorControl(metaclass=Singleton):
         # After mounting the sensor, these should be tweaked one time
         # in order to adjust whatever the sensor reads into the reference frame
         # of the mechanism
-        self.ABS_SENSOR_READING_AT_ELEVATOR_BOTTOM_M = .170 
+        self.ABS_SENSOR_READING_AT_ELEVATOR_BOTTOM_M = .121
 
         # Relative Encoder Offsets
         # Releative encoders always start at 0 at power-on

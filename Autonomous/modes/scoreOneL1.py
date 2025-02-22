@@ -15,9 +15,9 @@ class scoreOneL1(Mode):
     def __init__(self):
         Mode.__init__(self, f"Score One L1")
         
-        self.pathCmd = DrivePathCommand("ScoreOne")
+        self.pathCmd = DrivePathCommand("scoreOne")
         self.wait = WaitCommand(0.2)
-        self.eject = EjectCoralCommand()
+        self.eject = EjectCoralCommand(True)
         self.elev = ElevatorHeightCommand(ElevatorLevelCmd.L1)
         self.group = SequentialCommandGroup([self.pathCmd, self.elev, self.eject])
 

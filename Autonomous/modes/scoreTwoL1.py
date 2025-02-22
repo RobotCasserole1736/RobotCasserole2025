@@ -17,7 +17,7 @@ class scoreTwoL1(Mode):
         
         self.pathCmd1 = DrivePathCommand("ScoreTwoP1")
         self.pathCmd2 = DrivePathCommand("ScoreTwoP2")
-        self.pathCmd3 = DrivePathCommand("ScoreTwoP3")
+        self.pathCmd3 = DrivePathCommand("scoreTwoP3")
         self.wait = WaitCommand(0.2)
         self.eject = EjectCoralCommand()
         self.intake = IntakeCoralCommand()
