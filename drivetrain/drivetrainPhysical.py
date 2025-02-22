@@ -21,7 +21,7 @@ WHEEL_BASE_HALF_WIDTH_M = inchesToMeters(23.75 / 2.0)
 WHEEL_BASE_HALF_LENGTH_M = inchesToMeters(23.75 / 2.0)
 
 # Additional distance from the wheel contact patch out to the edge of the bumper
-BUMPER_THICKNESS_M = inchesToMeters(2.5)
+BUMPER_THICKNESS_M = inchesToMeters(5.5)
 
 # Total mass includes robot, battery, and bumpers
 # more than the "weigh-in" weight
@@ -109,28 +109,28 @@ BR = 3
 # which is in the center of the chassis on the ground
 ROBOT_TO_LEFTFRONT_CAM = Transform3d(
     Translation3d(
-        inchesToMeters(12.14), inchesToMeters(8.3), inchesToMeters(8.07)  # X  # Y  # Z
+        inchesToMeters(8.25), inchesToMeters(12.00), inchesToMeters(8.00)  # X  # Y  # Z
     ),
-    Rotation3d.fromDegrees(0, -5.0, -15.0),  # Roll  # Pitch  # Yaw
+    Rotation3d.fromDegrees(0, -15.0, -5.0),  # Roll  # Pitch  # Yaw
 )
 
 ROBOT_TO_RIGHTFRONT_CAM = Transform3d(
     Translation3d(
-        inchesToMeters(12.14), inchesToMeters(-8.3), inchesToMeters(8.07)  # X  # Y  # Z
+        inchesToMeters(8.25), inchesToMeters(-12.00), inchesToMeters(8.00)  # X  # Y  # Z
     ),
-    Rotation3d.fromDegrees(0, -5.0, 16.0),  # Roll  # Pitch  # Yaw
+    Rotation3d.fromDegrees(0, -15.0, 5.0),  # Roll  # Pitch  # Yaw
 )
 
 ROBOT_TO_LEFTBACK_CAM = Transform3d(
     Translation3d(
-        inchesToMeters(-12.14), inchesToMeters(8.3), inchesToMeters(8.07)  # X  # Y  # Z
+        inchesToMeters(-10.00), inchesToMeters(10.25), inchesToMeters(7.75)  # X  # Y  # Z
     ),
     Rotation3d.fromDegrees(0, -15.0, 170.0),  # Roll  # Pitch  # Yaw
 )
 
 ROBOT_TO_RIGHTBACK_CAM = Transform3d(
     Translation3d(
-        inchesToMeters(-12.14), inchesToMeters(-8.3), inchesToMeters(8.07)  # X  # Y  # Z
+        inchesToMeters(-10.00), inchesToMeters(-10.25), inchesToMeters(7.75)  # X  # Y  # Z
     ),
     Rotation3d.fromDegrees(0,-15,-170),  # Roll  # Pitch  # Yaw
 )
