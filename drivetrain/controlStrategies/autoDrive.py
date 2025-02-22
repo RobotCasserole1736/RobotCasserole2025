@@ -2,15 +2,11 @@ from wpilib import Timer
 from wpimath.geometry import Pose2d, Translation2d
 from drivetrain.controlStrategies.holonomicDriveController import HolonomicDriveController
 from drivetrain.drivetrainCommand import DrivetrainCommand
-from navigation.obstacleDetector import ObstacleDetector
-from utils.autonomousTransformUtils import flip
+from navigation.navConstants import getTransformedGoalList
 from utils.signalLogging import addLog
 from utils.singleton import Singleton
-from navigation.repulsorFieldPlanner import RepulsorFieldPlanner
-from navigation.navConstants import goalListTot
+from navigation.repulsorFieldPlanner import RepulsorFieldPlanner, RepulsorFieldPlannerState
 from drivetrain.drivetrainPhysical import MAX_DT_LINEAR_SPEED_MPS
-from utils.allianceTransformUtils import transform
-import math
 
 # Maximum speed that we'll attempt to path plan at. Needs to be at least 
 # slightly less than the maximum physical speed, so the robot can "catch up" 
@@ -30,12 +26,15 @@ class AutoDrive(metaclass=Singleton):
         self._autoPrevEnabled = False #This name might be a wee bit confusing. It just keeps track if we were in auto targeting the speaker last refresh.
         self.targetIndexNumber = 0
         self.stuckTracker = 0 
+        self.prevCallTime = Timer.getFPGATimestamp()
         self.prevPose = Pose2d()
         self.LenList = []
         self.goalListTotwTransform = []
         self.dashboardConversionList = [9, 11, 6, 8, 3, 5, 0, 2, 15, 17, 12, 14] #used by getDashTargetPositionIndex() to convert the target numbers from the python standard to the dashboard/JS standard
         #^ Bottom is the side facing our driver station.
         addLog("AutoDrive Proc Time", lambda:(self._plannerDur * 1000.0), "ms")
+        addLog("AutoDrive Running", self.isRunning, "bool")
+        addLog("AutoDrive At Goal", self.isAtGoal, "bool")
 
     def getGoal(self) -> Pose2d | None:
         return self.rfp.goal
@@ -58,10 +57,17 @@ class AutoDrive(metaclass=Singleton):
     
     def isRunning(self)->bool:
         return self.rfp.goal != None
+    
+    def isAtGoal(self)->bool:
+        return  self.isRunning() and self.rfp.curState == RepulsorFieldPlannerState.ATGOAL
 
     def update(self, cmdIn: DrivetrainCommand, curPose: Pose2d) -> DrivetrainCommand:
         
         startTime = Timer.getFPGATimestamp()
+
+        curTime = Timer.getFPGATimestamp()
+        Ts = curTime - self.prevCallTime
+        self.prevCallTime = curTime
 
         self.LenList.clear()
 
@@ -101,7 +107,10 @@ class AutoDrive(metaclass=Singleton):
             self.rfp.setGoal(flip(transform(None)))
         """
         #version 2 - this is based on distance, then rotation if the distances are too close
-        #but it's not really working. 
+
+        # NOTE - this function internally transforms to correct red/blue side
+        # No need to apply additional alliance-utils transform to use it.
+        goalListTot = getTransformedGoalList()
 
         if(not self._autoDrive):
             # Driving not requested, set no goal
@@ -109,17 +118,17 @@ class AutoDrive(metaclass=Singleton):
         elif(self._autoDrive and not self._autoPrevEnabled):
             # First loop of auto drive, calc a new goal based on current position
             for goalOption in goalListTot:
-                goalWTransform = flip(transform(goalOption.translation()))
+                goalWTransform = goalOption.translation()
                 self.LenList.append(goalWTransform.distance(curPose.translation()))
 
             #find the nearest one
             primeTargetIndex = self.LenList.index(min(self.LenList))
-            primeTarget = flip(transform(goalListTot[primeTargetIndex]))
+            primeTarget = goalListTot[primeTargetIndex]
             #pop the nearest in order to find the second nearest
             self.LenList.pop(primeTargetIndex)
             #second nearest
             secondTargetIndex = self.LenList.index(min(self.LenList))
-            secondTarget = flip(transform(goalListTot[secondTargetIndex]))
+            secondTarget = goalListTot[secondTargetIndex]
             #if they're close enough, look at rotation 
             closeEnough = abs(secondTarget.translation().distance(curPose.translation()) - primeTarget.translation().distance(curPose.translation())) <= 1.0
             difAngle = abs(secondTarget.rotation().degrees() - primeTarget.rotation().degrees()) >= 10
@@ -141,7 +150,7 @@ class AutoDrive(metaclass=Singleton):
             self.rfp.setGoal(target)
         """
         if self._autoDrive:
-            target = flip(transform(goalListTot[10]))
+            target = goalListTot[10]
             self.rfp.setGoal(target)
         else:
             self.rfp.setGoal(None)
@@ -154,9 +163,9 @@ class AutoDrive(metaclass=Singleton):
             # repulsor field path planner
             if(self._prevCmd is None):
                 initCmd = DrivetrainCommand(0,0,0,curPose) # TODO - init this from current odometry vel
-                self._olCmd = self.rfp.update(initCmd, MAX_PATHPLAN_SPEED_MPS*0.02)
+                self._olCmd = self.rfp.update(initCmd, MAX_PATHPLAN_SPEED_MPS*0.02, Ts)
             else:
-                self._olCmd = self.rfp.update(self._prevCmd, MAX_PATHPLAN_SPEED_MPS*0.02)
+                self._olCmd = self.rfp.update(self._prevCmd, MAX_PATHPLAN_SPEED_MPS*0.02, Ts=Ts)
 
             # Add closed loop - use the trajectory controller to add in additional 
             # velocity if we're currently far away from the desired pose

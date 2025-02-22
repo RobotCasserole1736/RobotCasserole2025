@@ -1,4 +1,5 @@
-from wpilib import TimedRobot
+from enum import IntEnum
+from wpilib import TimedRobot, Timer
 from wpimath.geometry import Pose2d, Translation2d, Rotation2d
 
 from utils.mapLookup2d import MapLookup2D
@@ -11,8 +12,7 @@ from drivetrain.drivetrainCommand import DrivetrainCommand
 from navigation.navForce import Force
 from navigation.forceGenerators import HorizontalObstacle, ForceGenerator, PointObstacle, VerticalObstacle
 from utils.constants import FIELD_X_M, FIELD_Y_M
-
-import math
+from utils.constants import blueReefLocation, redReefLocation
 
 # Relative strength of how hard the goal pulls the robot toward it
 # Too big and the robot will be pulled through obstacles
@@ -32,11 +32,10 @@ TRANSIENT_OBS_DECAY_PER_LOOP = 0.01
 
 # Fixed Obstacles - Reef, etc. 
 FIELD_OBSTACLES_2025 = [
-    PointObstacle(location=Translation2d(4.5747,4.0363),strength=1, radius=1.18745),
-    PointObstacle(location=Translation2d(13.0907,4.0363),strength=1, radius=1.18745),
-    PointObstacle(location=Translation2d(8.7630,4.0259),strength=1, radius=0.75),
-    PointObstacle(location=Translation2d(0, 0))
-
+    PointObstacle(location=blueReefLocation,strength=0.75, radius=0.8), # Blue Reef
+    PointObstacle(location=redReefLocation,strength=0.75, radius=0.8), # Red Reef
+    PointObstacle(location=Translation2d(8.7630,4.0259),strength=1, radius=1.0), # Center Post
+    # TODO - cages
 ]
 
 # Fixed Obstacles - Outer walls of the field 
@@ -54,19 +53,16 @@ WALLS = [B_WALL, T_WALL, L_WALL, R_WALL]
 ROT_RAD_PER_SEC = 2.5
 GOAL_MARGIN_DEG = 5.0
 
-# Fixed periodic rate assumed for execution
-Ts = 0.02
-
 # Usually, the path planner assumes we traverse the path at a fixed velocity
 # However, near the goal, we'd like to slow down. This map defines how we ramp down
 # the step-size toward zero as we get closer to the goal. Once we are close enough,
 # we stop taking steps and simply say the desired position is at the goal.
-GOAL_MARGIN_M = 0.05
-SLOW_DOWN_DISTANCE_M = 0.74
+GOAL_MARGIN_M = 0.1
+SLOW_DOWN_DISTANCE_M = 0.75
 GOAL_SLOW_DOWN_MAP = MapLookup2D([
     (9999.0, 1.0),
     (SLOW_DOWN_DISTANCE_M, 1.0),
-    (GOAL_MARGIN_M, 0.01),
+    (GOAL_MARGIN_M, 0.075),
     (0.0, 0.001)
 ])
 
@@ -80,6 +76,12 @@ LOOKAHEAD_STEP_SIZE = LOOKAHEAD_DIST_M/LOOKAHEAD_STEPS
 
 # If the lookahead routine's end poit is within this, we declare ourselves stuck.
 STUCK_DIST = LOOKAHEAD_DIST_M/4
+
+
+class RepulsorFieldPlannerState(IntEnum):
+    INACTIVE = 0
+    PLANNING = 1
+    ATGOAL = 2
 
 class RepulsorFieldPlanner:
     """
@@ -119,6 +121,8 @@ class RepulsorFieldPlanner:
 
         # Keep things slow right when the goal changes
         self.startSlowFactor = 0.0
+
+        self.curState = RepulsorFieldPlannerState.INACTIVE
 
         #addLog("PotentialField Num Obstacles", lambda: (len(self.fixedObstacles) + len(self.transientObstcales)))
         #addLog("PotentialField Path Active", lambda: (self.goal is not None))
@@ -281,13 +285,13 @@ class RepulsorFieldPlanner:
 
         return netForce
     
-    def update(self, curCmd:DrivetrainCommand, stepSize_m:float) -> DrivetrainCommand:
+    def update(self, curCmd:DrivetrainCommand, stepSize_m:float, Ts) -> DrivetrainCommand:
 
         # Update the initial "don't start too fast" factor
         self.startSlowFactor += 2.0 * Ts
         self.startSlowFactor = min(self.startSlowFactor, 1.0)
 
-        nextCmd = self._getCmd(curCmd, stepSize_m)
+        nextCmd = self._getCmd(curCmd, stepSize_m, Ts)
 
         if(TimedRobot.isSimulation()):
             # Lookahead is for telemetry and debug only, and is very
@@ -297,7 +301,7 @@ class RepulsorFieldPlanner:
 
         return nextCmd
 
-    def _getCmd(self, curCmd:DrivetrainCommand, stepSize_m:float) -> DrivetrainCommand:
+    def _getCmd(self, curCmd:DrivetrainCommand, stepSize_m:float, Ts) -> DrivetrainCommand:
         """
         Given a starting pose, and a maximum step size to take, produce a drivetrain command which moves the robot in the best direction
         """
@@ -310,6 +314,8 @@ class RepulsorFieldPlanner:
 
             if(not self.atGoal(curPose)):
                 # Only calculate a nonzero command if we have a goal and we're not near it.
+
+                self.curState = RepulsorFieldPlannerState.PLANNING
 
                 # Slow down when we're near the goal
                 slowFactor = GOAL_SLOW_DOWN_MAP.lookup(self.distToGo)
@@ -362,8 +368,11 @@ class RepulsorFieldPlanner:
                 retVal.velY = 0.0
                 retVal.velT = 0.0
                 retVal.desPose = self.goal
+                self.curState = RepulsorFieldPlannerState.ATGOAL
+
         else:
             self.distToGo = 0.0
+            self.curState = RepulsorFieldPlannerState.INACTIVE
         
         return retVal
     
@@ -378,7 +387,7 @@ class RepulsorFieldPlanner:
             self.lookaheadTraj.append(cc.desPose)
 
             for _ in range(0,LOOKAHEAD_STEPS):
-                tmp = self._getCmd(cc, LOOKAHEAD_STEP_SIZE)
+                tmp = self._getCmd(cc, LOOKAHEAD_STEP_SIZE, .02)
                 cp = tmp.desPose
                 self.lookaheadTraj.append(cc.desPose)
 

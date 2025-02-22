@@ -53,8 +53,9 @@ class WrapperedPoseEstPhotonCamera:
         # hack - results also have a more accurate "getTimestamp()", but this is
         # broken in photonvision 2.4.2. Hack with the non-broken latency calcualtion
         # TODO: in 2025, fix this to actually use the real latency
-        latency = 0.05 # a total guess
-        obsTime = wpilib.Timer.getFPGATimestamp() - latency
+        #latency = 0.05 # a total guess
+        obsTime = res.getTimestampSeconds()
+        
         
 
         # Update our disconnected fault since we have something from the camera
@@ -88,10 +89,11 @@ class WrapperedPoseEstPhotonCamera:
                     # Filter candidates in this frame to only the valid ones
                     filteredCandidates:list[Pose2d] = []
                     for poseCandidate in poseCandidates:
+                        isHorrible = tgtID in HUMAN_STATION_TAG_IDS
                         onField = self._poseIsOnField(poseCandidate)
                         closeEnough = self._closeEnoughToCamera(target)
                         # Add other filter conditions here
-                        if onField and closeEnough:
+                        if onField and closeEnough and not isHorrible:
                             filteredCandidates.append(poseCandidate)
 
                     # Pick the candidate closest to the last estimate
