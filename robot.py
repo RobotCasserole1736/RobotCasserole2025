@@ -168,7 +168,7 @@ class MyRobot(wpilib.TimedRobot):
 
         # TODO - this is technically one loop delayed, which could induce lag
         self.driveTrain.setElevLimiter(self.elev.getDtSpeedLimitFactor())
-        self.driveTrain.setManualCmd(self.dInt.getCmd())
+        self.driveTrain.setManualCmd(self.dInt.getCmd(), self.dInt.getRobotRelative())
         self.autosteer.setReefAutoSteerCmd(self.dInt.getAutoSteer())
         self.autodrive.setRequest(self.dInt.getAutoDrive())
 

@@ -35,6 +35,8 @@ class DriverInterface:
 
         # Utility - reset to zero-angle at the current pose
         self.gyroResetCmd = False
+        #utility - use robot-relative commands
+        self.robotRelative = False
 
         #Elevator commands
         self.climberExtendV = 0
@@ -47,6 +49,7 @@ class DriverInterface:
         #addLog("DI gyroResetCmd", lambda: self.gyroResetCmd, "bool")
         #addLog("DI autoDriveToSpeaker", lambda: self.autoDriveToSpeaker, "bool")
         #addLog("DI autoDriveToPickup", lambda: self.autoDriveToPickup, "bool")
+
 
     def update(self):
         # value of contoller buttons
@@ -75,6 +78,12 @@ class DriverInterface:
             velCmdYRaw = vYJoyWithDeadband * MAX_FWD_REV_SPEED_MPS * slowMult
             velCmdRotRaw = vRotJoyWithDeadband * MAX_ROTATE_SPEED_RAD_PER_SEC * 0.8
 
+            self.robotRelative = self.ctrl.getLeftBumper()
+            if self.robotRelative:
+                velCmdXRaw *= .5
+                velCmdYRaw *= .5
+                velCmdRotRaw *= .5
+
             # Slew rate limiter
             self.velXCmd = self.velXSlewRateLimiter.calculate(velCmdXRaw)
             self.velYCmd = self.velYSlewRateLimiter.calculate(velCmdYRaw)
@@ -98,6 +107,7 @@ class DriverInterface:
             self.velTCmd = 0.0
             self.gyroResetCmd = False
             self.autoDrive = False
+            self.robotRelative = False
             self.createDebugObstacle = False
             self.climberExtendV = 0
             self.climberRetractV = 0
@@ -133,3 +143,6 @@ class DriverInterface:
             climbVolt = 0.0
 
         return climbVolt
+    
+    def getRobotRelative(self):
+        return self.robotRelative
