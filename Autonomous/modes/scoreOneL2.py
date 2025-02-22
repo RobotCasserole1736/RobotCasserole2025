@@ -12,7 +12,7 @@ from utils.allianceTransformUtils import transform
 
 class scoreOneL2(Mode):
     def __init__(self):
-        Mode.__init__(self, f"Score One L1")
+        Mode.__init__(self, f"Score One L2")
         
         self.pathCmd1 = DrivePathCommand("ScoreOne")
         self.eject = EjectCoralCommand()

@@ -9,7 +9,7 @@ class ElevatorHeightCommand(Command):
 
     def __init__(self, ElvLvlCmd):
         self.ElevLevel = ElvLvlCmd
-        self.duration = 3
+
 
     def initialize(self):
         self.startTime = Timer.getFPGATimestamp()
@@ -18,12 +18,10 @@ class ElevatorHeightCommand(Command):
 
         ElevatorControl().setHeightGoal(self.ElevLevel)
     
-    def maxDuration(self,duration):
-        self.duration = duration + 1
 
     def isDone(self):
        # return Timer.getFPGATimestamp() - self.startTime >= self.duration
-        return ElevatorControl().getAtHeight()
+        return ElevatorControl().atHeight()
     
     def end(self,interrupt):
         ElevatorControl().setHeightGoal(ElevatorLevelCmd.NO_CMD)

@@ -80,7 +80,6 @@ class ElevatorControl(metaclass=Singleton):
 
         self.actualPos = 0
         self.stopped = False
-
         # Playing with Fusion time of flight sensor for initalizing elevator height
         self.heightAbsSen = TimeOfFlight(ELEV_TOF_CANID)
         self.heightAbsSen.setRangeOfInterest(8,8,8,8) # one pixel region of interest, right in the center. Should bring cone down to ~2 deg (max is 30)
@@ -118,7 +117,6 @@ class ElevatorControl(metaclass=Singleton):
         addLog("Elevator Fwd Limit Value", lambda: self.fwdLimitSwitchVal, "bool")
         addLog("Elevator Rev Limit Value", lambda: self.revLimitSwitchVal, "bool")
 
-
         # Finally, one-time init the relative sensor offsets from the absolute sensors
         self.initFromAbsoluteSensor()
 
@@ -143,6 +141,9 @@ class ElevatorControl(metaclass=Singleton):
     #return the height of the elevator as measured by the absolute sensor in meters
     def _getAbsHeight(self) -> float:
         return (self.heightAbsSen.getRange() / 1000.0 - self.ABS_SENSOR_READING_AT_ELEVATOR_BOTTOM_M)
+
+    def atHeight(self): 
+        return self.atElevHeight
 
     # This routine uses the absolute sensors to adjust the offsets for the relative sensors
     # so that the relative sensors match reality.
@@ -227,6 +228,12 @@ class ElevatorControl(metaclass=Singleton):
         self.revLimitSwitchVal = self.Rmotor.getRevLimitSwitch()
         self.fwdLimitSwitchVal = self.Rmotor.getFwdLimitSwitch()
 
+        if abs(self.heightGoal - self.actualPos) < .05:
+            self.atElevHeight = True
+        else: 
+            self.atElevHeight = False
+
+
     # API to set current height goal
     def setHeightGoal(self, presetHeightCmd:ElevatorLevelCmd) -> None:
         self.curHeightGoal = presetHeightCmd
@@ -237,7 +244,6 @@ class ElevatorControl(metaclass=Singleton):
 
     def setManualAdjCmd(self, cmd:float) -> None:
         self.manualAdjCmd = cmd
-
     # Returns a limit factor to apply to drivetrain speed commands based on elevator height
     def getDtSpeedLimitFactor(self) -> float:
         return self.dtSpeedLimitMap.lookup(self.actualPos)
