@@ -4,6 +4,7 @@ from Autonomous.commands.ejectCoralCommand import EjectCoralCommand
 from Autonomous.commands.drivePathCommand import DrivePathCommand
 from AutoSequencerV2.mode import Mode
 from utils.allianceTransformUtils import transform
+from utils.autonomousTransformUtils import flip
 
 # Just drives out of the starting zone. That's all.
 class Center1CoralL1(Mode):
@@ -25,4 +26,4 @@ class Center1CoralL1(Mode):
 
     def getInitialDrivetrainPose(self):
         # Use the path command to specify the starting pose, using getInitialPose()
-        return transform(self.pathCmd.path.get_initial_pose())
+        return flip(transform(self.pathCmd.path.get_initial_pose()))

@@ -5,6 +5,7 @@ from Autonomous.commands.intakeCoralCommand import IntakeCoralCommand
 from Autonomous.commands.drivePathCommand import DrivePathCommand
 from Autonomous.commands.ejectCoralCommand import EjectCoralCommand
 from utils.allianceTransformUtils import transform
+from utils.autonomousTransformUtils import flip
 
 class CCycleL1(Mode):
     def __init__(self):
@@ -29,4 +30,4 @@ class CCycleL1(Mode):
 
     def getInitialDrivetrainPose(self):
         # Use the path command to specify the starting pose, using getInitialPose()
-        return transform(self.pathCmd1.path.get_initial_pose())
+        return flip(transform(self.pathCmd1.path.get_initial_pose()))

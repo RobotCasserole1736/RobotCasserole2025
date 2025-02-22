@@ -10,6 +10,7 @@ from Autonomous.commands.drivePathCommand import DrivePathCommand
 from Autonomous.commands.ejectCoralCommand import EjectCoralCommand
 from Elevatorandmech.ElevatorandMechConstants import ElevatorLevelCmd
 from utils.allianceTransformUtils import transform
+from utils.autonomousTransformUtils import flip
 
 class scoreTwoL1(Mode):
     def __init__(self):
@@ -33,4 +34,4 @@ class scoreTwoL1(Mode):
 
     def getInitialDrivetrainPose(self):
         # Use the path command to specify the starting pose, using getInitialPose()
-        return transform(self.pathCmd1.path.get_initial_pose())
+        return flip(transform(self.pathCmd1.path.get_initial_pose()))

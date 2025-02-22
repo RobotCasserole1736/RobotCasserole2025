@@ -13,11 +13,8 @@ from Autonomous.modes.center1CoralL1 import Center1CoralL1
 from Autonomous.modes.driveForwardSlowly import DriveForwardSlowly
 from Autonomous.modes.driveOut import DriveOut
 
-from Autonomous.modes.driveTest1 import driveTest1
 from Autonomous.modes.lCycleL2 import LCycleL2
 from Autonomous.modes.lCycleL4 import LCycleL4
-from Autonomous.modes.scoreOneL1 import scoreOneL1
-from Autonomous.modes.scoreOneL2 import scoreOneL2
 from Autonomous.modes.scoreTwoL1 import scoreTwoL1
 from utils.singleton import Singleton
 from utils.allianceTransformUtils import onRed
@@ -45,7 +42,6 @@ class AutoSequencer(metaclass=Singleton):
         #right now, DriveOut is all commented out, so we don't need to add it to the list. 
         self.mainModeList.addMode(DriveOut())
         self.mainModeList.addMode(DriveForwardSlowly())
-        self.mainModeList.addMode(driveTest1())
         self.mainModeList.addMode(Center1CoralL1())
         self.mainModeList.addMode(LCycleL1())
         self.mainModeList.addMode(LCycleL2())
@@ -53,8 +49,6 @@ class AutoSequencer(metaclass=Singleton):
         self.mainModeList.addMode(CCycleL1())
         self.mainModeList.addMode(CCycleL2())
         self.mainModeList.addMode(CCycleL4())
-        self.mainModeList.addMode(scoreOneL1())
-        self.mainModeList.addMode(scoreOneL2())
         self.mainModeList.addMode(scoreTwoL1())
         
         self.topLevelCmdGroup = SequentialCommandGroup()
