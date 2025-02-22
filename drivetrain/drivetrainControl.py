@@ -98,9 +98,7 @@ class DrivetrainControl(metaclass=Singleton):
 
         if self.useRobotRelative:
             #This isn't working yet? 
-            tmp = ChassisSpeeds.fromRobotRelativeSpeeds(
-                self.curCmd.velX, self.curCmd.velY, self.curCmd.velT, curEstPose.rotation()
-            )
+            tmp = ChassisSpeeds(self.curCmd.velX, self.curCmd.velY, self.curCmd.velT )
         else:
             tmp = ChassisSpeeds.fromFieldRelativeSpeeds(
                 self.curCmd.velX, self.curCmd.velY, self.curCmd.velT, curEstPose.rotation()

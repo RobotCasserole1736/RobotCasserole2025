@@ -60,10 +60,13 @@ class DriverInterface:
             vYJoyRaw = self.ctrl.getLeftX() * -1
             vRotJoyRaw = self.ctrl.getRightX() * -1
 
-            # Correct for alliance
-            if onRed():
-                vXJoyRaw *= -1.0
-                vYJoyRaw *= -1.0
+            self.robotRelative = self.ctrl.getLeftBumper()
+
+            if not self.robotRelative:
+                # Correct for alliance
+                if onRed():
+                    vXJoyRaw *= -1.0
+                    vYJoyRaw *= -1.0
 
             # deadband
             vXJoyWithDeadband = applyDeadband(vXJoyRaw, 0.05)
@@ -78,7 +81,6 @@ class DriverInterface:
             velCmdYRaw = vYJoyWithDeadband * MAX_FWD_REV_SPEED_MPS * slowMult
             velCmdRotRaw = vRotJoyWithDeadband * MAX_ROTATE_SPEED_RAD_PER_SEC * 0.8
 
-            self.robotRelative = self.ctrl.getLeftBumper()
             if self.robotRelative:
                 velCmdXRaw *= .5
                 velCmdYRaw *= .5
