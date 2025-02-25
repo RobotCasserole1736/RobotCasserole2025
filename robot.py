@@ -1,6 +1,7 @@
 import sys
 from phoenix6 import SignalLogger
 import wpilib
+from ballShooter.ballShooter import BallShooterControl
 from dashboard import Dashboard
 from drivetrain.controlStrategies.autoDrive import AutoDrive
 from drivetrain.controlStrategies.trajectory import Trajectory
@@ -43,6 +44,8 @@ class MyRobot(wpilib.TimedRobot):
         self.driveTrain = DrivetrainControl()
         self.autodrive = AutoDrive()
 
+        self.ballShooter = BallShooterControl()
+
         self.stt = SegmentTimeTracker()      
 
         self.dInt = DriverInterface()
@@ -70,6 +73,9 @@ class MyRobot(wpilib.TimedRobot):
 
         self.dInt.update()
         self.stt.mark("Driver Interface")
+
+        self.ballShooter.update()
+        self.stt.mark("Ball Shooter")
 
         self.driveTrain.update()
         self.stt.mark("Drivetrain")
@@ -150,7 +156,7 @@ class MyRobot(wpilib.TimedRobot):
                 self.autodrive.rfp.addObstacleObservation(obs)
 
         self.autodrive.setRequest(self.dInt.getAutoDrive())
-
+        self.ballShooter.setInput(self.dInt.getShooterIntake(),self.dInt.getShooterEject())
         # No trajectory in Teleop
         Trajectory().setCmd(None)
 

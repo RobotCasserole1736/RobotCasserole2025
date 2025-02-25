@@ -38,8 +38,8 @@ DT_BL_AZMTH_CANID = 9
 ## PWM Bank
 #######################################################################################
 
-# Unused = 0
-# Unused = 1
+SHOOTER_EJCT_PWM = 0
+SHOOTER_INT_PWM = 1
 # Unused = 2
 # Unused = 3
 # Unused = 4

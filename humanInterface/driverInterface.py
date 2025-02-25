@@ -16,6 +16,8 @@ class DriverInterface:
         ctrlIdx = 0
         self.ctrl = XboxController(ctrlIdx)
         self.connectedFault = Fault(f"Driver XBox controller ({ctrlIdx}) unplugged")
+        self.shooterIntake = False
+        self.shooterEject = False
 
         # Drivetrain motion commands
         self.velXCmd = 0
@@ -76,6 +78,16 @@ class DriverInterface:
             self.velTCmd = self.velTSlewRateLimiter.calculate(velCmdRotRaw)
 
             self.gyroResetCmd = self.ctrl.getAButton()
+            
+            if self.ctrl.getRightBumper():
+                self.shooterEject = True
+                self.shooterIntake = False
+            elif self.ctrl.getLeftBumper():
+                self.shooterIntake = True 
+                self.shooterEject = False
+            else:
+                self.shooterIntake = False 
+                self.shooterEject = False
 
             self.autoDrive = self.ctrl.getBButton()
             self.createDebugObstacle = self.ctrl.getYButtonPressed()
@@ -87,6 +99,8 @@ class DriverInterface:
             self.velXCmd = 0.0
             self.velYCmd = 0.0
             self.velTCmd = 0.0
+            self.shooterIntake = False
+            self.shooterEject = False
             self.gyroResetCmd = False
             self.autoDrive = False
             self.createDebugObstacle = False
@@ -101,7 +115,13 @@ class DriverInterface:
         retval.velY = self.velYCmd
         retval.velT = self.velTCmd
         return retval
+    
+    def getShooterIntake(self) -> bool:
+        return self.shooterIntake
 
+    def getShooterEject(self) -> bool:
+        return self.shooterEject
+    
     def getAutoDrive(self) -> bool:
         return self.autoDrive
 
