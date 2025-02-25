@@ -33,7 +33,7 @@ class ElevatorControl(metaclass=Singleton):
         self.L1_Height = Calibration(name="Elevator Preset Height L1", units="m", default=0.0)
         self.L2_Height = Calibration(name="Elevator Preset Height L2", units="m", default=.2338)
         self.L3_Height = Calibration(name="Elevator Preset Height L3", units="m", default=.6023)
-        self.L4_Height = Calibration(name="Elevator Preset Height L4", units="m", default=1.3)
+        self.L4_Height = Calibration(name="Elevator Preset Height L4", units="m", default=1.25)
         self.AL2_Height = Calibration(name="Elevator Preset Height Algae L2", units="m", default=.638)
         self.AL3_Height = Calibration(name="Elevator Preset Height Algae L3", units="m", default=1.075)
 
@@ -65,7 +65,7 @@ class ElevatorControl(metaclass=Singleton):
         # FF and proportional gain constants
         self.kV = Calibration(name="Elevator kV", default=0.013, units="V/rps")
         self.kS = Calibration(name="Elevator kS", default=0.1, units="V")
-        self.kG = Calibration(name="Elevator kG", default=0.55, units="V")
+        self.kG = Calibration(name="Elevator kG", default=0.5, units="V")
         self.kP = Calibration(name="Elevator kP", default=0.1, units="V/rad error")
 
         # Set P gain on motor
@@ -228,7 +228,7 @@ class ElevatorControl(metaclass=Singleton):
         self.revLimitSwitchVal = self.Rmotor.getRevLimitSwitch()
         self.fwdLimitSwitchVal = self.Rmotor.getFwdLimitSwitch()
 
-        if abs(self.heightGoal - self.actualPos) < .05:
+        if abs(self.heightGoal - self.actualPos) < .1:
             self.atElevHeight = True
         else: 
             self.atElevHeight = False

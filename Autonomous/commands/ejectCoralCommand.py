@@ -15,11 +15,11 @@ class EjectCoralCommand(Command):
 
     def initialize(self):
         CoralManipulatorControl().setAtL1(self.atL1)
+        CoralManipulatorControl().setCoralCmd(CoralManState.EJECTING)
         self.hadPiece = False
 
     def execute(self):
         # Eject
-        CoralManipulatorControl().setCoralCmd(CoralManState.EJECTING)
 
         self.hasPiece = CoralManipulatorControl().getCheckGamePiece()
         if not self.hasPiece and not self.hadPiece:

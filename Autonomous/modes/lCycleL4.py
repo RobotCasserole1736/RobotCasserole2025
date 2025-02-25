@@ -21,13 +21,11 @@ class LCycleL4(Mode):
         self.pathCmd4 = DrivePathCommand("LCycleL2P4")
         self.pathCmd5 = DrivePathCommand("LCycleL2P5")
         self.pathCmd6 = DrivePathCommand("LCycleL2P6")
-        self.pathCmd7 = DrivePathCommand("LCycleL2P7")
-        self.pathCmd8 = DrivePathCommand("LCycleL2P8")
         self.scoreL2 = EjectCoralCommand()
         self.intake = IntakeCoralCommand()
         self.elev = ElevatorHeightCommand(ElevatorLevelCmd.L4)
         self.elevReturn = ElevatorHeightCommand(ElevatorLevelCmd.L1)
-        self.group = SequentialCommandGroup([self.pathCmd1,self.elev,self.scoreL2,self.elevReturn,self.pathCmd2,self.intake,self.pathCmd3,self.elev,self.scoreL2,self.elevReturn,self.pathCmd4,self.intake,self.pathCmd5,self.elev,self.scoreL2,self.elevReturn,self.pathCmd6,self.intake,self.pathCmd7,self.elev,self.scoreL2,self.elevReturn,self.pathCmd8,self.intake])
+        self.group = SequentialCommandGroup([self.pathCmd1,self.elev,self.scoreL2,self.elevReturn,self.pathCmd2,self.intake,self.pathCmd3,self.elev,self.scoreL2,self.elevReturn,self.pathCmd4,self.intake,self.pathCmd5,self.elev,self.scoreL2,self.elevReturn,self.pathCmd6,self.intake])
 
     def getCmdGroup(self):
         # Just return the path command normally, since we're only doing one path. 
