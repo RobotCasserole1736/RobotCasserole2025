@@ -21,12 +21,8 @@ class LCycleL1(Mode):
         self.pathCmd5 = DrivePathCommand("LCycleL1P5")
         self.scoreL1 = EjectCoralCommand(True)
         self.intake = IntakeCoralCommand()
-        self.wait1 = WaitCommand(.25)
-        self.wait2 = WaitCommand(.25)
-        self.wait3 = WaitCommand(.25)
-        self.wait4 = WaitCommand(.25)
-        self.group = SequentialCommandGroup([self.pathCmd1,self.scoreL1, self.wait1, self.pathCmd2, self.wait2, self.intake,
-                                             self.pathCmd3, self.wait3, self.scoreL1,self.pathCmd4, self.wait4, self.intake,self.pathCmd5,self.scoreL1])
+        self.group = SequentialCommandGroup([self.pathCmd1,self.scoreL1, self.pathCmd2, self.intake,self.pathCmd3,
+                                              self.scoreL1,self.pathCmd4, self.intake,self.pathCmd5,self.scoreL1])
 
     def getCmdGroup(self):
         # Just return the path command normally, since we're only doing one path. 
