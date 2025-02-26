@@ -62,19 +62,23 @@ class DrivetrainControl(metaclass=Singleton):
 
         self.elevSpeedLimit = 1.0
 
+        self.useRobotRelative = False
+
         self.gains = SwerveModuleGainSet()
 
         self.poseEst = DrivetrainPoseEstimator(self.getModulePositions())
 
         self._updateAllCals()
 
-    def setManualCmd(self, cmd: DrivetrainCommand):
+    def setManualCmd(self, cmd: DrivetrainCommand, robotRel):
         """Send commands to the robot for motion relative to the field
 
         Args:
             cmd (DrivetrainCommand): manual command input
+            robotRel: whether or not we want to be robot-Relative controlled
         """
         self.curManCmd = cmd
+        self.useRobotRelative = robotRel
 
     def update(self):
         """
@@ -92,10 +96,13 @@ class DrivetrainControl(metaclass=Singleton):
 
         self.curCmd.scaleBy(self.elevSpeedLimit)
 
-        # Transform the current command to be robot relative
-        tmp = ChassisSpeeds.fromFieldRelativeSpeeds(
-            self.curCmd.velX, self.curCmd.velY, self.curCmd.velT, curEstPose.rotation()
-        )
+        if self.useRobotRelative:
+            #This isn't working yet? 
+            tmp = ChassisSpeeds(self.curCmd.velX, self.curCmd.velY, self.curCmd.velT )
+        else:
+            tmp = ChassisSpeeds.fromFieldRelativeSpeeds(
+                self.curCmd.velX, self.curCmd.velY, self.curCmd.velT, curEstPose.rotation()
+            )
         self.desChSpd = _discretizeChSpd(tmp)
 
         # Set the desired pose for telemetry purposes

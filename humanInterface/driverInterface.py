@@ -35,6 +35,8 @@ class DriverInterface:
 
         # Utility - reset to zero-angle at the current pose
         self.gyroResetCmd = False
+        #utility - use robot-relative commands
+        self.robotRelative = False
 
         #Elevator commands
         self.climberExtendV = 0
@@ -48,6 +50,7 @@ class DriverInterface:
         #addLog("DI autoDriveToSpeaker", lambda: self.autoDriveToSpeaker, "bool")
         #addLog("DI autoDriveToPickup", lambda: self.autoDriveToPickup, "bool")
 
+
     def update(self):
         # value of contoller buttons
 
@@ -57,10 +60,13 @@ class DriverInterface:
             vYJoyRaw = self.ctrl.getLeftX() * -1
             vRotJoyRaw = self.ctrl.getRightX() * -1
 
-            # Correct for alliance
-            if onRed():
-                vXJoyRaw *= -1.0
-                vYJoyRaw *= -1.0
+            self.robotRelative = self.ctrl.getLeftBumper()
+
+            if not self.robotRelative:
+                # Correct for alliance
+                if onRed():
+                    vXJoyRaw *= -1.0
+                    vYJoyRaw *= -1.0
 
             # deadband
             vXJoyWithDeadband = applyDeadband(vXJoyRaw, 0.05)
@@ -74,6 +80,11 @@ class DriverInterface:
             velCmdXRaw = vXJoyWithDeadband * MAX_STRAFE_SPEED_MPS * slowMult
             velCmdYRaw = vYJoyWithDeadband * MAX_FWD_REV_SPEED_MPS * slowMult
             velCmdRotRaw = vRotJoyWithDeadband * MAX_ROTATE_SPEED_RAD_PER_SEC * 0.8
+
+            if self.robotRelative:
+                velCmdXRaw *= .5
+                velCmdYRaw *= .5
+                velCmdRotRaw *= .5
 
             # Slew rate limiter
             self.velXCmd = self.velXSlewRateLimiter.calculate(velCmdXRaw)
@@ -98,6 +109,7 @@ class DriverInterface:
             self.velTCmd = 0.0
             self.gyroResetCmd = False
             self.autoDrive = False
+            self.robotRelative = False
             self.createDebugObstacle = False
             self.climberExtendV = 0
             self.climberRetractV = 0
@@ -133,3 +145,6 @@ class DriverInterface:
             climbVolt = 0.0
 
         return climbVolt
+    
+    def getRobotRelative(self):
+        return self.robotRelative
