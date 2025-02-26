@@ -22,8 +22,8 @@ class BallShooterControl(metaclass=Singleton):
         elif self.ejectCommandState:
             self.updateEject(True)
         else:
-            self.shooterLMotor.set(-.5)
-            self.shooterRMotor.set(.5)
+            self.shooterLMotor.set(-.05)
+            self.shooterRMotor.set(.05)
 
     def setInput(self, intakeBool, ejectBool):
         self.intakeCommandState = intakeBool

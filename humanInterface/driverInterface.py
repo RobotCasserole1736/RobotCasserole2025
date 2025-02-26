@@ -59,18 +59,19 @@ class DriverInterface:
                 vYJoyRaw *= -1.0
 
             # deadband
-            vXJoyWithDeadband = applyDeadband(vXJoyRaw, 0.05)
-            vYJoyWithDeadband = applyDeadband(vYJoyRaw, 0.05)
-            vRotJoyWithDeadband = applyDeadband(vRotJoyRaw, 0.05)
+            deadband = 0.2
+            vXJoyWithDeadband = applyDeadband(vXJoyRaw, deadband)
+            vYJoyWithDeadband = applyDeadband(vYJoyRaw, deadband)
+            vRotJoyWithDeadband = applyDeadband(vRotJoyRaw, deadband)
 
             # TODO - if the driver wants a slow or sprint button, add it here.
-            slowMult = 1.0 if (self.ctrl.getRightBumper()) else 0.7
+            slowMult = 0.25 #1.0 if (self.ctrl.getRightBumper()) else 0.7
             #slowMult = 1.0
 
             # Shape velocity command
             velCmdXRaw = vXJoyWithDeadband * MAX_STRAFE_SPEED_MPS * slowMult
             velCmdYRaw = vYJoyWithDeadband * MAX_FWD_REV_SPEED_MPS * slowMult
-            velCmdRotRaw = vRotJoyWithDeadband * MAX_ROTATE_SPEED_RAD_PER_SEC * 0.8
+            velCmdRotRaw = vRotJoyWithDeadband * MAX_ROTATE_SPEED_RAD_PER_SEC * 0.8 * slowMult
 
             # Slew rate limiter
             self.velXCmd = self.velXSlewRateLimiter.calculate(velCmdXRaw)
@@ -79,17 +80,17 @@ class DriverInterface:
 
             self.gyroResetCmd = self.ctrl.getAButton()
             
-            if self.ctrl.getRightBumper():
+            if self.ctrl.getLeftTriggerAxis():
                 self.shooterEject = True
                 self.shooterIntake = False
-            elif self.ctrl.getLeftBumper():
+            elif self.ctrl.getRightTriggerAxis():
                 self.shooterIntake = True 
                 self.shooterEject = False
             else:
                 self.shooterIntake = False 
                 self.shooterEject = False
 
-            self.autoDrive = self.ctrl.getBButton()
+            # self.autoDrive = self.ctrl.getBButton()
             self.createDebugObstacle = self.ctrl.getYButtonPressed()
 
             self.connectedFault.setNoFault()
