@@ -1,3 +1,4 @@
+import os
 import wpilib
 from utils.faults import Fault
 from utils.singleton import Singleton
@@ -9,7 +10,7 @@ class CTREMusicPlayback(metaclass=Singleton):
     def __init__(self):
         self.loadFault = Fault("Call Me Maybe Unavailable")
         self.orch = Orchestra()
-        status = self.orch.load_music("/home/lvuser/py/deploy/callMeMaybe.chrp")
+        status = self.orch.load_music(os.path.join(wpilib.getDeployDirectory(),"callMeMaybe.chrp") )
         print(status.description)
         self.loadFault.set(status.is_error())
 
