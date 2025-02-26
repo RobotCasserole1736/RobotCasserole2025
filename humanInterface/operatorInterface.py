@@ -18,6 +18,7 @@ class OperatorInterface:
         #elevator commands
         self.elevatorLevelCmd = ElevatorLevelCmd.NO_CMD
         self.elevManAdjCmd = 0.0
+        self.elevReset = False
 
         self.algaeManipCmd = AlgaeWristState.STOW
 
@@ -83,6 +84,8 @@ class OperatorInterface:
             else:
                 self.algaeManipCmd = AlgaeWristState.NOTHING
 
+            self.elevReset = self.ctrl.getBackButton()
+
             self.connectedFault.setNoFault()
 
         else:
@@ -93,6 +96,7 @@ class OperatorInterface:
             self.algaeManipCmd = AlgaeWristState.STOW
             self.elevatorLevelCmd = ElevatorLevelCmd.NO_CMD
             self.elevManAdjCmd = 0.0
+            self.elevReset = False
             self.connectedFault.setFaulted()
 
     def getCoralCmd(self) -> CoralManState:
@@ -114,3 +118,6 @@ class OperatorInterface:
     # -1.0 is full down motion, 1.0 is full up motion
     def getElevManAdjCmd(self) -> float:
         return self.elevManAdjCmd
+
+    def getElevReset(self):
+        return self.elevReset

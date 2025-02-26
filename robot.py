@@ -176,6 +176,9 @@ class MyRobot(wpilib.TimedRobot):
 
         self.algaeManip.setDesPos(self.oInt.getAlgaeManipCmd())
 
+        if self.oInt.getElevReset():
+            self.elev.zeroElevatorReading()
+
         if self.dInt.getGyroResetCmd():
             self.driveTrain.resetGyro()
 
