@@ -36,9 +36,11 @@ class DriverInterface:
         # Utility - reset to zero-angle at the current pose
         self.gyroResetCmd = False
 
-        #Elevator commands
-        self.climberExtendV = 0
-        self.climberRetractV = 0
+        #climb commands
+        self.climberExtend = 0
+        self.climberRetract = 0
+        self.climbV = 0
+        self.drop = False
 
         # Logging
         #addLog("DI FwdRev Cmd", lambda: self.velXCmd, "mps")
@@ -86,8 +88,10 @@ class DriverInterface:
             self.autoSteer = self.ctrl.getXButton()
             self.createDebugObstacle = self.ctrl.getYButtonPressed()
 
-            self.climberExtendV = applyDeadband(self.ctrl.getLeftTriggerAxis(),.1) * 12
-            self.climberRetractV = applyDeadband(self.ctrl.getRightTriggerAxis(),.1) *-12
+            self.climberExtend = applyDeadband(self.ctrl.getLeftTriggerAxis(),.1)
+            self.climberRetract = applyDeadband(self.ctrl.getRightTriggerAxis(),.1)
+            self.climbV = self.climberExtend - self.climberRetract * 12
+            self.drop = self.ctrl.getBackButton() and self.ctrl.getStartButton()
 
             self.connectedFault.setNoFault()
 
@@ -99,10 +103,12 @@ class DriverInterface:
             self.gyroResetCmd = False
             self.autoDrive = False
             self.createDebugObstacle = False
-            self.climberExtendV = 0
-            self.climberRetractV = 0
+            self.climberExtend = 0
+            self.climberRetract = 0
+            self.climbV = 0
+            self.drop = False
             self.connectedFault.setFaulted()
-
+        
 
     def getCmd(self) -> DrivetrainCommand:
         retval = DrivetrainCommand()
@@ -124,12 +130,7 @@ class DriverInterface:
         return self.createDebugObstacle
     
     def getClimbWinchCmd(self):
-        #we need to pick some order in case both climb triggers are being pressed
-        if self.climberRetractV != 0.0:
-            climbVolt = self.climberRetractV
-        elif self.climberExtendV != 0.0:
-            climbVolt = self.climberExtendV
-        else:
-            climbVolt = 0.0
-
-        return climbVolt
+        return self.climbV
+    
+    def getServoDrop(self):
+        return self.drop

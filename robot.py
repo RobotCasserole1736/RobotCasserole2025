@@ -1,6 +1,7 @@
 import sys
 # from phoenix6 import SignalLogger
 from AutoSequencerV2.autoSequencer import AutoSequencer
+from climb.climbControl import ClimbControl
 from dashboard import Dashboard
 from drivetrain.controlStrategies.autoDrive import AutoDrive
 from drivetrain.controlStrategies.autoSteer import AutoSteer
@@ -68,6 +69,7 @@ class MyRobot(wpilib.TimedRobot):
         self.pwrMon = PowerMonitor()
 
         self.elev = ElevatorControl()
+        self.climb = ClimbControl()
 
         self.algaeManip = AlgaeWristControl()
 
@@ -107,8 +109,8 @@ class MyRobot(wpilib.TimedRobot):
         self.elev.update()
         self.stt.mark("Elevator")
 
-        # TODO
-        #self.coralMan.setAtL1()
+        self.climb.update()
+        self.stt.mark("Climber")
 
 
         self.autodrive.updateTelemetry()
@@ -201,6 +203,9 @@ class MyRobot(wpilib.TimedRobot):
         self.elev.setSafeToLeaveL1(self.coralMan.getCoralSafeToMove())
         self.elev.setManualAdjCmd(self.oInt.getElevManAdjCmd())
         self.elev.setHeightGoal(self.oInt.getElevCmd())
+
+        self.climb.setClimbCmdVolt(self.dInt.getClimbWinchCmd())
+        self.climb.setServoCmdPos(self.dInt.getServoDrop())
 
         # No trajectory in Teleop
         Trajectory().setCmd(None)
