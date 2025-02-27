@@ -41,6 +41,7 @@ CORAL_L_CANID = 14
 CORAL_R_CANID = 13
 ALGAE_INT_CANID = 15
 ALGAE_WRIST_CANID = 16
+CLIMB_CANID = 19
 ALGAE_GAMEPIECE_CANID = 20
 
 #######################################################################################
@@ -54,8 +55,8 @@ ALGAE_GAMEPIECE_CANID = 20
 # Unused = 4
 # Unused = 5
 # Unused = 6
-# Unused = 7
 # Unused = 8
+FUNNEL_SERVO = 7
 LED_STACK_LIGHT_CTRL_PWM = 9
 
 
