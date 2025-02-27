@@ -55,8 +55,8 @@ ALGAE_GAMEPIECE_CANID = 20
 # Unused = 4
 # Unused = 5
 # Unused = 6
-# Unused = 7
-FUNNEL_SERVO = 8
+# Unused = 8
+FUNNEL_SERVO = 7
 LED_STACK_LIGHT_CTRL_PWM = 9
 
 

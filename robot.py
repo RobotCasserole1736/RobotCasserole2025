@@ -112,7 +112,6 @@ class MyRobot(wpilib.TimedRobot):
         self.climb.update()
         self.stt.mark("Climber")
 
-
         self.autodrive.updateTelemetry()
         self.driveTrain.poseEst._telemetry.setCurAutoDriveWaypoints(self.autodrive.getWaypoints())
         self.driveTrain.poseEst._telemetry.setCurObstacles(self.autodrive.rfp.getObstacleStrengths())

@@ -41,6 +41,7 @@ class DriverInterface:
         self.climberRetract = 0
         self.climbV = 0
         self.drop = False
+        self.climbStarted = False
 
         # Logging
         #addLog("DI FwdRev Cmd", lambda: self.velXCmd, "mps")
@@ -49,6 +50,9 @@ class DriverInterface:
         #addLog("DI gyroResetCmd", lambda: self.gyroResetCmd, "bool")
         #addLog("DI autoDriveToSpeaker", lambda: self.autoDriveToSpeaker, "bool")
         #addLog("DI autoDriveToPickup", lambda: self.autoDriveToPickup, "bool")
+        addLog("Climber Winch Command Volt", lambda: self.climbV, "V")
+        addLog("Servo Cmd", lambda:self.drop, "Bool")
+        addLog("Climb started", lambda:self.climbStarted, "Bool")
 
     def update(self):
         # value of contoller buttons
@@ -90,8 +94,13 @@ class DriverInterface:
 
             self.climberExtend = applyDeadband(self.ctrl.getLeftTriggerAxis(),.1)
             self.climberRetract = applyDeadband(self.ctrl.getRightTriggerAxis(),.1)
-            self.climbV = self.climberExtend - self.climberRetract * 12
-            self.drop = self.ctrl.getBackButton() and self.ctrl.getStartButton()
+            self.climbV = (self.climberExtend - self.climberRetract) * 7
+                        
+            if not self.climbStarted:
+                self.drop = self.ctrl.getBackButton() and self.ctrl.getStartButton() 
+                if self.drop:
+                    self.climbStarted = True
+                
 
             self.connectedFault.setNoFault()
 
