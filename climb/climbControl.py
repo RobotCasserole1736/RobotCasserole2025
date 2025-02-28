@@ -4,7 +4,7 @@ from wrappers.wrapperedSparkMax import WrapperedSparkMax
 
 class ClimbControl:
     def __init__(self):
-        self.climbMotor = WrapperedSparkMax(CLIMB_CANID, "ClimbMot", brakeMode=True)
+        self.climbMotor = WrapperedSparkMax(CLIMB_CANID, "ClimbMot", brakeMode=True, currentLimitA=60)
         self.servo = wpilib.Servo(FUNNEL_SERVO)
         self.climbMotor.setInverted(False)
         self.cmdVolt = 0

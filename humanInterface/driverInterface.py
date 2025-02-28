@@ -103,7 +103,7 @@ class DriverInterface:
 
             self.climberExtend = applyDeadband(self.ctrl.getLeftTriggerAxis(),.1)
             self.climberRetract = applyDeadband(self.ctrl.getRightTriggerAxis(),.1)
-            self.climbV = (self.climberExtend - self.climberRetract) * 7
+            self.climbV = (self.climberExtend - self.climberRetract) * -12
 
             if not self.climbStarted:
                 self.drop = self.ctrl.getBackButton() and self.ctrl.getStartButton()
