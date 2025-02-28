@@ -13,7 +13,7 @@ class EjectAlgaeCommand(Command):
     def execute(self):
         # Eject
         #algaecommandfile().setInput(everything, that, input, needs)
-        AlgeaIntakeControl().setInput(False,True, -60)
+        AlgeaIntakeControl().setInput(False,True, algaeAngleEnum=0)
         
     def maxDuration(self, duration):
         self.duration = duration + 1

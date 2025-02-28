@@ -173,7 +173,7 @@ class MyRobot(wpilib.TimedRobot):
         self.autosteer.setReefAutoSteerCmd(self.dInt.getAutoSteer())
         self.autodrive.setRequest(self.dInt.getAutoDrive())
 
-        self.algaeIntake.setInput(self.oInt.getIntakeAlgae(),self.oInt.getEjectAlgae(), self.algaeWrist.getAngleRad())
+        self.algaeIntake.setInput(self.oInt.getIntakeAlgae(),self.oInt.getEjectAlgae(), self.oInt.getAlgaeManipCmd())
 
         self.algaeManip.setDesPos(self.oInt.getAlgaeManipCmd())
 

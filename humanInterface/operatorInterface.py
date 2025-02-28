@@ -61,9 +61,8 @@ class OperatorInterface:
                 self.intakeAlgae = True 
                 self.ejectAlgae = False
             else:
-                self.intakeAlgae = False 
                 self.ejectAlgae = False
-
+                # But leave intake the same
 
             # Set Algae Manipulator command
             # Dpad down = Intake off ground Position

@@ -14,16 +14,14 @@ class IntakeAlgaeCommand(Command):
     def execute(self):
         # Intake
         #algaecommandfile().setInput(everything, that, input, needs)
-        AlgeaIntakeControl().setInput(True,False)
+        AlgeaIntakeControl().setInput(True,False, algaeAngleEnum=0)
         
     def maxDuration(self, duration):
         self.duration = duration + 1
 
     def isDone(self):
-       # return Timer.getFPGATimestamp() - self.startTime >= self.duration
-
-        return AlgeaIntakeControl().checkHasGamePiece()
+       return Timer.getFPGATimestamp() - self.startTime >= self.duration
 
     def end(self,interrupt):
-        AlgeaIntakeControl().setInput(False,False)
+        AlgeaIntakeControl().setInput(False,False, algaeAngleEnum=0)
         AlgeaIntakeControl().update()
