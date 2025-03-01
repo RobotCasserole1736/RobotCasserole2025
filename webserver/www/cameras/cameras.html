@@ -8,5 +8,46 @@
 </head>
 
 <body>
-    <img src="http://10.17.36.14:1186/stream.mjpg" style="width: 100%;"/> <!-- todo - dynamically generate this from web config -->
+    <img id="mjpeg-stream" src="http://10.17.36.14:1186/stream.mjpg" style="width: 100%;"/> <!-- todo - dynamically generate this from web config -->
 </body>
+
+<script>
+  const img = document.getElementById("mjpeg-stream");
+  let lastUpdate = Date.now();
+  let reloadTimeout = 5000; // Reload if no update for 5 seconds
+  let reloadScheduled = false; // Prevent multiple reloads
+
+  // Detect errors (e.g., stream stops)
+  img.onerror = function() {
+    console.warn("MJPEG stream error detected, scheduling reload...");
+    scheduleReload();
+  };
+
+  // Detect if image is updating (MJPEG should change periodically)
+  function checkStream() {
+    const newSrc = img.src.split("?")[0] + "?t=" + Date.now(); // Add timestamp to bypass caching
+    img.src = newSrc; 
+
+    if (Date.now() - lastUpdate > reloadTimeout) {
+      console.warn("MJPEG stream not updating, scheduling reload...");
+      scheduleReload();
+    }
+  }
+
+  // Update timestamp when image loads successfully
+  img.onload = function() {
+    lastUpdate = Date.now();
+  };
+
+  // Schedule a reload with a 1-second delay
+  function scheduleReload() {
+    if (!reloadScheduled) {
+      reloadScheduled = true;
+      setTimeout(() => {
+        location.reload();
+      }, 1000);
+    }
+  }
+
+  setInterval(checkStream, 1000); // Check every second
+</script>
