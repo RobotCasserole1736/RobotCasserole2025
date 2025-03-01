@@ -16,10 +16,6 @@ class ClimbControl:
         #if not self.servoWent:
         self.servo.set(self.cmdPos)
 
-        """if self.cmdPos == 1:
-                #if the command position is not its default. 
-                self.servoWent = True"""
-
     def setClimbCmdVolt(self, voltage):
         self.cmdVolt = voltage
 

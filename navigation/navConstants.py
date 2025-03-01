@@ -33,18 +33,18 @@ Constants related to navigation
 
 # Overall in-out fudge factor for RED Reef
 FUDGE_DIST_IN_OUT_RED = [ # Negative is further from the reef, Positive is closer in.
-inchesToMeters(-3.0), # 1a
-inchesToMeters(-3.0), # 1b
-inchesToMeters(-3.0), # 2a
-inchesToMeters(-3.0), # 2b
-inchesToMeters(-3.0), # 3a
-inchesToMeters(-3.0), # 3b
-inchesToMeters(-3.0), # 4a
-inchesToMeters(-3.0), # 4b
-inchesToMeters(-3.0), # 5a
-inchesToMeters(-3.0), # 5b
-inchesToMeters(-3.0), # 6a
-inchesToMeters(-3.0), # 6b
+inchesToMeters(0.0), # 1a
+inchesToMeters(0.0), # 1b
+inchesToMeters(0.0), # 2a
+inchesToMeters(0.0), # 2b
+inchesToMeters(0.0), # 3a
+inchesToMeters(0.0), # 3b
+inchesToMeters(0.0), # 4a
+inchesToMeters(0.0), # 4b
+inchesToMeters(0.0), # 5a
+inchesToMeters(0.0), # 5b
+inchesToMeters(0.0), # 6a
+inchesToMeters(0.0), # 6b
 ]
 
 # Left/Right fudge factor for RED Reef

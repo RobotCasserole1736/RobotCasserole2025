@@ -157,13 +157,6 @@ class MyRobot(wpilib.TimedRobot):
         # clear existing telemetry trajectory
         self.driveTrain.poseEst._telemetry.setCurAutoTrajectory(None)
 
-        # If we're starting teleop but haven't run auto, set a nominal default pose
-        # This is needed because initial pose is usually set by the autonomous routine
-        if not self.autoHasRun:
-            self.driveTrain.poseEst.setKnownPose(
-                Pose2d(1.0, 1.0, Rotation2d(0.0))
-            )
-
 
     def teleopPeriodic(self):
 

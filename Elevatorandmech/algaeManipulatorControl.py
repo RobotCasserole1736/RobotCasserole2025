@@ -120,6 +120,9 @@ class AlgeaIntakeControl(metaclass=Singleton):
         self.ejectCommandState = ejectBool
         if AlgaeWristState.INTAKEOFFGROUND == algaeAngleEnum:
             self.flip=True
+        elif AlgaeWristState.NOTHING == algaeAngleEnum:
+            pass
+            #we want to pass here to preserve flip from last loop
         else:
             self.flip=False
 
