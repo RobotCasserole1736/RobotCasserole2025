@@ -49,7 +49,7 @@ class LEDControl(metaclass=Singleton):
             if(self._coralInterfers):
                 pwmVal = YELLOW * BLINK
             else:
-                if( self.isEndgame() ):
+                if( self._isEndgame() ):
                     # Endgame - solid Orange-ish?
                     pwmVal = ORANGE
                 else:
@@ -58,7 +58,7 @@ class LEDControl(metaclass=Singleton):
 
         self.ledPWMOutput.set(pwmVal)
 
-    def isEndgame(self) -> bool:
+    def _isEndgame(self) -> bool:
         matchTime = Timer.getMatchTime()
         if(DriverStation.isTeleop() and matchTime < 20.0 and matchTime >= 0.0):
             return True
