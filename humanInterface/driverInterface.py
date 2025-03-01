@@ -27,7 +27,6 @@ class DriverInterface:
         self.velYSlewRateLimiter = SlewRateLimiter(rateLimit=MAX_TRANSLATE_ACCEL_MPS2)
         self.velTSlewRateLimiter = SlewRateLimiter(rateLimit=MAX_ROTATE_ACCEL_RAD_PER_SEC_2)
 
-
         # Navigation commands
         self.autoDrive = False
         self.autoSteer = False
@@ -38,9 +37,11 @@ class DriverInterface:
         #utility - use robot-relative commands
         self.robotRelative = False
 
-        #Elevator commands
-        self.climberExtendV = 0
-        self.climberRetractV = 0
+        #climb commands
+        self.climberExtend = 0
+        self.climberRetract = 0
+        self.climbV = 0
+        self.drop = False
 
         # Logging
         #addLog("DI FwdRev Cmd", lambda: self.velXCmd, "mps")
@@ -49,7 +50,8 @@ class DriverInterface:
         #addLog("DI gyroResetCmd", lambda: self.gyroResetCmd, "bool")
         #addLog("DI autoDriveToSpeaker", lambda: self.autoDriveToSpeaker, "bool")
         #addLog("DI autoDriveToPickup", lambda: self.autoDriveToPickup, "bool")
-
+        addLog("Climber Winch Command Volt", lambda: self.climbV, "V")
+        addLog("Servo Cmd", lambda:self.drop, "Bool")
 
     def update(self):
         # value of contoller buttons
@@ -74,7 +76,7 @@ class DriverInterface:
             vRotJoyWithDeadband = applyDeadband(vRotJoyRaw, 0.05)
 
             # TODO - if the driver wants a slow or sprint button, add it here.
-            slowMult = 1.0 if (self.ctrl.getRightBumper()) else 0.7
+            slowMult = 1.0 if (self.ctrl.getRightBumper()) else 0.5
 
             # Shape velocity command
             velCmdXRaw = vXJoyWithDeadband * MAX_STRAFE_SPEED_MPS * slowMult
@@ -97,8 +99,14 @@ class DriverInterface:
             self.autoSteer = self.ctrl.getXButton()
             self.createDebugObstacle = self.ctrl.getYButtonPressed()
 
-            self.climberExtendV = applyDeadband(self.ctrl.getLeftTriggerAxis(),.1) * 12
-            self.climberRetractV = applyDeadband(self.ctrl.getRightTriggerAxis(),.1) *-12
+            self.climberExtend = applyDeadband(self.ctrl.getLeftTriggerAxis(),.1)
+            self.climberRetract = applyDeadband(self.ctrl.getRightTriggerAxis(),.1)
+            self.climbV = (self.climberExtend - self.climberRetract) * -12
+
+            if self.ctrl.getBackButton():
+                self.drop = True
+            elif self.ctrl.getStartButton():
+                self.drop = False
 
             self.connectedFault.setNoFault()
 
@@ -111,10 +119,11 @@ class DriverInterface:
             self.autoDrive = False
             self.robotRelative = False
             self.createDebugObstacle = False
-            self.climberExtendV = 0
-            self.climberRetractV = 0
+            self.climberExtend = 0
+            self.climberRetract = 0
+            self.climbV = 0
+            self.drop = False
             self.connectedFault.setFaulted()
-
 
     def getCmd(self) -> DrivetrainCommand:
         retval = DrivetrainCommand()
@@ -125,7 +134,7 @@ class DriverInterface:
 
     def getAutoDrive(self) -> bool:
         return self.autoDrive
-    
+
     def getAutoSteer(self) -> bool:
         return self.autoSteer
 
@@ -134,17 +143,12 @@ class DriverInterface:
 
     def getCreateObstacle(self) -> bool:
         return self.createDebugObstacle
-    
-    def getClimbWinchCmd(self):
-        #we need to pick some order in case both climb triggers are being pressed
-        if self.climberRetractV != 0.0:
-            climbVolt = self.climberRetractV
-        elif self.climberExtendV != 0.0:
-            climbVolt = self.climberExtendV
-        else:
-            climbVolt = 0.0
 
-        return climbVolt
-    
     def getRobotRelative(self):
         return self.robotRelative
+
+    def getClimbWinchCmd(self):
+        return self.climbV
+
+    def getServoDrop(self):
+        return self.drop

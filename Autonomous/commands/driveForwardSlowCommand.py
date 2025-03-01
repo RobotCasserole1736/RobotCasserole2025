@@ -29,11 +29,11 @@ class DriveForwardSlowCommand(Command):
 
     def execute(self):
         #this returns the total drive train command, a combination of the x, y, and z vectors
-        self.drivetrainControl.setManualCmd(self.returnDriveTrainCommand)
+        self.drivetrainControl.setManualCmd(self.returnDriveTrainCommand, False)
 
     def isDone(self):
         #when time we've spent running is greater than or equal to 3, we're done, so it returns true
         return Timer.getFPGATimestamp() - self.startTime >= 3
 
     def end(self,interrupt):
-        self.drivetrainControl.setManualCmd(DrivetrainCommand(0,0,0))
+        self.drivetrainControl.setManualCmd(DrivetrainCommand(0,0,0), False)

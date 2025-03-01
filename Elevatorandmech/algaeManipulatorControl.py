@@ -97,7 +97,7 @@ class AlgeaIntakeControl(metaclass=Singleton):
         self.flip = False
         #self.flip will flip the intake/eject voltages if the algae wrist is at a high angle
         
-        self.algaeMotor = WrapperedSparkMax(ALGAE_INT_CANID, "AlgaeIntakeMotor", True)
+        self.algaeMotor = WrapperedSparkMax(ALGAE_INT_CANID, "AlgaeIntakeMotor", brakeMode=True, currentLimitA=10)
 
         self.intakeVoltageCal = Calibration("Algae Manipulator IntakeVoltage", -12, "V")
         self.ejectVoltageCal = Calibration("Algae Manipulator EjectVoltage", 12, "V")
@@ -115,10 +115,16 @@ class AlgeaIntakeControl(metaclass=Singleton):
         else:
             self.algaeMotor.setVoltage(0)
 
-    def setInput(self, intakeBool, ejectBool, algaeAngle):
+    def setInput(self, intakeBool, ejectBool, algaeAngleEnum):
         self.intakeCommandState = intakeBool
         self.ejectCommandState = ejectBool
-        self.flip = (rad2Deg(algaeAngle) > -45)
+        if AlgaeWristState.INTAKEOFFGROUND == algaeAngleEnum:
+            self.flip=True
+        elif AlgaeWristState.NOTHING == algaeAngleEnum:
+            pass
+            #we want to pass here to preserve flip from last loop
+        else:
+            self.flip=False
 
     def updateIntake(self, run, flip):
         if flip:

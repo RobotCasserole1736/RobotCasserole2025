@@ -31,9 +31,9 @@ class ElevatorControl(metaclass=Singleton):
 
         # Coral Scoring Heights in meters
         self.L1_Height = Calibration(name="Elevator Preset Height L1", units="m", default=0.0)
-        self.L2_Height = Calibration(name="Elevator Preset Height L2", units="m", default=.2338)
-        self.L3_Height = Calibration(name="Elevator Preset Height L3", units="m", default=.6023)
-        self.L4_Height = Calibration(name="Elevator Preset Height L4", units="m", default=1.3)
+        self.L2_Height = Calibration(name="Elevator Preset Height L2", units="m", default=.1847)
+        self.L3_Height = Calibration(name="Elevator Preset Height L3", units="m", default=.6139)
+        self.L4_Height = Calibration(name="Elevator Preset Height L4", units="m", default=1.277)
         self.AL2_Height = Calibration(name="Elevator Preset Height Algae L2", units="m", default=.638)
         self.AL3_Height = Calibration(name="Elevator Preset Height Algae L3", units="m", default=1.075)
 
@@ -65,7 +65,7 @@ class ElevatorControl(metaclass=Singleton):
         # FF and proportional gain constants
         self.kV = Calibration(name="Elevator kV", default=0.013, units="V/rps")
         self.kS = Calibration(name="Elevator kS", default=0.1, units="V")
-        self.kG = Calibration(name="Elevator kG", default=0.55, units="V")
+        self.kG = Calibration(name="Elevator kG", default=0.5, units="V")
         self.kP = Calibration(name="Elevator kP", default=0.1, units="V/rad error")
 
         # Set P gain on motor
@@ -80,15 +80,6 @@ class ElevatorControl(metaclass=Singleton):
 
         self.actualPos = 0
         self.stopped = False
-        # Playing with Fusion time of flight sensor for initalizing elevator height
-        self.heightAbsSen = TimeOfFlight(ELEV_TOF_CANID)
-        self.heightAbsSen.setRangeOfInterest(8,8,8,8) # one pixel region of interest, right in the center. Should bring cone down to ~2 deg (max is 30)
-
-        # Absolute Sensor mount offsets
-        # After mounting the sensor, these should be tweaked one time
-        # in order to adjust whatever the sensor reads into the reference frame
-        # of the mechanism
-        self.ABS_SENSOR_READING_AT_ELEVATOR_BOTTOM_M = .121
 
         # Relative Encoder Offsets
         # Releative encoders always start at 0 at power-on
@@ -110,7 +101,6 @@ class ElevatorControl(metaclass=Singleton):
 
         # Add some helpful log values
         addLog("Elevator Actual Height", lambda: self.actualPos, "m")
-        addLog("Elevator TOF Measurment", self._getAbsHeight, "m")
         addLog("Elevator Goal Height", lambda: self.heightGoal, "m")
         addLog("Elevator Stopped", lambda: self.stopped, "bool")
         addLog("Elevator Profiled Height", lambda: self.curState.position, "m")
@@ -118,7 +108,7 @@ class ElevatorControl(metaclass=Singleton):
         addLog("Elevator Rev Limit Value", lambda: self.revLimitSwitchVal, "bool")
 
         # Finally, one-time init the relative sensor offsets from the absolute sensors
-        self.initFromAbsoluteSensor()
+        self.zeroElevatorReading()
 
     def _RmotorRadToHeight(self, RmotorRad: float) -> float:
         return RmotorRad * 1/ELEV_GEARBOX_GEAR_RATIO * (ELEV_SPOOL_RADIUS_M) + self.relEncOffsetM
@@ -138,23 +128,17 @@ class ElevatorControl(metaclass=Singleton):
     def getReverseLimit(self) -> bool:
         return self.revLimitSwitchVal
     
-    #return the height of the elevator as measured by the absolute sensor in meters
-    def _getAbsHeight(self) -> float:
-        return (self.heightAbsSen.getRange() / 1000.0 - self.ABS_SENSOR_READING_AT_ELEVATOR_BOTTOM_M)
-
     def atHeight(self): 
         return self.atElevHeight
 
-    # This routine uses the absolute sensors to adjust the offsets for the relative sensors
-    # so that the relative sensors match reality.
-    # It should be called.... infrequently. Likely once shortly after robot init.
-    def initFromAbsoluteSensor(self) -> None:
+    # Call this to zero out
+    def zeroElevatorReading(self) -> None:
         # Reset offsets to zero, so the relative sensor get functions return
         # just whatever offset the relative sensor currently has.
         self.relEncOffsetM = 0.0
 
         # New Offset = real height - what height says?? 
-        self.relEncOffsetM = self._getAbsHeight() - self.getHeightM()
+        self.relEncOffsetM = -self.getHeightM()
 
     def update(self) -> None:
         self.actualPos = self.getHeightM()
@@ -228,7 +212,7 @@ class ElevatorControl(metaclass=Singleton):
         self.revLimitSwitchVal = self.Rmotor.getRevLimitSwitch()
         self.fwdLimitSwitchVal = self.Rmotor.getFwdLimitSwitch()
 
-        if abs(self.heightGoal - self.actualPos) < .05:
+        if abs(self.heightGoal - self.actualPos) < .01:
             self.atElevHeight = True
         else: 
             self.atElevHeight = False

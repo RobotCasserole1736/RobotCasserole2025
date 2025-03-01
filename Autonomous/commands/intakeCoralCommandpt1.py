@@ -5,7 +5,7 @@ from Elevatorandmech.ElevatorandMechConstants import CoralManState, ElevatorLeve
 from Elevatorandmech.coralManipulatorControl import CoralManipulatorControl
 from Elevatorandmech.ElevatorControl import ElevatorControl
 
-class IntakeCoralCommand(Command):
+class IntakeCoralCommandPt1(Command):
     def __init__(self):
         self.duration = 5
 
@@ -22,7 +22,7 @@ class IntakeCoralCommand(Command):
 
     def isDone(self):
         return (Timer.getFPGATimestamp() - self.startTime >= self.duration) \
-            or (CoralManipulatorControl().getCheckGamePiece())
+            or (CoralManipulatorControl()._backSeesCoral())
 
     def end(self,interrupt):
         ElevatorControl().setHeightGoal(ElevatorLevelCmd.NO_CMD)
