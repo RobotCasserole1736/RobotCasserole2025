@@ -2,10 +2,13 @@ from wpilib import PWMMotorController
 from utils.constants import LED_STACK_LIGHT_CTRL_PWM
 from utils.singleton import Singleton
 from wpimath.filter import Debouncer
+from wpilib import Timer
+from wpilib import RobotController, DriverStation
 
 BLINK = -1.0
 GREEN = 0.35
 RED = 0.03
+ORANGE = 0.07
 YELLOW = 0.15
 BLUE = 0.75
 OFF = 0.0
@@ -35,17 +38,32 @@ class LEDControl(metaclass=Singleton):
         stuckDebounced = self.stuckDebounce.calculate(self._isStuck)
 
         if(self._isAutoDrive):
+            # Autos - blue for normal, blinky red for issues
             if(stuckDebounced):
                 pwmVal = RED * BLINK
             else:
                 pwmVal = BLUE
         else:
+            # Manual
+            # Indicate coral interference and endgame
             if(self._coralInterfers):
                 pwmVal = YELLOW * BLINK
             else:
-                pwmVal = GREEN
+                if( self.isEndgame() ):
+                    # Endgame - solid Orange-ish?
+                    pwmVal = ORANGE
+                else:
+                    # Nominal enabled. Green is good!
+                    pwmVal = GREEN
 
         self.ledPWMOutput.set(pwmVal)
+
+    def isEndgame(self) -> bool:
+        matchTime = Timer.getMatchTime()
+        if(DriverStation.isTeleop() and matchTime < 20.0 and matchTime >= 0.0):
+            return True
+        else:
+            return False
 
     def setAutoDrive(self, isAutoDrive:bool):
         """
