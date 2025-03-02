@@ -7,6 +7,7 @@ from utils.signalLogging import addLog
 from wpimath import applyDeadband
 from wpimath.filter import SlewRateLimiter
 from wpilib import XboxController
+from wpilib import DriverStation
 
 class DriverInterface:
     """Class to gather input from the driver of the robot"""
@@ -123,7 +124,8 @@ class DriverInterface:
             self.climberRetract = 0
             self.climbV = 0
             self.drop = False
-            self.connectedFault.setFaulted()
+            if(DriverStation.isFMSAttached()):
+                self.connectedFault.setFaulted()
 
     def getCmd(self) -> DrivetrainCommand:
         retval = DrivetrainCommand()

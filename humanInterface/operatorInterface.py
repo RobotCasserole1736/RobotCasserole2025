@@ -1,7 +1,7 @@
 from Elevatorandmech.ElevatorandMechConstants import AlgaeWristState, ElevatorLevelCmd, CoralManState
 from utils.faults import Fault
 from utils.signalLogging import addLog
-from wpilib import XboxController
+from wpilib import DriverStation, XboxController
 
 class OperatorInterface:
     """Class to gather input from the driver of the robot"""
@@ -96,8 +96,9 @@ class OperatorInterface:
             self.elevatorLevelCmd = ElevatorLevelCmd.NO_CMD
             self.elevManAdjCmd = 0.0
             self.elevReset = False
-            self.connectedFault.setFaulted()
-
+            if(DriverStation.isFMSAttached()):
+                self.connectedFault.setFaulted()
+                
     def getCoralCmd(self) -> CoralManState:
         return self.coralCmd
 

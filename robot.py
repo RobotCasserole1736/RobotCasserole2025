@@ -78,7 +78,7 @@ class MyRobot(wpilib.TimedRobot):
         self.addPeriodic(self.pwrMon.update, 0.2, 0.0)
         self.addPeriodic(self.crashLogger.update, 1.0, 0.0)
         self.addPeriodic(CalibrationWrangler().update, 0.5, 0.0)
-        self.addPeriodic(FaultWrangler().update, 0.2, 0.0)
+        self.addPeriodic(FaultWrangler().update, 0.06, 0.0)
 
         self.autoHasRun = False
 
