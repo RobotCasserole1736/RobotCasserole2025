@@ -3,6 +3,8 @@ from utils.faults import Fault
 from utils.signalLogging import addLog
 from wpilib import DriverStation, XboxController
 
+
+
 class OperatorInterface:
     """Class to gather input from the driver of the robot"""
 
@@ -19,6 +21,9 @@ class OperatorInterface:
         self.elevatorLevelCmd = ElevatorLevelCmd.NO_CMD
         self.elevManAdjCmd = 0.0
         self.elevReset = False
+        
+        #Feedback for elevator being blocked while motion commanded
+        self.elevBlocked = False
 
         self.algaeManipCmd = AlgaeWristState.STOW
 
@@ -35,6 +40,8 @@ class OperatorInterface:
         if self.ctrl.isConnected():
             # Convert from  joystic sign/axis conventions to robot velocity conventions
 
+            elevMotionCommanded = False
+
             # Elevator Commands
             self.elevatorLevelCmd = ElevatorLevelCmd.NO_CMD # default to no command
             if(self.ctrl.getXButton()):
@@ -46,6 +53,14 @@ class OperatorInterface:
             elif(self.ctrl.getYButton()):
                 self.elevatorLevelCmd = ElevatorLevelCmd.L4
             self.elevManAdjCmd = ((self.ctrl.getLeftY() > 0.1) - (self.ctrl.getLeftY() < -0.1)) * -1 #If the left Y is greater than .1 then go up 1 else go down one. This is what Lucas wants for some reason.
+
+            # Give haptic feedback if the elevator is blocked but some level is commanded.
+            elevMotionCommanded = self.elevatorLevelCmd != ElevatorLevelCmd.NO_CMD and self.elevManAdjCmd != 0.0
+            if(elevMotionCommanded and self.elevBlocked):
+                self.ctrl.setRumble(XboxController.RumbleType.kBothRumble, 1.0)
+            else:
+                self.ctrl.setRumble(XboxController.RumbleType.kBothRumble, 0.0)
+
 
             if self.ctrl.getRightTriggerAxis() > .2: #Currently Prioritizes right trigger 
                 self.coralCmd = CoralManState.EJECTING
@@ -121,3 +136,6 @@ class OperatorInterface:
 
     def getElevReset(self):
         return self.elevReset
+    
+    def setElevatorBlocked(self, isBlocked):
+        self.elevBlocked = isBlocked

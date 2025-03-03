@@ -105,6 +105,7 @@ class MyRobot(wpilib.TimedRobot):
 
         self.elev.setSafeToLeaveL1(self.coralMan.getCoralSafeToMove())
         self.ledCtrl.setCoralInterferencePossible(not self.coralMan.getCoralSafeToMove())
+        self.oInt.setElevatorBlocked(not self.coralMan.getCoralSafeToMove())
 
         self.elev.update()
         self.stt.mark("Elevator")
