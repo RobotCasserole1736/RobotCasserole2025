@@ -1,6 +1,5 @@
 from enum import Enum
 from math import cos
-from playingwithfusion import TimeOfFlight
 from Elevatorandmech.ElevatorandMechConstants import ALGAE_ANGLE_ABS_POS_ENC_OFFSET, AlgaeWristState
 from utils.signalLogging import addLog
 from utils import faults

@@ -26,9 +26,11 @@ from utils.signalLogging import logUpdate
 from utils.singleton import destroyAllSingletonInstances
 from webserver.webserver import Webserver
 import wpilib
-from wpimath.geometry import Translation2d, Pose2d, Rotation2d
 
 class MyRobot(wpilib.TimedRobot):
+
+    #def __init__(self):
+    #    super.__init__()
 
     #########################################################
     ## Common init/update for all modes

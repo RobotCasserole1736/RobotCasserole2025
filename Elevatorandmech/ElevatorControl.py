@@ -1,4 +1,3 @@
-from playingwithfusion import TimeOfFlight
 from Elevatorandmech.ElevatorandMechConstants import MAX_ELEV_ACCEL_MPS2, MAX_ELEV_VEL_MPS, ELEV_GEARBOX_GEAR_RATIO, ELEV_SPOOL_RADIUS_M, ElevatorLevelCmd
 from utils.calibration import Calibration
 from utils.mapLookup2d import MapLookup2D
