@@ -387,7 +387,7 @@ class RepulsorFieldPlanner:
             self.lookaheadTraj.append(cc.desPose)
 
             for _ in range(0,LOOKAHEAD_STEPS):
-                tmp = self._getCmd(cc, LOOKAHEAD_STEP_SIZE, .02)
+                tmp = self._getCmd(cc, LOOKAHEAD_STEP_SIZE, .04)
                 cp = tmp.desPose
                 self.lookaheadTraj.append(cc.desPose)
 

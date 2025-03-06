@@ -195,7 +195,7 @@ class ElevatorControl(metaclass=Singleton):
             self.LMotor.setVoltage(self.kG.get() + manAdjVoltage)
             self.curState = TrapezoidProfile.State(self.actualPos,0)
         else:
-            self.curState = self.profiler.calculate(0.02, self.curState, self.desState)
+            self.curState = self.profiler.calculate(0.04, self.curState, self.desState)
 
             motorPosCmd = self._heightToMotorRad(self.curState.position)
             motorVelCmd = self._heightVeltoMotorVel(self.curState.velocity)

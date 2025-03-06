@@ -163,9 +163,9 @@ class AutoDrive(metaclass=Singleton):
             # repulsor field path planner
             if(self._prevCmd is None):
                 initCmd = DrivetrainCommand(0,0,0,curPose) # TODO - init this from current odometry vel
-                self._olCmd = self.rfp.update(initCmd, MAX_PATHPLAN_SPEED_MPS*0.02, Ts)
+                self._olCmd = self.rfp.update(initCmd, MAX_PATHPLAN_SPEED_MPS*0.04, Ts)
             else:
-                self._olCmd = self.rfp.update(self._prevCmd, MAX_PATHPLAN_SPEED_MPS*0.02, Ts=Ts)
+                self._olCmd = self.rfp.update(self._prevCmd, MAX_PATHPLAN_SPEED_MPS*0.04, Ts=Ts)
 
             # Add closed loop - use the trajectory controller to add in additional 
             # velocity if we're currently far away from the desired pose

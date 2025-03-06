@@ -117,7 +117,7 @@ class DrivetrainPoseEstimator:
             # Simulate an angle based on (simulated) motor speeds with some noise
             chSpds = kinematics.toChassisSpeeds(curModuleSpeeds)
             self._simPose = self._simPose.exp(
-                Twist2d(chSpds.vx * 0.02, chSpds.vy * 0.02, chSpds.omega * 0.02)
+                Twist2d(chSpds.vx * 0.04, chSpds.vy * 0.04, chSpds.omega * 0.04)
             )
             noise = Rotation2d.fromDegrees(random.uniform(-0.0, 0.0))
             self._curRawGyroAngle = self._simPose.rotation() + noise
