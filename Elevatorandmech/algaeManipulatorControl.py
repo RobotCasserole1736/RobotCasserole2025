@@ -37,8 +37,8 @@ class AlgaeWristControl(metaclass=Singleton):
         self.curPosCmdDeg = self.stowPos.get()
         self.pos = AlgaeWristState.NOTHING
 
-        addLog("Algae Wrist Desired Angle",lambda: self.curPosCmdDeg, "deg")
-        addLog("Algae Wrist Actual Angle", lambda: rad2Deg(self.getAngleRad()), "deg")
+        #addLog("Algae Wrist Desired Angle",lambda: self.curPosCmdDeg, "deg")
+        #addLog("Algae Wrist Actual Angle", lambda: rad2Deg(self.getAngleRad()), "deg")
 
     def setDesPos(self, desState : AlgaeWristState):
         #this is called in teleop periodic or autonomous to set the desired pos of algae manipulator
@@ -102,8 +102,8 @@ class AlgeaIntakeControl(metaclass=Singleton):
         self.intakeVoltageCal = Calibration("Algae Manipulator IntakeVoltage", -12, "V")
         self.ejectVoltageCal = Calibration("Algae Manipulator EjectVoltage", 12, "V")
 
-        addLog("Algae Manipulator intake cmd",lambda:self.intakeCommandState,"Bool")
-        addLog("Algae Manipulator  cmd",lambda:self.ejectCommandState,"Bool")
+        #addLog("Algae Manipulator intake cmd",lambda:self.intakeCommandState,"Bool")
+        #addLog("Algae Manipulator  cmd",lambda:self.ejectCommandState,"Bool")
         #addLog("Has Game Piece", self.getHasGamePiece, "Bool")
 
     def update(self):

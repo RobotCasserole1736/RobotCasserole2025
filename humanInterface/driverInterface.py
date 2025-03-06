@@ -51,8 +51,8 @@ class DriverInterface:
         #addLog("DI gyroResetCmd", lambda: self.gyroResetCmd, "bool")
         #addLog("DI autoDriveToSpeaker", lambda: self.autoDriveToSpeaker, "bool")
         #addLog("DI autoDriveToPickup", lambda: self.autoDriveToPickup, "bool")
-        addLog("Climber Winch Command Volt", lambda: self.climbV, "V")
-        addLog("Servo Cmd", lambda:self.drop, "Bool")
+        #addLog("Climber Winch Command Volt", lambda: self.climbV, "V")
+        #addLog("Servo Cmd", lambda:self.drop, "Bool")
 
     def update(self):
         # value of contoller buttons
