@@ -62,7 +62,7 @@ class ElevatorControl(metaclass=Singleton):
         self.fwdLimitSwitchVal = self.Rmotor.getFwdLimitSwitch()
 
         # FF and proportional gain constants
-        self.kV = Calibration(name="Elevator kV", default=0.013, units="V/rps")
+        self.kV = Calibration(name="Elevator kV", default=0.0124, units="V/rps")
         self.kS = Calibration(name="Elevator kS", default=0.1, units="V")
         self.kG = Calibration(name="Elevator kG", default=0.5, units="V")
         self.kP = Calibration(name="Elevator kP", default=0.1, units="V/rad error")
