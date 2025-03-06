@@ -1,6 +1,7 @@
 from AutoSequencerV2.sequentialCommandGroup import SequentialCommandGroup
 from Autonomous.commands.drivePathCommand import DrivePathCommand
 from AutoSequencerV2.mode import Mode
+from Autonomous.commands.ejectCoralCommand import EjectCoralCommand
 from Autonomous.commands.elevatorHeightCommand import ElevatorHeightCommand
 from Elevatorandmech.ElevatorandMechConstants import ElevatorLevelCmd
 from utils.allianceTransformUtils import transform
@@ -16,8 +17,9 @@ class ScoreOneL4(Mode):
         #exactly the same as it is in the Choreo name. 
         self.pathCmd = DrivePathCommand("scoreOneL4")
         self.elev = ElevatorHeightCommand(ElevatorLevelCmd.L4)
+        self.eject = EjectCoralCommand()
         self.elevReturn = ElevatorHeightCommand(ElevatorLevelCmd.L1)
-        self.cmdGroup = SequentialCommandGroup([self.pathCmd, self.elev, self.elevReturn ])
+        self.cmdGroup = SequentialCommandGroup([self.pathCmd, self.elev, self.eject, self.elevReturn ])
     def getCmdGroup(self):
         # Just return the path command normally, since we're only doing one path. 
         # When changing to the return self.pathCmd, get rid of the pass
