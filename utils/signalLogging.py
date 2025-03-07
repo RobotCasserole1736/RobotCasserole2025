@@ -32,12 +32,13 @@ class SignalWrangler(metaclass=Singleton):
         self.time = int(0)
         self.log = None
     
-        if ExtDriveManager().isConnected():
-            wpilib.DataLogManager.start(dir=ExtDriveManager().getLogStoragePath())
-            wpilib.DataLogManager.logNetworkTables(
-                False
-            )  # We have a lot of things in NT that don't need to be logged
-            self.log = wpilib.DataLogManager.getLog()
+        # Disable file logging for debug to see if this is triggering our long loops
+        #if ExtDriveManager().isConnected():
+        #    wpilib.DataLogManager.start(dir=ExtDriveManager().getLogStoragePath())
+        #    wpilib.DataLogManager.logNetworkTables(
+        #        False
+        #    )  # We have a lot of things in NT that don't need to be logged
+        #    self.log = wpilib.DataLogManager.getLog()
 
     def update(self):
         curTime = nt._now()  # pylint: disable=W0212
