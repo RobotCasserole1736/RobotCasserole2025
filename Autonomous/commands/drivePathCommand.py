@@ -10,7 +10,7 @@ from utils.autonomousTransformUtils import flip
 
 
 class DrivePathCommand(Command):
-    def __init__(self, pathFile):
+    def __init__(self, pathFile, extraAlignTime_s = 0.5):
         self.name = pathFile
 
         self.trajCtrl = Trajectory()
@@ -34,7 +34,7 @@ class DrivePathCommand(Command):
         )
        
         # we'll populate these for real later, just declare they'll exist
-        self.duration = self.path.get_total_time()
+        self.duration = self.path.get_total_time() + extraAlignTime_s
         self.drivetrain = DrivetrainControl()
         self.poseTelem = self.drivetrain.poseEst._telemetry
 
