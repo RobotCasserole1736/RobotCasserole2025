@@ -82,7 +82,7 @@ class DrivetrainControl(metaclass=Singleton):
 
     def update(self):
         """
-        Main periodic update, should be called every 20ms
+        Main periodic update, should be called every 40ms
         """
         curEstPose = self.poseEst.getCurEstPose()
 

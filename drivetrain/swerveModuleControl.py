@@ -166,7 +166,7 @@ class SwerveModuleControl:
         self.desiredState = desState
 
     def update(self):
-        """Main update function, call every 20ms"""
+        """Main update function, call every 40ms"""
 
         # Read from the azimuth angle sensor (encoder)
         self.azmthEnc.update()

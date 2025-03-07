@@ -19,7 +19,7 @@ class FaultWrangler(metaclass=Singleton):
 
     def update(self):
         """
-        Main update - call this every 20ms from main robot code to keep animating LED blinks, indicating code is running
+        Main update - call this every 40ms from main robot code to keep animating LED blinks, indicating code is running
         """
         self.loopCounter += 1
         if self.loopCounter == self.statusUpdateLoops:

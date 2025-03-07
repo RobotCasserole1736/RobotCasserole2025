@@ -30,7 +30,7 @@ class WrapperedKraken:
         self.motorPosSig = self.ctrl.get_rotor_position()
         self.motorPosSig.set_update_frequency(50.0)
         self.motorVelSig = self.ctrl.get_rotor_velocity()
-        self.motorVelSig.set_update_frequency(20.0)
+        self.motorVelSig.set_update_frequency(40.0)
 
         self.cfg.motor_output.neutral_mode = signals.NeutralModeValue.BRAKE if brakeMode else signals.NeutralModeValue.COAST 
 

@@ -83,7 +83,7 @@ class SignalWrangler(metaclass=Singleton):
 def logUpdate():
     """
     Periodic call to sample and broadcast all logged values. Should happen once per 
-    20ms loop.
+    40ms loop.
     """
     SignalWrangler().update()
 
