@@ -29,10 +29,10 @@ class HolonomicDriveController:
         self.curVy = 0
         self.curVtheta = 0
 
-        self.transP = Calibration(f"{name} HDC Translation kP", 6.0)
+        self.transP = Calibration(f"{name} HDC Translation kP", 9.0)
         self.transI = Calibration(f"{name} HDC Translation kI", 0.0)
         self.transD = Calibration(f"{name} HDC Translation kD", 0.0)
-        self.rotP = Calibration(f"{name} HDC Rotation kP", 2.0)
+        self.rotP = Calibration(f"{name} HDC Rotation kP", 4.0)
         self.rotI = Calibration(f"{name} HDC Rotation kI", 0.0)
         self.rotD = Calibration(f"{name} HDC Rotation kD", .05)
 
