@@ -53,14 +53,6 @@ class ElevatorControl(metaclass=Singleton):
         self.LMotor.setInverted(False)
         self.Rmotor.setInverted(True)
 
-        #limit switches...
-        # Limit switch code; bottom for resetting offset and ensuring it starts correctly, top for saftey to stop from spinning
-        # Only for protection, not for initializing the elevator height
-        # TODO - on right or left motor
-        #Also, the limit switches we're using are "normally open," which is the default, so we should be good on that. 
-        self.revLimitSwitchVal = self.Rmotor.getRevLimitSwitch()
-        self.fwdLimitSwitchVal = self.Rmotor.getFwdLimitSwitch()
-
         # FF and proportional gain constants
         self.kV = Calibration(name="Elevator kV", default=0.013, units="V/rps")
         self.kS = Calibration(name="Elevator kS", default=0.1, units="V")
@@ -103,8 +95,6 @@ class ElevatorControl(metaclass=Singleton):
         addLog("Elevator Goal Height", lambda: self.heightGoal, "m")
         addLog("Elevator Stopped", lambda: self.stopped, "bool")
         addLog("Elevator Profiled Height", lambda: self.curState.position, "m")
-        addLog("Elevator Fwd Limit Value", lambda: self.fwdLimitSwitchVal, "bool")
-        addLog("Elevator Rev Limit Value", lambda: self.revLimitSwitchVal, "bool")
 
         # Finally, one-time init the relative sensor offsets from the absolute sensors
         self.zeroElevatorReading()
@@ -120,12 +110,6 @@ class ElevatorControl(metaclass=Singleton):
     
     def getHeightM(self) -> float:
         return (self._RmotorRadToHeight(self.Rmotor.getMotorPositionRad()))
-    
-    def getForwardLimit(self) -> bool:
-        return self.fwdLimitSwitchVal
-    
-    def getReverseLimit(self) -> bool:
-        return self.revLimitSwitchVal
     
     def atHeight(self): 
         return self.atElevHeight
@@ -206,10 +190,6 @@ class ElevatorControl(metaclass=Singleton):
             self.Rmotor.setPosCmd(motorPosCmd, vFF)
             #self.LMotor.setPosCmd(motorPosCmd, vFF)
             self.LMotor.setVoltage(vFF)
-
-
-        self.revLimitSwitchVal = self.Rmotor.getRevLimitSwitch()
-        self.fwdLimitSwitchVal = self.Rmotor.getFwdLimitSwitch()
 
         if abs(self.heightGoal - self.actualPos) < .01:
             self.atElevHeight = True
