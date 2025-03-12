@@ -6,7 +6,7 @@
 [tool.robotpy]
 
 # Version of robotpy this project depends on
-robotpy_version = "2025.2.1.0"
+robotpy_version = "2025.3.1.1"
 
 # Which extra RobotPy components should be installed
 # -> equivalent to `pip install robotpy[extra1, ...]
@@ -27,9 +27,8 @@ robotpy_extras = [
 
 # Other pip packages to install
 requires = [
-    "photonlibpy==2025.1.1",
-    "debugpy==1.8.11",
-    #"phoenix6==25.2.1",
-    "sleipnirgroup-choreolib == 2025.0.1",
-    "robotpy-playingwithfusion == 2025.0.0",
+    "photonlibpy",
+    "debugpy",
+    "sleipnirgroup-choreolib",
+    "yappi",
     ]

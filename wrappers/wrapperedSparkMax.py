@@ -42,7 +42,7 @@ class WrapperedSparkMax:
         # Perform motor configuration, tracking errors and retrying until we have success
         # Clear previous configuration, and persist anything set in this config.
         retryCounter = 0
-        while not self.configSuccess and retryCounter < 10:
+        while not self.configSuccess and retryCounter < 3:
             retryCounter += 1
             err = self.ctrl.configure(self.cfg, 
                                       SparkBase.ResetMode.kResetSafeParameters, 

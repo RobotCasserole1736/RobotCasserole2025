@@ -26,6 +26,7 @@ from utils.signalLogging import logUpdate
 from utils.singleton import destroyAllSingletonInstances
 from webserver.webserver import Webserver
 import wpilib
+import yappi
 
 class MyRobot(wpilib.TimedRobot):
 
@@ -159,6 +160,8 @@ class MyRobot(wpilib.TimedRobot):
     def teleopInit(self):
         # clear existing telemetry trajectory
         self.driveTrain.poseEst._telemetry.setCurAutoTrajectory(None)
+        yappi.start()
+
 
 
     def teleopPeriodic(self):
@@ -207,6 +210,34 @@ class MyRobot(wpilib.TimedRobot):
 
         # No trajectory in Teleop
         Trajectory().setCmd(None)
+
+
+    def teleopExit(self) -> None:
+        yappi.stop()
+        #fs = yappi.get_func_stats()
+        #fs.print_all(columns={
+        #    0: ("name", 200),  # Set the 'name' column width to 100
+        #    1: ("ncall", 10),
+        #    2: ("tsub", 8),
+        #    3: ("ttot", 8),
+        #    4: ("tavg", 8),
+        #})
+        
+        # Write function stats to a file
+        with open("/home/lvuser/yappi_stats.txt", "w") as f:
+            yappi.get_func_stats().print_all(out=f,columns={
+                0: ("name", 120),  # Set the 'name' column width to 100
+                1: ("ncall", 10),
+                2: ("tsub", 8),
+                3: ("ttot", 8),
+                4: ("tavg", 8),
+            })
+
+        # Optionally, write thread stats as well
+        with open("/home/lvuser/yappi_thread_stats.txt", "w") as f:
+            yappi.get_thread_stats().print_all(out=f)
+            
+        return super().teleopExit()
 
     #########################################################
     ## Disabled-Specific init and update

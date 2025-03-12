@@ -57,9 +57,9 @@ class WrapperedKraken:
         
 
     def _applyCurCfg(self):
-        # Retry config apply up to 5 times, report if failure
+        # Retry config apply up to 3 times, report if failure
         status: StatusCode = StatusCode.STATUS_CODE_NOT_INITIALIZED
-        for _ in range(0, 5):
+        for _ in range(0, 3):
             status = self.ctrl.configurator.apply(self.cfg, 0.5) # type: ignore
             if status.is_ok():
                 self.configSuccess = True
