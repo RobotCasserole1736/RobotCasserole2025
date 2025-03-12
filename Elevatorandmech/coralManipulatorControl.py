@@ -51,7 +51,7 @@ class CoralManipulatorControl(metaclass=Singleton):
             else:
                 self.coralMotorL.setVoltage(0)
                 self.coralMotorR.setVoltage(0)
-
+                
     def getCheckGamePiece(self) -> bool:
         """We think the back sensor (the one the coral hits first) needs to be clear to have a game piece.
         And the front sensor needs to be tripped.

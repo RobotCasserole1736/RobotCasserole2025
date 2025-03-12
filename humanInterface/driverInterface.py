@@ -42,7 +42,6 @@ class DriverInterface:
         self.climberExtend = 0
         self.climberRetract = 0
         self.climbV = 0
-        self.drop = False
 
         # Logging
         #addLog("DI FwdRev Cmd", lambda: self.velXCmd, "mps")
@@ -52,7 +51,6 @@ class DriverInterface:
         #addLog("DI autoDriveToSpeaker", lambda: self.autoDriveToSpeaker, "bool")
         #addLog("DI autoDriveToPickup", lambda: self.autoDriveToPickup, "bool")
         #addLog("Climber Winch Command Volt", lambda: self.climbV, "V")
-        #addLog("Servo Cmd", lambda:self.drop, "Bool")
 
     def update(self):
         # value of contoller buttons
@@ -104,11 +102,6 @@ class DriverInterface:
             self.climberRetract = applyDeadband(self.ctrl.getRightTriggerAxis(),.1)
             self.climbV = (self.climberExtend - self.climberRetract) * -12
 
-            if self.ctrl.getBackButton():
-                self.drop = True
-            elif self.ctrl.getStartButton():
-                self.drop = False
-
             self.connectedFault.setNoFault()
 
         else:
@@ -123,7 +116,6 @@ class DriverInterface:
             self.climberExtend = 0
             self.climberRetract = 0
             self.climbV = 0
-            self.drop = False
             if(DriverStation.isFMSAttached()):
                 self.connectedFault.setFaulted()
 
@@ -152,5 +144,3 @@ class DriverInterface:
     def getClimbWinchCmd(self):
         return self.climbV
 
-    def getServoDrop(self):
-        return self.drop

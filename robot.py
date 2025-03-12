@@ -203,7 +203,6 @@ class MyRobot(wpilib.TimedRobot):
         self.elev.setHeightGoal(self.oInt.getElevCmd())
 
         self.climb.setClimbCmdVolt(self.dInt.getClimbWinchCmd())
-        self.climb.setServoCmdPos(self.dInt.getServoDrop())
 
         # No trajectory in Teleop
         Trajectory().setCmd(None)
