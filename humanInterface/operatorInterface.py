@@ -2,6 +2,7 @@ from Elevatorandmech.ElevatorandMechConstants import AlgaeWristState, ElevatorLe
 from utils.faults import Fault
 from utils.signalLogging import addLog
 from wpilib import DriverStation, XboxController
+from utils.mapLookup2d import MapLookup2D
 
 
 
@@ -17,10 +18,25 @@ class OperatorInterface:
         self.intakeAlgae = False
         self.ejectAlgae = False
 
+
+
         #elevator commands
         self.elevatorLevelCmd = ElevatorLevelCmd.NO_CMD
         self.elevManAdjCmd = 0.0
         self.elevReset = False
+
+        # Mostly on-off, but with a bit of controllability near the center
+        # Input: joystick value (-1.0 to 1.0)
+        # Output: Frac of max elevator manual adjust voltage
+        self.elevManCmdLookup = MapLookup2D([
+            (-1.0,  -1.0),
+            (-0.25, -1.0),
+            (-0.1,   0.0), #deadzone
+            (0.0,    0.0),
+            (0.1,    0.0), #deadzone
+            (0.25,   1.0),
+            (1.0,    1.0)
+        ])
         
         #Feedback for elevator being blocked while motion commanded
         self.elevBlocked = False
@@ -52,7 +68,7 @@ class OperatorInterface:
                 self.elevatorLevelCmd = ElevatorLevelCmd.L3
             elif(self.ctrl.getYButton()):
                 self.elevatorLevelCmd = ElevatorLevelCmd.L4
-            self.elevManAdjCmd = ((self.ctrl.getLeftY() > 0.1) - (self.ctrl.getLeftY() < -0.1)) * -1 #If the left Y is greater than .1 then go up 1 else go down one. This is what Lucas wants for some reason.
+            self.elevManAdjCmd = self.elevManCmdLookup.lookup(self.ctrl.getLeftY() * -1.0) 
 
             # Give haptic feedback if the elevator is blocked but some level is commanded.
             elevMotionCommanded = self.elevatorLevelCmd != ElevatorLevelCmd.NO_CMD and self.elevManAdjCmd != 0.0

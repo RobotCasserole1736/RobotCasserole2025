@@ -37,7 +37,7 @@ class ElevatorControl(metaclass=Singleton):
         self.AL3_Height = Calibration(name="Elevator Preset Height Algae L3", units="m", default=1.075)
 
 
-        self.manAdjMaxVoltage = Calibration(name="Elevator Manual Adj Max Voltage", default=1.0, units="V")
+        self.manAdjMaxVoltage = Calibration(name="Elevator Manual Adj Max Voltage", default=2.0, units="V")
 
         self.curHeightGoal = ElevatorLevelCmd.NO_CMD
         self.heightGoal = self.L1_Height.get()
@@ -54,7 +54,7 @@ class ElevatorControl(metaclass=Singleton):
         self.Rmotor.setInverted(True)
 
         # FF and proportional gain constants
-        self.kV = Calibration(name="Elevator kV", default=0.0124, units="V/rps")
+        self.kV = Calibration(name="Elevator kV", default=0.015, units="V/rps")
         self.kS = Calibration(name="Elevator kS", default=0.1, units="V")
         self.kG = Calibration(name="Elevator kG", default=0.5, units="V")
         self.kP = Calibration(name="Elevator kP", default=0.1, units="V/rad error")
@@ -64,9 +64,7 @@ class ElevatorControl(metaclass=Singleton):
         self.LMotor.setPID(self.kP.get(), 0.0, 0.0)
 
         # Profiler
-        self.maxV = Calibration(name="Elevator Max Vel", default=MAX_ELEV_VEL_MPS, units="mps")
-        self.maxA = Calibration(name="Elevator Max Accel", default=MAX_ELEV_ACCEL_MPS2, units="mps2")
-        self.profiler = TrapezoidProfile(TrapezoidProfile.Constraints(self.maxV.get(),self.maxA.get()))
+        self.profiler = TrapezoidProfile(TrapezoidProfile.Constraints(MAX_ELEV_VEL_MPS,MAX_ELEV_ACCEL_MPS2))
         self.curState = self.profiler.State()
 
         self.actualPos = 0
@@ -182,14 +180,16 @@ class ElevatorControl(metaclass=Singleton):
             self.curState = self.profiler.calculate(0.04, self.curState, self.desState)
 
             motorPosCmd = self._heightToMotorRad(self.curState.position)
+            motorActPos = self._heightToMotorRad(self.actualPos)
             motorVelCmd = self._heightVeltoMotorVel(self.curState.velocity)
 
             vFF = self.kV.get() * motorVelCmd  + self.kS.get() * sign(motorVelCmd) \
                 + self.kG.get()
+            
+            vFB = self.kP.get() * (motorPosCmd - motorActPos)
 
-            self.Rmotor.setPosCmd(motorPosCmd, vFF)
-            #self.LMotor.setPosCmd(motorPosCmd, vFF)
-            self.LMotor.setVoltage(vFF)
+            self.LMotor.setVoltage(vFF + vFB)
+            self.Rmotor.setVoltage(vFF + vFB)
 
         if abs(self.heightGoal - self.actualPos) < .01:
             self.atElevHeight = True
