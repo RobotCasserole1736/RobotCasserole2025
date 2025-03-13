@@ -29,7 +29,7 @@ class ElevatorControl(metaclass=Singleton):
     def __init__(self):
 
         # Coral Scoring Heights in meters
-        self.L1_Height = Calibration(name="Elevator Preset Height L1", units="m", default=0.0)
+        self.L1_Height = Calibration(name="Elevator Preset Height L1", units="m", default=0.01)
         self.L2_Height = Calibration(name="Elevator Preset Height L2", units="m", default=.1847)
         self.L3_Height = Calibration(name="Elevator Preset Height L3", units="m", default=.6139)
         self.L4_Height = Calibration(name="Elevator Preset Height L4", units="m", default=1.277)
@@ -62,10 +62,10 @@ class ElevatorControl(metaclass=Singleton):
         self.fwdLimitSwitchVal = self.Rmotor.getFwdLimitSwitch()
 
         # FF and proportional gain constants
-        self.kV = Calibration(name="Elevator kV", default=0.0124, units="V/rps")
+        self.kV = Calibration(name="Elevator kV", default=0.0185, units="V/rps")
         self.kS = Calibration(name="Elevator kS", default=0.1, units="V")
-        self.kG = Calibration(name="Elevator kG", default=0.5, units="V")
-        self.kP = Calibration(name="Elevator kP", default=0.1, units="V/rad error")
+        self.kG = Calibration(name="Elevator kG", default=0.6, units="V")
+        self.kP = Calibration(name="Elevator kP", default=0.12, units="V/rad error")
 
         # Set P gain on motor
         self.Rmotor.setPID(self.kP.get(), 0.0, 0.0)
