@@ -32,7 +32,7 @@ class WrapperedSparkMax:
         self.cfg = SparkMaxConfig()
         self.cfg.signals.appliedOutputPeriodMs(200)
         self.cfg.signals.busVoltagePeriodMs(200)
-        self.cfg.signals.primaryEncoderPositionPeriodMs(20)
+        self.cfg.signals.primaryEncoderPositionPeriodMs(40)
         self.cfg.signals.primaryEncoderVelocityPeriodMs(200)
         self.cfg.setIdleMode(SparkBaseConfig.IdleMode.kBrake if brakeMode else SparkBaseConfig.IdleMode.kCoast)
         self.cfg.smartCurrentLimit(round(currentLimitA))

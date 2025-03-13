@@ -82,7 +82,7 @@ class DrivetrainControl(metaclass=Singleton):
 
     def update(self):
         """
-        Main periodic update, should be called every 20ms
+        Main periodic update, should be called every 40ms
         """
         curEstPose = self.poseEst.getCurEstPose()
 
@@ -181,7 +181,7 @@ def _discretizeChSpd(chSpd):
     Returns:
         ChassisSpeeds: Adjusted ch speed
     """
-    dt = 0.02
+    dt = 0.04
     poseVel = Pose2d(chSpd.vx * dt, chSpd.vy * dt, Rotation2d(chSpd.omega * dt))
     twistVel = Pose2d().log(poseVel)
     return ChassisSpeeds(twistVel.dx / dt, twistVel.dy / dt, twistVel.dtheta / dt)

@@ -166,7 +166,7 @@ class SwerveModuleControl:
         self.desiredState = desState
 
     def update(self):
-        """Main update function, call every 20ms"""
+        """Main update function, call every 40ms"""
 
         # Read from the azimuth angle sensor (encoder)
         self.azmthEnc.update()
@@ -209,10 +209,10 @@ class SwerveModuleControl:
             # sensor data for the next loop.
 
             # Very simple voltage/motor model of azimuth rotation
-            self.actualState.angle += Rotation2d.fromDegrees(self.azmthVoltage / 12.0 * 1500.0 * 0.02)
+            self.actualState.angle += Rotation2d.fromDegrees(self.azmthVoltage / 12.0 * 1500.0 * 0.04)
             self.actualPosition.angle = self.actualState.angle
 
             # Wheel speed is slew-rate filtered to roughly simulate robot inertia
             speed = self.wheelSimFilter.calculate(self.desiredState.speed)
             self.actualState.speed = speed + random.uniform(-0.0, 0.0)
-            self.actualPosition.distance += self.actualState.speed * 0.02
+            self.actualPosition.distance += self.actualState.speed * 0.04

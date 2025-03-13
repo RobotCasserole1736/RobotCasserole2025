@@ -54,7 +54,7 @@ class ElevatorControl(metaclass=Singleton):
         self.Rmotor.setInverted(True)
 
         # FF and proportional gain constants
-        self.kV = Calibration(name="Elevator kV", default=0.013, units="V/rps")
+        self.kV = Calibration(name="Elevator kV", default=0.0124, units="V/rps")
         self.kS = Calibration(name="Elevator kS", default=0.1, units="V")
         self.kG = Calibration(name="Elevator kG", default=0.5, units="V")
         self.kP = Calibration(name="Elevator kP", default=0.1, units="V/rad error")
@@ -179,7 +179,7 @@ class ElevatorControl(metaclass=Singleton):
             self.LMotor.setVoltage(self.kG.get() + manAdjVoltage)
             self.curState = TrapezoidProfile.State(self.actualPos,0)
         else:
-            self.curState = self.profiler.calculate(0.02, self.curState, self.desState)
+            self.curState = self.profiler.calculate(0.04, self.curState, self.desState)
 
             motorPosCmd = self._heightToMotorRad(self.curState.position)
             motorVelCmd = self._heightVeltoMotorVel(self.curState.velocity)
