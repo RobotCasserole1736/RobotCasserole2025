@@ -36,8 +36,6 @@ class WrapperedSparkMax:
         self.cfg.signals.primaryEncoderVelocityPeriodMs(200)
         self.cfg.setIdleMode(SparkBaseConfig.IdleMode.kBrake if brakeMode else SparkBaseConfig.IdleMode.kCoast)
         self.cfg.smartCurrentLimit(round(currentLimitA))
-        self.cfg.limitSwitch.forwardLimitSwitchEnabled(fLimitEna)
-        self.cfg.limitSwitch.reverseLimitSwitchEnabled(rLimitEna)
 
         # Perform motor configuration, tracking errors and retrying until we have success
         # Clear previous configuration, and persist anything set in this config.
@@ -80,12 +78,6 @@ class WrapperedSparkMax:
             self.ctrl.configure(self.cfg,
                                 SparkBase.ResetMode.kNoResetSafeParameters, 
                                 SparkBase.PersistMode.kPersistParameters)
-    
-    def getFwdLimitSwitch(self):
-        return self.ctrl.getForwardLimitSwitch().get() #This will return true/false
-
-    def getRevLimitSwitch(self):
-        return self.ctrl.getReverseLimitSwitch().get() #This will return true/false
 
     def setPID(self, kP, kI, kD, persist=SparkBase.PersistMode.kPersistParameters):
         if self.configSuccess:

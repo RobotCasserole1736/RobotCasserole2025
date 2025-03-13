@@ -38,11 +38,6 @@ class DriverInterface:
         #utility - use robot-relative commands
         self.robotRelative = False
 
-        #climb commands
-        self.climberExtend = 0
-        self.climberRetract = 0
-        self.climbV = 0
-
         # Logging
         #addLog("DI FwdRev Cmd", lambda: self.velXCmd, "mps")
         #addLog("DI Strafe Cmd", lambda: self.velYCmd, "mps")
@@ -50,7 +45,6 @@ class DriverInterface:
         #addLog("DI gyroResetCmd", lambda: self.gyroResetCmd, "bool")
         #addLog("DI autoDriveToSpeaker", lambda: self.autoDriveToSpeaker, "bool")
         #addLog("DI autoDriveToPickup", lambda: self.autoDriveToPickup, "bool")
-        #addLog("Climber Winch Command Volt", lambda: self.climbV, "V")
 
     def update(self):
         # value of contoller buttons
@@ -98,10 +92,6 @@ class DriverInterface:
             self.autoSteer = self.ctrl.getXButton()
             self.createDebugObstacle = self.ctrl.getYButtonPressed()
 
-            self.climberExtend = applyDeadband(self.ctrl.getLeftTriggerAxis(),.1)
-            self.climberRetract = applyDeadband(self.ctrl.getRightTriggerAxis(),.1)
-            self.climbV = (self.climberExtend - self.climberRetract) * -12
-
             self.connectedFault.setNoFault()
 
         else:
@@ -113,9 +103,6 @@ class DriverInterface:
             self.autoDrive = False
             self.robotRelative = False
             self.createDebugObstacle = False
-            self.climberExtend = 0
-            self.climberRetract = 0
-            self.climbV = 0
             if(DriverStation.isFMSAttached()):
                 self.connectedFault.setFaulted()
 
@@ -140,7 +127,3 @@ class DriverInterface:
 
     def getRobotRelative(self):
         return self.robotRelative
-
-    def getClimbWinchCmd(self):
-        return self.climbV
-

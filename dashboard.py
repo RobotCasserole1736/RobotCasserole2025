@@ -27,8 +27,6 @@ class Dashboard:
 
         #all the indicators in the middle. Top row, then bottom row
         webServer.addDashboardWidget(Icon(35, 45, "/SmartDashboard/isautoSteerState", "#9632bf", "autoSteer"))
-        webServer.addDashboardWidget(Icon(35, 55, "/SmartDashboard/isUpperLimit", "#82c598", "upperLimit"))
-        webServer.addDashboardWidget(Icon(35, 55, "/SmartDashboard/isLowerLimit", "#0f672c", "lowerLimit"))
         webServer.addDashboardWidget(Icon(45, 45, "/SmartDashboard/isRedIconState", "#FF0000", "allianceRed"))
         webServer.addDashboardWidget(Icon(55, 45, "/SmartDashboard/isBlueIconState", "#0000FF", "allianceBlue"))
         webServer.addDashboardWidget(Icon(65, 45, "/SmartDashboard/PE Vision Targets Seen", "#00FF00", "vision"))
@@ -72,18 +70,6 @@ class Dashboard:
         addLog("isautoSteerState",  
                lambda: (
             Icon.kON if AutoSteer().autoSteerIsRunning()
-            else Icon.kOFF)
-        )
-
-        addLog("isLowerLimit",  
-               lambda: (
-            Icon.kON if ElevatorControl().getReverseLimit()
-            else Icon.kOFF)
-        )
-
-        addLog("isUpperLimit",  
-               lambda: (
-            Icon.kON if ElevatorControl().getForwardLimit()
             else Icon.kOFF)
         )
 
