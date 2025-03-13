@@ -17,7 +17,8 @@ class CoralManipulatorControl(metaclass=Singleton):
         self.gamepieceSensorF = DigitalInput(CORAL_GAME_PIECE_F_PORT)
         self.gamepieceSensorB = DigitalInput(CORAL_GAME_PIECE_B_PORT)
         self.motorHoldingVoltage = Calibration("MotorHolding", 0.0, "V")
-        self.motorIntakeVoltage =  Calibration("MotorIntake", 3.0, "V")
+        self.motorIntakeFastVoltage =  Calibration("MotorIntakeFast", 10.0, "V")
+        self.motorIntakeSlowVoltage = Calibration("MotorIntakeSlow", 3.0, "V")
         self.motorEjectVoltage =  Calibration("MotorEject", 12.0, "V")
         self.RMotorEjectVoltageL1 = Calibration("MotorEjectRForL1", 5.0, "V")
         self.atL1 = False
@@ -26,32 +27,32 @@ class CoralManipulatorControl(metaclass=Singleton):
         addLog("Has Game Piece", self.getCheckGamePiece, "Bool")
 
     def update(self) -> None:
-        # Always disable if commanded to disable
-        if self.coralCurState == CoralManState.DISABLED:
-            self.coralMotorL.setVoltage(0)
-            self.coralMotorR.setVoltage(0)
-        # Eject or hold if it has a game piece
-        elif self.coralCurState == CoralManState.EJECTING:
+        # Eject if we want to eject
+        if self.coralCurState == CoralManState.EJECTING:
             EVoltage = self.motorEjectVoltage.get()
             self.coralMotorL.setVoltage(EVoltage)
             if self.atL1:
                 self.coralMotorR.setVoltage(self.RMotorEjectVoltageL1.get())
             else:
-                self.coralMotorR.setVoltage(EVoltage)        
+                self.coralMotorR.setVoltage(EVoltage)
+        #Next, if we have a game piece, we don't want to do anything
         elif self.getCheckGamePiece():
             self.coralCurState = CoralManState.HOLDING
             self.coralMotorL.setVoltage(self.motorHoldingVoltage.get())
             self.coralMotorR.setVoltage(self.motorHoldingVoltage.get())
-        # Can intake if there is no game piece
+        #if we are close to being in the right position but aren't for any reason, we want to intake slowly
+        elif self._frontSeesCoral() and self._backSeesCoral():
+            self.coralMotorL.setVoltage(self.motorIntakeSlowVoltage.get())
+            self.coralMotorR.setVoltage(self.motorIntakeSlowVoltage.get())
+        #if we are trying to intake and don't have a game piece on front and back, we want to intake at full speed
+        elif self.coralCurState == CoralManState.INTAKING:
+            self.coralMotorL.setVoltage(self.motorIntakeFastVoltage.get())
+            self.coralMotorR.setVoltage(self.motorIntakeFastVoltage.get())    
         else:
-            if self.coralCurState == CoralManState.INTAKING:
-                self.coralMotorL.setVoltage(self.motorIntakeVoltage.get())
-                self.coralMotorR.setVoltage(self.motorIntakeVoltage.get())
             # Disable otherwise
-            else:
-                self.coralMotorL.setVoltage(0)
-                self.coralMotorR.setVoltage(0)
-                
+            self.coralMotorL.setVoltage(0)
+            self.coralMotorR.setVoltage(0)
+
     def getCheckGamePiece(self) -> bool:
         """We think the back sensor (the one the coral hits first) needs to be clear to have a game piece.
         And the front sensor needs to be tripped.
