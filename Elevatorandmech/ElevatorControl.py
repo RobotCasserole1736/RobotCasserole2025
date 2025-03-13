@@ -63,6 +63,7 @@ class ElevatorControl(metaclass=Singleton):
 
         # FF and proportional gain constants
         self.kV = Calibration(name="Elevator kV", default=0.0124, units="V/rps")
+        self.kA = Calibration(name="Elevator kA", default=0.0, units="V/rps/s")
         self.kS = Calibration(name="Elevator kS", default=0.1, units="V")
         self.kG = Calibration(name="Elevator kG", default=0.5, units="V")
         self.kP = Calibration(name="Elevator kP", default=0.1, units="V/rad error")
@@ -117,6 +118,9 @@ class ElevatorControl(metaclass=Singleton):
     
     def _heightVeltoMotorVel(self, elevLinVel: float) -> float:
         return (elevLinVel *1/(ELEV_SPOOL_RADIUS_M) * ELEV_GEARBOX_GEAR_RATIO)
+
+    def _heightAccelToMotorAccel(self, evelLinAccel: float) -> float:
+        return (elevLinAccel * 1/(ELEV_SPOOL_RADIUS_M) * ELEV_GEARBOX_GEAR_RATIO)
     
     def getHeightM(self) -> float:
         return (self._RmotorRadToHeight(self.Rmotor.getMotorPositionRad()))
@@ -199,8 +203,9 @@ class ElevatorControl(metaclass=Singleton):
 
             motorPosCmd = self._heightToMotorRad(self.curState.position)
             motorVelCmd = self._heightVeltoMotorVel(self.curState.velocity)
+            motorAccelCmd = self._heightAccelToMotorAccel(self.curState.acceleration)
 
-            vFF = self.kV.get() * motorVelCmd  + self.kS.get() * sign(motorVelCmd) \
+            vFF = self.kV.get() * motorVelCmd + self.kA.get() * motorAccelCmd + self.kS.get() * sign(motorVelCmd) \
                 + self.kG.get()
 
             self.Rmotor.setPosCmd(motorPosCmd, vFF)
