@@ -26,11 +26,11 @@ class WrapperedKraken:
         self.cfg.current_limits.supply_current_limit_enable = True
 
         self.motorCurrentSig = self.ctrl.get_supply_current()
-        self.motorCurrentSig.set_update_frequency(10.0)
+        self.motorCurrentSig.set_update_frequency(5.0)
         self.motorPosSig = self.ctrl.get_rotor_position()
-        self.motorPosSig.set_update_frequency(50.0)
+        self.motorPosSig.set_update_frequency(25.0)
         self.motorVelSig = self.ctrl.get_rotor_velocity()
-        self.motorVelSig.set_update_frequency(40.0)
+        self.motorVelSig.set_update_frequency(25.0)
 
         self.cfg.motor_output.neutral_mode = signals.NeutralModeValue.BRAKE if brakeMode else signals.NeutralModeValue.COAST 
 
@@ -67,9 +67,6 @@ class WrapperedKraken:
 
         self.disconFault.set(not self.configSuccess)
 
-    def _refereshAllSigs(self):
-        self.motorCurrentSig.refresh()
-        self.motorPosSig.refresh()
 
     def setInverted(self, isInverted):
         if(isInverted):
@@ -96,8 +93,9 @@ class WrapperedKraken:
         self.desPos = posCmd
         self.desVolt = arbFF
         posCmdRev = rad2Rev(posCmd)
-        if(not CTREMusicPlayback().isPlaying()):
-            self.ctrl.set_control(controls.PositionVoltage(posCmdRev).with_slot(0).with_feed_forward(arbFF))
+        #if(not CTREMusicPlayback().isPlaying()):
+        self.ctrl.set_control(controls.PositionVoltage(posCmdRev).with_slot(0).with_feed_forward(arbFF))
+        self.motorCurrentSig.refresh()
 
 
 
@@ -113,14 +111,16 @@ class WrapperedKraken:
         self.desVel = velCmdRPM
         self.desVolt = arbFF
         velCmdRotPS = velCmdRPM/60.0
-        if(not CTREMusicPlayback().isPlaying()):
-            self.ctrl.set_control(controls.VelocityVoltage(velCmdRotPS).with_slot(0).with_feed_forward(arbFF))
+        #if(not CTREMusicPlayback().isPlaying()):
+        self.ctrl.set_control(controls.VelocityVoltage(velCmdRotPS).with_slot(0).with_feed_forward(arbFF))
+        self.motorCurrentSig.refresh()
 
 
     def setVoltage(self, outputVoltageVolts):
         self.desVolt = outputVoltageVolts
-        if(not CTREMusicPlayback().isPlaying()):
-            self.ctrl.set_control(controls.VoltageOut(outputVoltageVolts))
+        #if(not CTREMusicPlayback().isPlaying()):
+        self.ctrl.set_control(controls.VoltageOut(outputVoltageVolts))
+        self.motorCurrentSig.refresh()
 
     def getMotorPositionRad(self):
         if(TimedRobot.isSimulation()):
