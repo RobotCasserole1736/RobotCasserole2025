@@ -57,13 +57,13 @@ GOAL_MARGIN_DEG = 5.0
 # However, near the goal, we'd like to slow down. This map defines how we ramp down
 # the step-size toward zero as we get closer to the goal. Once we are close enough,
 # we stop taking steps and simply say the desired position is at the goal.
-GOAL_MARGIN_M = 0.1
+GOAL_MARGIN_M = 0.15
 SLOW_DOWN_DISTANCE_M = 0.75
 GOAL_SLOW_DOWN_MAP = MapLookup2D([
     (9999.0, 1.0),
     (SLOW_DOWN_DISTANCE_M, 1.0),
     (GOAL_MARGIN_M, 0.075),
-    (0.0, 0.001)
+    (0.0, 0.01)
 ])
 
 # These define how far in advance we attempt to plan for telemetry purposes

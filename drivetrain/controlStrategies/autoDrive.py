@@ -11,7 +11,7 @@ from drivetrain.drivetrainPhysical import MAX_DT_LINEAR_SPEED_MPS
 # Maximum speed that we'll attempt to path plan at. Needs to be at least 
 # slightly less than the maximum physical speed, so the robot can "catch up" 
 # if it gets off the planned path
-MAX_PATHPLAN_SPEED_MPS = 0.75 * MAX_DT_LINEAR_SPEED_MPS
+MAX_PATHPLAN_SPEED_MPS = 0.35 * MAX_DT_LINEAR_SPEED_MPS
 
 class AutoDrive(metaclass=Singleton):
     def __init__(self):
@@ -163,9 +163,9 @@ class AutoDrive(metaclass=Singleton):
             # repulsor field path planner
             if(self._prevCmd is None):
                 initCmd = DrivetrainCommand(0,0,0,curPose) # TODO - init this from current odometry vel
-                self._olCmd = self.rfp.update(initCmd, MAX_PATHPLAN_SPEED_MPS*0.04, Ts)
+                self._olCmd = self.rfp.update(initCmd, MAX_PATHPLAN_SPEED_MPS*Ts, Ts)
             else:
-                self._olCmd = self.rfp.update(self._prevCmd, MAX_PATHPLAN_SPEED_MPS*0.04, Ts=Ts)
+                self._olCmd = self.rfp.update(self._prevCmd, MAX_PATHPLAN_SPEED_MPS*Ts, Ts=Ts)
 
             # Add closed loop - use the trajectory controller to add in additional 
             # velocity if we're currently far away from the desired pose

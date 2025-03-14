@@ -11,6 +11,7 @@ from choreo.trajectory import SwerveSample
 from utils.calibration import Calibration
 from utils.signalLogging import addLog
 from utils.mathUtils import limit
+from utils.units import m2in
 
 class HolonomicDriveController:
     """
@@ -29,10 +30,10 @@ class HolonomicDriveController:
         self.curVy = 0
         self.curVtheta = 0
 
-        self.transP = Calibration(f"{name} HDC Translation kP", 9.0)
+        self.transP = Calibration(f"{name} HDC Translation kP", 6.0)
         self.transI = Calibration(f"{name} HDC Translation kI", 0.0)
         self.transD = Calibration(f"{name} HDC Translation kD", 0.0)
-        self.rotP = Calibration(f"{name} HDC Rotation kP", 4.0)
+        self.rotP = Calibration(f"{name} HDC Rotation kP", 8.0)
         self.rotI = Calibration(f"{name} HDC Rotation kI", 0.0)
         self.rotD = Calibration(f"{name} HDC Rotation kD", .05)
 
@@ -49,6 +50,14 @@ class HolonomicDriveController:
         #addLog(f"{name} HDC xFB", lambda:self.xFB, "mps")
         #addLog(f"{name} HDC yFB", lambda:self.yFB, "mps")
         #addLog(f"{name} HDC tFB", lambda:self.tFB, "radpersec")
+
+
+        self.errX_in = 0
+        self.errY_in = 0
+        self.errT_deg = 0
+        addLog(f"{name} HDC err X", lambda:self.errX_in, "in")
+        addLog(f"{name} HDC err Y", lambda:self.errY_in, "in")
+        addLog(f"{name} HDC err T", lambda:self.errT_deg, "deg")
 
         # Closed-loop control for the X position
         self.xCtrl = PIDController(
@@ -95,6 +104,12 @@ class HolonomicDriveController:
         return self.update2(xFF,yFF,tFF,cmdPose,curEstPose)
 
     def update2(self, xFF, yFF, tFF, cmdPose:Pose2d, curEstPose:Pose2d):
+
+        #calc some errs
+        self.errX_in = m2in(cmdPose.X() - curEstPose.X())
+        self.errY_in = m2in(cmdPose.Y() - curEstPose.Y())
+        self.errT_deg = (cmdPose.rotation() - curEstPose.rotation()).degrees()
+
         # Feed-Back - Apply additional correction if we're not quite yet at the spot on the field we
         #             want to be at.
         self.xFB = self.xCtrl.calculate(curEstPose.X(), cmdPose.X())

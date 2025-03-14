@@ -98,7 +98,7 @@ class WrapperedPoseEstPhotonCamera:
                         # Filter candidates in this frame to only the valid ones
                         filteredCandidates:list[Pose2d] = []
                         for poseCandidate in poseCandidates:
-                            isHorrible = tgtID in HUMAN_STATION_TAG_IDS
+                            isHorrible = tgtID not in REEF_TAG_IDS
                             onField = self._poseIsOnField(poseCandidate)
                             closeEnough = self._closeEnoughToCamera(target)
                             # Add other filter conditions here
