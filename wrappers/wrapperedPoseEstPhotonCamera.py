@@ -43,6 +43,10 @@ class WrapperedPoseEstPhotonCamera:
         addLog(f"PoseCam {self.name} latency", lambda:self.lastLatency, "sec")
         addLog(f"PoseCam {self.name} Duration", lambda:self.updateDuration, "ms")
         self.prevTimestampSec = 0.0
+        self.singleTagModeTagList = None
+
+    def setSingleTagMode(self, tag:list[int]|None):
+        self.singleTagModeTagList = tag
 
     def update(self, prevEstPose:Pose2d):
 
@@ -86,7 +90,8 @@ class WrapperedPoseEstPhotonCamera:
                     if tagFieldPose is not None:
                         # Only handle known tags
                         poseCandidates:list[Pose2d] = []
-                        if target.getPoseAmbiguity() <= .5:
+                        if target.getPoseAmbiguity() <= 0.05:
+                            # Only use very non-ambiguous estimates, throw the ambiguous ones out
                             poseCandidates.append(
                                 self._toFieldPose(tagFieldPose, target.getBestCameraToTarget())
                             )
@@ -98,11 +103,19 @@ class WrapperedPoseEstPhotonCamera:
                         # Filter candidates in this frame to only the valid ones
                         filteredCandidates:list[Pose2d] = []
                         for poseCandidate in poseCandidates:
-                            isHorrible = tgtID not in REEF_TAG_IDS
+
+                            # True if we're either not in single tag mode, 
+                            # or (if we are) the tag matches
+                            matchesSingleTag = (self.singleTagModeTagList is None or tgtID in self.singleTagModeTagList)
+
+                            # Discard the bad tags on our practice field at least
+                            isHorrible = tgtID in HUMAN_STATION_TAG_IDS
+
+                            # is on field
                             onField = self._poseIsOnField(poseCandidate)
                             closeEnough = self._closeEnoughToCamera(target)
                             # Add other filter conditions here
-                            if onField and closeEnough and not isHorrible:
+                            if onField and closeEnough and not isHorrible and matchesSingleTag:
                                 filteredCandidates.append(poseCandidate)
 
 
@@ -153,5 +166,5 @@ class WrapperedPoseEstPhotonCamera:
         return inX and inY
     
     def _closeEnoughToCamera(self, target: PhotonTrackedTarget):
-        return target.getBestCameraToTarget().translation().norm() <= 3.0
+        return target.getBestCameraToTarget().translation().norm() <= 2.0
     
