@@ -8,6 +8,7 @@ from wpimath.geometry import Pose2d, Pose3d, Transform2d, Rotation2d, Translatio
 from ntcore import NetworkTableInstance
 from choreo.trajectory import SwerveTrajectory
 
+from drivetrain.controlStrategies.autoSteer import AutoSteer
 from utils.allianceTransformUtils import transform
 from drivetrain.drivetrainPhysical import ROBOT_TO_FRONT_CAM, ROBOT_TO_LEFTFRONT_CAM, ROBOT_TO_RIGHTFRONT_CAM, ROBOT_TO_RIGHTBACK_CAM, ROBOT_TO_LEFTBACK_CAM, robotToModuleTranslations
 from utils.autonomousTransformUtils import flip
@@ -105,6 +106,10 @@ class DrivetrainPoseTelemetry:
         self.field.getObject("curObstaclesFull").setPoses([Pose2d(x, Rotation2d()) for x in self.fullObstacles])
         self.field.getObject("curObstaclesThird").setPoses([Pose2d(x, Rotation2d()) for x in self.thirdObstacles])
         self.field.getObject("curObstaclesAlmostGone").setPoses([Pose2d(x, Rotation2d()) for x in self.almostGoneObstacles])
+        
+        asGoal = AutoSteer().getCurGoalPose()
+        if(asGoal is not None):
+            self.field.getObject("AutoSteerGoal").setPose(asGoal)
 
         self.field.getObject("visionObservations").setPoses(self.visionPoses)
         self.visionPoses = []

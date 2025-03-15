@@ -2,7 +2,7 @@ from wpilib import Timer
 from wpimath.geometry import Pose2d, Translation2d
 from drivetrain.controlStrategies.holonomicDriveController import HolonomicDriveController
 from drivetrain.drivetrainCommand import DrivetrainCommand
-from navigation.navConstants import getTransformedGoalList
+from navigation.autoDriveNavConstants import getTransformedGoalList
 from utils.signalLogging import addLog
 from utils.singleton import Singleton
 from navigation.repulsorFieldPlanner import RepulsorFieldPlanner, RepulsorFieldPlannerState

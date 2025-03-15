@@ -123,12 +123,14 @@ REEF_RADIUS = inchesToMeters(32.1)
 # Pulled from CAD model of field
 SCORE_PEG_CENTER_DIST = inchesToMeters(6.48)
 
+#Arbitrary number for where we want to autosteer point towards
+#how far (positive number) is the edge of the pink coral pipes from the reef edge
+SCORE_POINT_DIST = inchesToMeters(1)
+
 # Distance we want to be from the reef center while scoring
 # Sum of reef size and robot size.
 SCORE_DIST_FROM_REEF_CENTER = \
-    REEF_RADIUS  + \
-    WHEEL_BASE_HALF_LENGTH_M + \
-    BUMPER_THICKNESS_M 
+    REEF_RADIUS - SCORE_POINT_DIST
 
 # Pre-calculate blue goals
 _goalListCacheBlue = []

@@ -2,7 +2,7 @@ import math
 from wpilib import Timer
 from wpimath.geometry import Pose2d, Rotation2d
 from drivetrain.drivetrainCommand import DrivetrainCommand
-from navigation.navConstants import getTransformedGoalList
+from navigation.autoSteerNavConstants import getTransformedGoalList
 from utils.allianceTransformUtils import transform
 from utils.calibration import Calibration
 from utils.constants import FIELD_Y_M, blueReefLocation
@@ -14,7 +14,7 @@ from utils.units import deg2Rad
 HP_STATION_HYSTERISIS_M = 1.0
 HP_STATION_ANGLE_MAG_DEG = 54.0
 
-ACTIVE_CMD_THRESH_TRANS_MPS = 0.01
+ACTIVE_CMD_THRESH_TRANS_MPS = 0.1
 ACTIVE_CMD_THRESH_ROT_RADPERS = deg2Rad(10)
 
 class AutoSteer(metaclass=Singleton):
@@ -38,6 +38,8 @@ class AutoSteer(metaclass=Singleton):
         self.lenList= []
 
         self.isActive = False
+
+        self.curGoalPose = None
 
 
         self.curTargetRot = Rotation2d()
@@ -81,9 +83,13 @@ class AutoSteer(metaclass=Singleton):
             self.isActive = False
             return cmdIn
 
+    def getCurGoalPose(self) -> Pose2d|None:
+        return self.curGoalPose
+    
     def updateRotationAngle(self, curPose: Pose2d) -> None:
 
         self.lenList.clear()
+        self.curGoalPose = None
 
         if(self.alignToProcessor):
             self.curTargetRot = transform(Rotation2d.fromDegrees(-90.0))
@@ -94,9 +100,32 @@ class AutoSteer(metaclass=Singleton):
                 goalWTransform = goalOption.translation()
                 self.lenList.append(goalWTransform.distance(curPose.translation()))
             primeTargetIndex = self.lenList.index(min(self.lenList))
-            targetLocation = goalListTot[primeTargetIndex].translation()
+            primeTarget = goalListTot[primeTargetIndex]
+            #pop the nearest in order to find the second nearest
+            self.lenList.pop(primeTargetIndex)
+            #second nearest
+            secondTargetIndex = self.lenList.index(min(self.lenList))
+            secondTarget = goalListTot[secondTargetIndex]
+            #if they're close enough, look at rotation 
+            closeEnough = abs(secondTarget.translation().distance(curPose.translation()) - primeTarget.translation().distance(curPose.translation())) <= 1.0
+            difAngle = abs(secondTarget.rotation().degrees() - primeTarget.rotation().degrees()) >= 10
+            if (closeEnough and difAngle):
+                #checking rotation
+                #dif in degrees
+                curRot = curPose.rotation().degrees()
+                primeTargetDiff = abs(primeTarget.rotation().degrees() - curRot)
+                secondTargetDiff = abs(secondTarget.rotation().degrees() - curRot)
+                if primeTargetDiff <= secondTargetDiff:
+                    self.targetIndexNumber = primeTargetIndex
+                else:
+                    self.targetIndexNumber = secondTargetIndex
+            else:
+                self.targetIndexNumber = primeTargetIndex
+
+            targetLocation = goalListTot[self.targetIndexNumber].translation()
             robotToTargetTrans = targetLocation - curPose.translation()
             self.curTargetRot = Rotation2d(robotToTargetTrans.X(), robotToTargetTrans.Y())
+            self.curGoalPose = Pose2d(targetLocation, Rotation2d())
         else:
             # Check if we are closer to the left or right human player station
             curY = transform(curPose.translation()).Y()
