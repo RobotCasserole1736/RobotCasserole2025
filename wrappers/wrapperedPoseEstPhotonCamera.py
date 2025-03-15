@@ -43,7 +43,7 @@ class WrapperedPoseEstPhotonCamera:
         addLog(f"PoseCam {self.name} latency", lambda:self.lastLatency, "sec")
         addLog(f"PoseCam {self.name} Duration", lambda:self.updateDuration, "ms")
         self.prevTimestampSec = 0.0
-        self.singleTagModeTagList = None
+        self.singleTagModeTagList = None #not currently used
 
     def setSingleTagMode(self, tag:list[int]|None):
         self.singleTagModeTagList = tag
