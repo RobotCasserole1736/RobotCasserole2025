@@ -1,3 +1,4 @@
+import math
 from wpilib import Timer
 from wpimath.geometry import Pose2d, Rotation2d
 from drivetrain.drivetrainCommand import DrivetrainCommand
@@ -7,39 +8,81 @@ from utils.constants import FIELD_Y_M, blueReefLocation
 from utils.singleton import Singleton
 from wpimath.filter import Debouncer
 
-HP_STATION_HYSTERISIS_M = 2.0
+from utils.units import deg2Rad
+
+HP_STATION_HYSTERISIS_M = 1.0
 HP_STATION_ANGLE_MAG_DEG = 54.0
+
+ACTIVE_CMD_THRESH_TRANS_MPS = 0.01
+ACTIVE_CMD_THRESH_ROT_RADPERS = deg2Rad(10)
 
 class AutoSteer(metaclass=Singleton):
     def __init__(self):
         self.reefAlignActive = False
+        self.alignToProcessor = False
         self.returnDriveTrainCommand = DrivetrainCommand()
         self.rotKp = Calibration("Auto Align Rotation Kp",5)
         self.maxRotSpd = Calibration("Auto Align Max Rotate Speed", 6)
-        self.hasCoralDbnc = True
+        self.hasCoralDbncd = True
         self.hasCoralDebouncer = Debouncer(0.5, Debouncer.DebounceType.kBoth)
+        
+        self.hasIncomingRotCmdDbncd = False
+        self.hasIncomingTransCmdDbncd = False
+
+        self.incomingRotDebouncer = Debouncer(0.1, Debouncer.DebounceType.kBoth)
+        self.incomingTransDebouncer = Debouncer(0.5, Debouncer.DebounceType.kBoth)
+
+        self.manualCmdInhibit = False
+
+        self.isActive = False
+
 
         self.curTargetRot = Rotation2d()
 
-    def setReefAutoSteerCmd(self, shouldAutoAlign: bool):
+    def _updateManualCmdInhibit(self, curCmd:DrivetrainCommand)->None:
+        incomingRotCmdRaw = abs(curCmd.velT) > ACTIVE_CMD_THRESH_ROT_RADPERS
+        incomingTransCmdRaw = abs(math.hypot(curCmd.velX, curCmd.velY)) > ACTIVE_CMD_THRESH_TRANS_MPS
+        self.hasIncomingRotCmdDbncd = self.incomingRotDebouncer.calculate(incomingRotCmdRaw)
+        self.hasIncomingTransCmdDbncd = self.incomingTransDebouncer.calculate(incomingTransCmdRaw)
+
+        if(self.hasIncomingRotCmdDbncd):
+            #any rotation command wins
+            self.manualCmdInhibit = True
+        elif(self.hasIncomingTransCmdDbncd):
+            #only go back once we're translating
+            self.manualCmdInhibit = False
+        else:
+            # Maintain old state
+            pass
+
+    def setAutoSteerActiveCmd(self, shouldAutoAlign: bool):
         self.reefAlignActive = shouldAutoAlign
 
+    def setAlignToProcessor(self, alignToProcessor: bool):
+        self.alignToProcessor = alignToProcessor
+
     def setHasCoral(self, hasCoral: bool):
-        self.hasCoralDbnc = self.hasCoralDebouncer.calculate(hasCoral)
+        self.hasCoralDbncd = self.hasCoralDebouncer.calculate(hasCoral)
         
-    def autoSteerIsRunning(self):
-        return self.reefAlignActive
-        
+    def isRunning(self):
+        return self.isActive
 
     def update(self, cmdIn: DrivetrainCommand, curPose: Pose2d) -> DrivetrainCommand:
-        if self.reefAlignActive:
+
+        self._updateManualCmdInhibit(cmdIn)
+
+        if self.reefAlignActive and not self.manualCmdInhibit:
+            self.isActive = True
             return self._calcAutoSteerDrivetrainCommand(curPose, cmdIn)
         else:
+            self.isActive = False
             return cmdIn
 
     def updateRotationAngle(self, curPose: Pose2d) -> None:
 
-        if(self.hasCoralDbnc):
+        if(self.alignToProcessor):
+            self.curTargetRot = transform(Rotation2d.fromDegrees(-90.0))
+        elif(self.hasCoralDbncd):
             targetLocation = transform(blueReefLocation)
             robotToTargetTrans = targetLocation - curPose.translation()
             self.curTargetRot = Rotation2d(robotToTargetTrans.X(), robotToTargetTrans.Y())

@@ -116,7 +116,8 @@ class MyRobot(wpilib.TimedRobot):
         self.stt.mark("Telemetry")
 
 
-        self.ledCtrl.setAutoDrive(self.autodrive.isRunning())
+        self.ledCtrl.setAutoDriveActive(self.autodrive.isRunning())
+        self.ledCtrl.setAutoSteerActive(self.autosteer.isRunning())
         self.ledCtrl.setStuck(self.autodrive.rfp.isStuck())
         self.ledCtrl.update()
         self.stt.mark("LED Ctrl")
@@ -164,9 +165,10 @@ class MyRobot(wpilib.TimedRobot):
 
 
         # There are indeed conditions on which we inhibit, but otherwise we're on
-        inhibitAutoSteer = self.dInt.getAutoSteerInhibit() or self.dInt.getAutoDrive() or self.dInt.getRobotRelative()
-        self.autosteer.setReefAutoSteerCmd(not inhibitAutoSteer)
+        inhibitAutoSteer = self.dInt.getRobotRelative()
+        self.autosteer.setAutoSteerActiveCmd(not inhibitAutoSteer)
         self.autosteer.setHasCoral(self.coralMan.hasCoralAnywhere())
+        self.autosteer.setAlignToProcessor(self.dInt.getAutoSteerToAlgaeProcessor())
         
         self.autodrive.setRequest(self.dInt.getAutoDrive())
 

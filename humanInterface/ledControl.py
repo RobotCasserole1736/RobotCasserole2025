@@ -10,7 +10,8 @@ GREEN = 0.35
 RED = 0.03
 ORANGE = 0.07
 YELLOW = 0.15
-BLUE = 0.75
+PURPLEISH = 0.75
+BLUE = 0.65
 OFF = 0.0
 
 class LEDControl(metaclass=Singleton):
@@ -26,6 +27,7 @@ class LEDControl(metaclass=Singleton):
     def __init__(self):
 
         self._isAutoDrive = False
+        self._isAutoSteer = False
         self._isStuck = False
         self._coralInterfers = False
         self.stuckDebounce = Debouncer(0.3, Debouncer.DebounceType.kFalling)
@@ -43,6 +45,8 @@ class LEDControl(metaclass=Singleton):
                 pwmVal = RED * BLINK
             else:
                 pwmVal = BLUE
+        elif(self._isAutoSteer):
+            pwmVal = PURPLEISH
         else:
             # Manual
             # Indicate coral interference and endgame
@@ -65,11 +69,17 @@ class LEDControl(metaclass=Singleton):
         else:
             return False
 
-    def setAutoDrive(self, isAutoDrive:bool):
+    def setAutoDriveActive(self, isAutoDrive:bool):
         """
         Set whether the LED should change color to indicate we are doing auto-drive now
         """
         self._isAutoDrive = isAutoDrive
+
+    def setAutoSteerActive(self, isAutoSteer:bool):
+        """
+        Set whether the LED should change color to indicate we are doing auto-steer now
+        """
+        self._isAutoSteer = isAutoSteer
 
     def setStuck(self, isStuck:bool):
         """

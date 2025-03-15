@@ -91,8 +91,8 @@ class DrivetrainControl(metaclass=Singleton):
 
         self.curCmd = self.curManCmd
         self.curCmd = Trajectory().update(self.curCmd, curEstPose)
-        self.curCmd = AutoDrive().update(self.curCmd, curEstPose)
         self.curCmd = AutoSteer().update(self.curCmd, curEstPose)
+        self.curCmd = AutoDrive().update(self.curCmd, curEstPose)
 
         self.curCmd.scaleBy(self.elevSpeedLimit)
 
