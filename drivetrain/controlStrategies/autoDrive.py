@@ -29,7 +29,6 @@ class AutoDrive(metaclass=Singleton):
         self.prevCallTime = Timer.getFPGATimestamp()
         self.prevPose = Pose2d()
         self.LenList = []
-        self.goalListTotwTransform = []
         self.dashboardConversionList = [9, 11, 6, 8, 3, 5, 0, 2, 15, 17, 12, 14] #used by getDashTargetPositionIndex() to convert the target numbers from the python standard to the dashboard/JS standard
         #^ Bottom is the side facing our driver station.
         #addLog("AutoDrive Proc Time", lambda:(self._plannerDur * 1000.0), "ms")
@@ -70,8 +69,6 @@ class AutoDrive(metaclass=Singleton):
         self.prevCallTime = curTime
 
         self.LenList.clear()
-
-        self.goalListTotwTransform.clear()
 
         retCmd = cmdIn # default - no auto driving
 

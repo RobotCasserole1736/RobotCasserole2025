@@ -2,6 +2,7 @@ import math
 from wpilib import Timer
 from wpimath.geometry import Pose2d, Rotation2d
 from drivetrain.drivetrainCommand import DrivetrainCommand
+from navigation.navConstants import getTransformedGoalList
 from utils.allianceTransformUtils import transform
 from utils.calibration import Calibration
 from utils.constants import FIELD_Y_M, blueReefLocation
@@ -33,6 +34,8 @@ class AutoSteer(metaclass=Singleton):
         self.incomingTransDebouncer = Debouncer(0.5, Debouncer.DebounceType.kBoth)
 
         self.manualCmdInhibit = False
+
+        self.lenList= []
 
         self.isActive = False
 
@@ -80,10 +83,18 @@ class AutoSteer(metaclass=Singleton):
 
     def updateRotationAngle(self, curPose: Pose2d) -> None:
 
+        self.lenList.clear()
+
         if(self.alignToProcessor):
             self.curTargetRot = transform(Rotation2d.fromDegrees(-90.0))
         elif(self.hasCoralDbncd):
-            targetLocation = transform(blueReefLocation)
+            goalListTot = getTransformedGoalList()
+
+            for goalOption in goalListTot:
+                goalWTransform = goalOption.translation()
+                self.lenList.append(goalWTransform.distance(curPose.translation()))
+            primeTargetIndex = self.lenList.index(min(self.lenList))
+            targetLocation = goalListTot[primeTargetIndex].translation()
             robotToTargetTrans = targetLocation - curPose.translation()
             self.curTargetRot = Rotation2d(robotToTargetTrans.X(), robotToTargetTrans.Y())
         else:
