@@ -39,26 +39,33 @@ class LEDControl(metaclass=Singleton):
         """
         stuckDebounced = self.stuckDebounce.calculate(self._isStuck)
 
-        if(self._isAutoDrive):
-            # Autos - blue for normal, blinky red for issues
+        if(self._coralInterfers):
+            # Indicate coral interference as first priority
+            pwmVal = YELLOW * BLINK
+
+        elif(self._isAutoDrive):
+            # Autos - purpley for normal, red for issues
             if(stuckDebounced):
-                pwmVal = RED * BLINK
+                pwmVal = RED
             else:
-                pwmVal = BLUE
+                pwmVal = PURPLEISH
+
         elif(self._isAutoSteer):
-            pwmVal = PURPLEISH
+            # Auto-Steering
+            if( self._isEndgame() ):
+                # Endgame - blinky blue
+                pwmVal = BLUE * BLINK
+            else:
+                # Nominal autodrive
+                pwmVal = BLUE 
         else:
             # Manual
-            # Indicate coral interference and endgame
-            if(self._coralInterfers):
-                pwmVal = YELLOW * BLINK
+            if( self._isEndgame() ):
+                # Endgame - blinky green
+                pwmVal = GREEN * BLINK
             else:
-                if( self._isEndgame() ):
-                    # Endgame - solid Orange-ish?
-                    pwmVal = ORANGE
-                else:
-                    # Nominal enabled. Green is good!
-                    pwmVal = GREEN
+                # Nominal enabled. Green is good!
+                pwmVal = GREEN 
 
         self.ledPWMOutput.set(pwmVal)
 

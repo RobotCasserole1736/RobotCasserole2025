@@ -164,9 +164,9 @@ class MyRobot(wpilib.TimedRobot):
         self.driveTrain.setManualCmd(self.dInt.getCmd(), self.dInt.getRobotRelative())
 
 
-        # There are indeed conditions on which we inhibit, but otherwise we're on
-        inhibitAutoSteer = self.dInt.getRobotRelative()
-        self.autosteer.setAutoSteerActiveCmd(not inhibitAutoSteer)
+        # We're enabled as long as the driver is commanding it, and we're _not_ trying to control robot relative.
+        enableAutoSteer = not self.dInt.getRobotRelative() and self.dInt.getAutoSteerEnable()
+        self.autosteer.setAutoSteerActiveCmd(enableAutoSteer)
         self.autosteer.setHasCoral(self.coralMan.hasCoralAnywhere())
         self.autosteer.setAlignToProcessor(self.dInt.getAutoSteerToAlgaeProcessor())
         
