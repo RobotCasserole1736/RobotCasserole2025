@@ -161,7 +161,13 @@ class MyRobot(wpilib.TimedRobot):
         # TODO - this is technically one loop delayed, which could induce lag
         self.driveTrain.setElevLimiter(self.elev.getDtSpeedLimitFactor())
         self.driveTrain.setManualCmd(self.dInt.getCmd(), self.dInt.getRobotRelative())
-        self.autosteer.setReefAutoSteerCmd(self.dInt.getAutoSteer())
+
+
+        # There are indeed conditions on which we inhibit, but otherwise we're on
+        inhibitAutoSteer = self.dInt.getAutoSteerInhibit() or self.dInt.getAutoDrive() or self.dInt.getRobotRelative()
+        self.autosteer.setReefAutoSteerCmd(not inhibitAutoSteer)
+        self.autosteer.setHasCoral(self.coralMan.hasCoralAnywhere())
+        
         self.autodrive.setRequest(self.dInt.getAutoDrive())
 
         self.algaeIntake.setInput(self.oInt.getIntakeAlgae(),self.oInt.getEjectAlgae(), self.oInt.getAlgaeManipCmd())

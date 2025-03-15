@@ -75,3 +75,6 @@ class CoralManipulatorControl(metaclass=Singleton):
 
     def setAtL1(self, isAtL1: bool) -> None:
         self.atL1 = isAtL1
+
+    def hasCoralAnywhere(self) -> bool:
+        return self._backSeesCoral() or self._frontSeesCoral()
