@@ -29,7 +29,7 @@ class DriverInterface:
         self.velTSlewRateLimiter = SlewRateLimiter(rateLimit=MAX_ROTATE_ACCEL_RAD_PER_SEC_2)
 
         # Navigation commands
-        self.autoDrive = False
+        self.autoDriveCmd = False
         self.autoSteerToAlgaeProcessor = False
         self.createDebugObstacle = False
 
@@ -38,10 +38,13 @@ class DriverInterface:
         #utility - use robot-relative commands
         self.robotRelative = False
 
+        self.autoSteerEnable = True
+
         # Logging
         addLog("DI FwdRev Cmd", lambda: self.velXCmd, "mps")
         addLog("DI Strafe Cmd", lambda: self.velYCmd, "mps")
         addLog("DI Rot Cmd", lambda: self.velTCmd, "radps")
+        addLog("DI AutoSteer Enable", lambda: self.autoSteerEnable, "radps")
         #addLog("DI gyroResetCmd", lambda: self.gyroResetCmd, "bool")
         #addLog("DI autoDriveToSpeaker", lambda: self.autoDriveToSpeaker, "bool")
         #addLog("DI autoDriveToPickup", lambda: self.autoDriveToPickup, "bool")
@@ -88,9 +91,16 @@ class DriverInterface:
 
             self.gyroResetCmd = self.ctrl.getAButton()
 
-            self.autoDrive = self.ctrl.getBButton()
+            self.autoDriveCmd = self.ctrl.getBButton()
             self.autoSteerToAlgaeProcessor = self.ctrl.getXButton()
             self.createDebugObstacle = self.ctrl.getYButtonPressed()
+
+            if(self.ctrl.getBackButton()):
+                self.autoSteerEnable = False
+            elif(self.ctrl.getStartButton()):
+                self.autoSteerEnable = True
+            else:
+                pass
 
             self.connectedFault.setNoFault()
 
@@ -100,7 +110,7 @@ class DriverInterface:
             self.velYCmd = 0.0
             self.velTCmd = 0.0
             self.gyroResetCmd = False
-            self.autoDrive = False
+            self.autoDriveCmd = False
             self.robotRelative = False
             self.createDebugObstacle = False
             if(DriverStation.isFMSAttached()):
@@ -114,7 +124,10 @@ class DriverInterface:
         return retval
 
     def getAutoDrive(self) -> bool:
-        return self.autoDrive
+        return self.autoDriveCmd
+    
+    def getAutoSteerEnable(self) -> bool:
+        return self.autoSteerEnable
 
     def getAutoSteerToAlgaeProcessor(self) -> bool:
         return self.autoSteerToAlgaeProcessor
