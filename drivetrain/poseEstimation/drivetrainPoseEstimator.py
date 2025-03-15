@@ -133,9 +133,11 @@ class DrivetrainPoseEstimator:
         self._curEstPose = self._poseEst.getEstimatedPosition()
 
         # make sure we're not inside the reef somewhow
+        startPoseEst = self._curEstPose
         self._curEstPose = self._adjustOutsideReef(self._curEstPose, blueReefLocation)
         self._curEstPose = self._adjustOutsideReef(self._curEstPose, redReefLocation)
-        self._poseEst.resetTranslation(self._curEstPose.translation())
+        if(startPoseEst != self._curEstPose):
+            self._poseEst.resetTranslation(self._curEstPose.translation())
 
         # Record the estimate to telemetry/logging-
         self._telemetry.update(self._curEstPose, [x.angle for x in curModulePositions])
