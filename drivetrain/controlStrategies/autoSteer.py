@@ -100,29 +100,8 @@ class AutoSteer(metaclass=Singleton):
                 goalWTransform = goalOption.translation()
                 self.lenList.append(goalWTransform.distance(curPose.translation()))
             primeTargetIndex = self.lenList.index(min(self.lenList))
-            primeTarget = goalListTot[primeTargetIndex]
-            #pop the nearest in order to find the second nearest
-            self.lenList.pop(primeTargetIndex)
-            #second nearest
-            secondTargetIndex = self.lenList.index(min(self.lenList))
-            secondTarget = goalListTot[secondTargetIndex]
-            #if they're close enough, look at rotation 
-            closeEnough = abs(secondTarget.translation().distance(curPose.translation()) - primeTarget.translation().distance(curPose.translation())) <= 1.0
-            difAngle = abs(secondTarget.rotation().degrees() - primeTarget.rotation().degrees()) >= 10
-            if (closeEnough and difAngle):
-                #checking rotation
-                #dif in degrees
-                curRot = curPose.rotation().degrees()
-                primeTargetDiff = abs(primeTarget.rotation().degrees() - curRot)
-                secondTargetDiff = abs(secondTarget.rotation().degrees() - curRot)
-                if primeTargetDiff <= secondTargetDiff:
-                    self.targetIndexNumber = primeTargetIndex
-                else:
-                    self.targetIndexNumber = secondTargetIndex
-            else:
-                self.targetIndexNumber = primeTargetIndex
+            targetLocation = goalListTot[primeTargetIndex].translation()
 
-            targetLocation = goalListTot[self.targetIndexNumber].translation()
             robotToTargetTrans = targetLocation - curPose.translation()
             self.curTargetRot = Rotation2d(robotToTargetTrans.X(), robotToTargetTrans.Y())
             self.curGoalPose = Pose2d(targetLocation, Rotation2d())

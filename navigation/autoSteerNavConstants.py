@@ -125,7 +125,7 @@ SCORE_PEG_CENTER_DIST = inchesToMeters(6.48)
 
 #Arbitrary number for where we want to autosteer point towards
 #how far (positive number) is the edge of the pink coral pipes from the reef edge
-SCORE_POINT_DIST = inchesToMeters(1)
+SCORE_POINT_DIST = inchesToMeters(0)
 
 # Distance we want to be from the reef center while scoring
 # Sum of reef size and robot size.
