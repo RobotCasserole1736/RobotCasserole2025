@@ -37,7 +37,7 @@ class ElevatorControl(metaclass=Singleton):
         self.AL3_Height = Calibration(name="Elevator Preset Height Algae L3", units="m", default=1.075)
 
 
-        self.manAdjMaxVoltage = Calibration(name="Elevator Manual Adj Max Voltage", default=2.0, units="V")
+        self.manAdjMaxVoltage = Calibration(name="Elevator Manual Adj Max Voltage", default=3.0, units="V")
 
         self.curHeightGoal = ElevatorLevelCmd.NO_CMD
         self.heightGoal = self.L1_Height.get()
@@ -84,8 +84,9 @@ class ElevatorControl(metaclass=Singleton):
         # Based on elevator height, limit the max speed of the drivetrain
         # Limits the drivetrain speed by a factor depending on elevator height
         self.dtSpeedLimitMap = MapLookup2D([
+            # (elevator measured height, Dt Limit fraction)
             (0.0, 1.0),
-            (1.0, 0.2) # TODO - tweak and tune as needed, these were randomly chosen by Chris
+            (1.0, 0.15) # TODO - tweak and tune as needed, these were randomly chosen by Chris
         ])
 
         # Add some helpful log values

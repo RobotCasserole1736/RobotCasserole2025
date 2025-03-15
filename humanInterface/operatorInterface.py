@@ -30,11 +30,11 @@ class OperatorInterface:
         # Output: Frac of max elevator manual adjust voltage
         self.elevManCmdLookup = MapLookup2D([
             (-1.0,  -1.0),
-            (-0.25, -1.0),
+            (-0.4,  -1.0),
             (-0.1,   0.0), #deadzone
             (0.0,    0.0),
             (0.1,    0.0), #deadzone
-            (0.25,   1.0),
+            (0.4,    1.0),
             (1.0,    1.0)
         ])
         

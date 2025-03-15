@@ -39,9 +39,9 @@ class DriverInterface:
         self.robotRelative = False
 
         # Logging
-        #addLog("DI FwdRev Cmd", lambda: self.velXCmd, "mps")
-        #addLog("DI Strafe Cmd", lambda: self.velYCmd, "mps")
-        #addLog("DI Rot Cmd", lambda: self.velTCmd, "radps")
+        addLog("DI FwdRev Cmd", lambda: self.velXCmd, "mps")
+        addLog("DI Strafe Cmd", lambda: self.velYCmd, "mps")
+        addLog("DI Rot Cmd", lambda: self.velTCmd, "radps")
         #addLog("DI gyroResetCmd", lambda: self.gyroResetCmd, "bool")
         #addLog("DI autoDriveToSpeaker", lambda: self.autoDriveToSpeaker, "bool")
         #addLog("DI autoDriveToPickup", lambda: self.autoDriveToPickup, "bool")
@@ -69,7 +69,7 @@ class DriverInterface:
             vRotJoyWithDeadband = applyDeadband(vRotJoyRaw, 0.05)
 
             # TODO - if the driver wants a slow or sprint button, add it here.
-            slowMult = 1.0 if (self.ctrl.getRightBumper()) else 0.5
+            slowMult = 1.0 if (self.ctrl.getRightBumper()) else 0.35
 
             # Shape velocity command
             velCmdXRaw = vXJoyWithDeadband * MAX_STRAFE_SPEED_MPS * slowMult
