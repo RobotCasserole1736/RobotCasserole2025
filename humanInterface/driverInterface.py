@@ -40,6 +40,8 @@ class DriverInterface:
 
         self.autoSteerEnable = True
 
+        self.ejectCoral = False
+
         # Logging
         addLog("DI FwdRev Cmd", lambda: self.velXCmd, "mps")
         addLog("DI Strafe Cmd", lambda: self.velYCmd, "mps")
@@ -95,6 +97,8 @@ class DriverInterface:
             self.autoSteerToAlgaeProcessor = self.ctrl.getXButton()
             self.autoSteerDownfield = self.ctrl.getYButton()
 
+            self.ejectCoral = self.ctrl.getRightTriggerAxis() > .5
+
             if(self.ctrl.getBackButton()):
                 self.autoSteerEnable = False
             elif(self.ctrl.getStartButton()):
@@ -140,6 +144,9 @@ class DriverInterface:
 
     def getCreateObstacle(self) -> bool:
         return self.createDebugObstacle
+
+    def getEjectCoral(self) -> bool:
+        return self.ejectCoral
 
     def getRobotRelative(self):
         return self.robotRelative

@@ -199,7 +199,7 @@ class MyRobot(wpilib.TimedRobot):
         #        obs = PointObstacle(location=(ct+tf), strength=0.5)
         #        self.autodrive.rfp.addObstacleObservation(obs)
 
-        self.coralMan.setCoralCmd(self.oInt.getCoralCmd())
+        self.coralMan.setCoralCmd(self.oInt.getCoralCmd(), self.dInt.getEjectCoral())
         self.coralMan.setAtL1(self.elev.getHeightM() < (self.elev.L1_Height.get() + 0.1))
 
         self.elev.setSafeToLeaveL1(self.coralMan.getCoralSafeToMove())

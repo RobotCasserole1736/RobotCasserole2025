@@ -32,7 +32,7 @@ class ElevatorControl(metaclass=Singleton):
         self.L1_Height = Calibration(name="Elevator Preset Height L1", units="m", default=0.0)
         self.L2_Height = Calibration(name="Elevator Preset Height L2", units="m", default=.1847)
         self.L3_Height = Calibration(name="Elevator Preset Height L3", units="m", default=.6139)
-        self.L4_Height = Calibration(name="Elevator Preset Height L4", units="m", default=1.27)
+        self.L4_Height = Calibration(name="Elevator Preset Height L4", units="m", default=1.28)
         self.AL2_Height = Calibration(name="Elevator Preset Height Algae L2", units="m", default=.760)
         self.AL3_Height = Calibration(name="Elevator Preset Height Algae L3", units="m", default=1.14)
         self.BARGE_Height = Calibration(name="Elevator Preset Height Algae Barge", units="m", default=1.31)

@@ -69,9 +69,12 @@ class CoralManipulatorControl(metaclass=Singleton):
     def _backSeesCoral(self) -> bool:
         return not self.gamepieceSensorB.get() # True means no coral seen. False means sensor sees some coral.
 
-    def setCoralCmd(self, cmdStateIn: CoralManState) -> None:
+    def setCoralCmd(self, cmdStateIn: CoralManState, ejectCoral=False) -> None:
         #we need commands to tell us what the coral motors should be doing
-        self.coralCurState = cmdStateIn
+        if ejectCoral:
+            self.coralCurState = CoralManState.EJECTING
+        else:
+            self.coralCurState = cmdStateIn
 
     def setAtL1(self, isAtL1: bool) -> None:
         self.atL1 = isAtL1

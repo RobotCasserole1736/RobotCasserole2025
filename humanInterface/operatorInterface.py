@@ -78,9 +78,7 @@ class OperatorInterface:
                 self.ctrl.setRumble(XboxController.RumbleType.kBothRumble, 0.0)
 
 
-            if self.ctrl.getRightTriggerAxis() > .2: #Currently Prioritizes right trigger 
-                self.coralCmd = CoralManState.EJECTING
-            elif self.ctrl.getLeftTriggerAxis() > .2:
+            if self.ctrl.getLeftTriggerAxis() > .2:
                 self.coralCmd = CoralManState.INTAKING
             else:
                 self.coralCmd = CoralManState.DISABLED
@@ -111,7 +109,6 @@ class OperatorInterface:
             # Dpad right = Stow Position
             elif 45 < self.ctrl.getPOV() < 135:
                 self.algaeManipCmd = AlgaeWristState.STOW
-                self.elevatorLevelCmd = ElevatorLevelCmd.L1
             # Dpad left = Reef Position, L2
             elif 225 < self.ctrl.getPOV() < 315:
                 self.algaeManipCmd = AlgaeWristState.REEF
