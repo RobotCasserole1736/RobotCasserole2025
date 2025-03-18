@@ -169,6 +169,7 @@ class MyRobot(wpilib.TimedRobot):
         self.autosteer.setAutoSteerActiveCmd(enableAutoSteer)
         self.autosteer.setHasCoral(self.coralMan.hasCoralAnywhere())
         self.autosteer.setAlignToProcessor(self.dInt.getAutoSteerToAlgaeProcessor())
+        self.autosteer.setAlignDownfield(self.dInt.getAutoSteerDownfield())
         
         self.autodrive.setRequest(self.dInt.getAutoDrive())
 

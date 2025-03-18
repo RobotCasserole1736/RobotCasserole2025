@@ -33,8 +33,9 @@ class ElevatorControl(metaclass=Singleton):
         self.L2_Height = Calibration(name="Elevator Preset Height L2", units="m", default=.1847)
         self.L3_Height = Calibration(name="Elevator Preset Height L3", units="m", default=.6139)
         self.L4_Height = Calibration(name="Elevator Preset Height L4", units="m", default=1.27)
-        self.AL2_Height = Calibration(name="Elevator Preset Height Algae L2", units="m", default=.638)
-        self.AL3_Height = Calibration(name="Elevator Preset Height Algae L3", units="m", default=1.075)
+        self.AL2_Height = Calibration(name="Elevator Preset Height Algae L2", units="m", default=.760)
+        self.AL3_Height = Calibration(name="Elevator Preset Height Algae L3", units="m", default=1.14)
+        self.BARGE_Height = Calibration(name="Elevator Preset Height Algae Barge", units="m", default=1.31)
 
 
         self.manAdjMaxVoltage = Calibration(name="Elevator Manual Adj Max Voltage", default=3.0, units="V")
@@ -139,6 +140,9 @@ class ElevatorControl(metaclass=Singleton):
             self.heightGoal = self.AL2_Height.get()
         elif self.curHeightGoal == ElevatorLevelCmd.AL3:
             self.heightGoal = self.AL3_Height.get()
+        elif self.curHeightGoal == ElevatorLevelCmd.BARGE:
+            self.heightGoal = self.BARGE_Height.get()
+
            
         if not self.coralSafe:
             # Coral blocks motion. Modify goals/commands as needed.

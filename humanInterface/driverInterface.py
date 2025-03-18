@@ -31,7 +31,7 @@ class DriverInterface:
         # Navigation commands
         self.autoDriveCmd = False
         self.autoSteerToAlgaeProcessor = False
-        self.createDebugObstacle = False
+        self.autoSteerDownfield = False
 
         # Utility - reset to zero-angle at the current pose
         self.gyroResetCmd = False
@@ -93,7 +93,7 @@ class DriverInterface:
 
             self.autoDriveCmd = self.ctrl.getBButton()
             self.autoSteerToAlgaeProcessor = self.ctrl.getXButton()
-            self.createDebugObstacle = self.ctrl.getYButtonPressed()
+            self.autoSteerDownfield = self.ctrl.getYButton()
 
             if(self.ctrl.getBackButton()):
                 self.autoSteerEnable = False
@@ -131,6 +131,9 @@ class DriverInterface:
 
     def getAutoSteerToAlgaeProcessor(self) -> bool:
         return self.autoSteerToAlgaeProcessor
+    
+    def getAutoSteerDownfield(self) -> bool:
+        return self.autoSteerDownfield
 
     def getGyroResetCmd(self) -> bool:
         return self.gyroResetCmd

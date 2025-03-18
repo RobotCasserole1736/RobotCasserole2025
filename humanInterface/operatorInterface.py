@@ -96,13 +96,22 @@ class OperatorInterface:
                 # But leave intake the same
 
             # Set Algae Manipulator command
-            # Dpad down = Intake off ground Position
+            # Dpad down = Processor Score Position
             if 135 < self.ctrl.getPOV() < 225:
+                self.algaeManipCmd = AlgaeWristState.PROCESSOR
+                self.elevatorLevelCmd = ElevatorLevelCmd.L1
+            #right joystick up = barge shot
+            elif self.ctrl.getRightY() < -.5:
+                self.algaeManipCmd = AlgaeWristState.BARGE
+                self.elevatorLevelCmd = ElevatorLevelCmd.BARGE
+            #right joystick down = intake off ground
+            elif self.ctrl.getRightY() > .5:
                 self.algaeManipCmd = AlgaeWristState.INTAKEOFFGROUND
                 self.elevatorLevelCmd = ElevatorLevelCmd.L1
             # Dpad right = Stow Position
             elif 45 < self.ctrl.getPOV() < 135:
                 self.algaeManipCmd = AlgaeWristState.STOW
+                self.elevatorLevelCmd = ElevatorLevelCmd.L1
             # Dpad left = Reef Position, L2
             elif 225 < self.ctrl.getPOV() < 315:
                 self.algaeManipCmd = AlgaeWristState.REEF

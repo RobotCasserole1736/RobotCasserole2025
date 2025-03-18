@@ -66,6 +66,9 @@ class AutoSteer(metaclass=Singleton):
     def setAlignToProcessor(self, alignToProcessor: bool):
         self.alignToProcessor = alignToProcessor
 
+    def setAlignDownfield(self, alignDownField: bool):
+        self.alignDownfield = alignDownField
+
     def setHasCoral(self, hasCoral: bool):
         self.hasCoralDbncd = self.hasCoralDebouncer.calculate(hasCoral)
         
@@ -93,6 +96,8 @@ class AutoSteer(metaclass=Singleton):
 
         if(self.alignToProcessor):
             self.curTargetRot = transform(Rotation2d.fromDegrees(-90.0))
+        if(self.alignDownfield):
+            self.curTargetRot = transform(Rotation2d.fromDegrees(0.0))
         elif(self.hasCoralDbncd):
             goalListTot = getTransformedGoalList()
 
