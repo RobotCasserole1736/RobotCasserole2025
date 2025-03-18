@@ -96,7 +96,7 @@ class AutoSteer(metaclass=Singleton):
 
         if(self.alignToProcessor):
             self.curTargetRot = transform(Rotation2d.fromDegrees(-90.0))
-        if(self.alignDownfield):
+        elif(self.alignDownfield):
             self.curTargetRot = transform(Rotation2d.fromDegrees(0.0))
         elif(self.hasCoralDbncd):
             goalListTot = getTransformedGoalList()
