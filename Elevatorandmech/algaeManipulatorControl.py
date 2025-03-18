@@ -30,7 +30,7 @@ class AlgaeWristControl(metaclass=Singleton):
         self.inPos = Calibration(name="Algae Wrist Barge Position", default = 80, units="deg")
         self.stowPos = Calibration(name="Algae Wrist Stow Position", default = 95, units="deg")
         self.reefPos = Calibration(name="Algae Wrist Reef Position", default = -20, units="deg")
-        self.procPos = Calibration(name="Algae Wrist Processor Position", default = 0, units="deg")
+        self.procPos = Calibration(name="Algae Wrist Processor Position", default = 10, units="deg")
         self.intakeOffGroundPos = Calibration(name="Algae Wrist Intake Off Ground Position", default = -20, units="deg")
         
         #positions

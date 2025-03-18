@@ -71,6 +71,7 @@ class CoralManipulatorControl(metaclass=Singleton):
 
     def setCoralCmd(self, cmdStateIn: CoralManState, ejectCoral=False) -> None:
         #we need commands to tell us what the coral motors should be doing
+        #Operator also has the ability to eject, in case of emergency 
         if ejectCoral:
             self.coralCurState = CoralManState.EJECTING
         else:
