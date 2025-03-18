@@ -18,13 +18,13 @@ class AlgaeWristControl(metaclass=Singleton):
         #one important assumption we're making right now is that we don't need limits on the algae manipulator based on elevator height
 
         #motor and encoder
-        self.wristMotor = WrapperedSparkMax(ALGAE_WRIST_CANID, "AlgaeWristMotor", brakeMode=True)
+        self.wristMotor = WrapperedSparkMax(ALGAE_WRIST_CANID, "AlgaeWristMotor", brakeMode=True, currentLimitA=20.0)
         self.algaeAbsEnc = WrapperedThroughBoreHexEncoder(port=ALGAE_ENC_PORT, name="Algae Wrist Enc", mountOffsetRad=deg2Rad(ALGAE_ANGLE_ABS_POS_ENC_OFFSET), dirInverted=True)
 
         #PID stuff calibrations
         self.kP = Calibration(name="Algae Wrist kP", default=.6, units="V/degErr")
-        self.maxV = Calibration(name="Algae Wrist maxV", default=4.0, units="V")
-        self.deadzone = Calibration(name="Algae Wrist deadzone", default=8.0, units="deg")
+        self.maxV = Calibration(name="Algae Wrist maxV", default=6.0, units="V")
+        self.deadzone = Calibration(name="Algae Wrist deadzone", default=4.0, units="deg")
 
         #position calibrations... an angle in degrees. Assumingt 0 is horizontal, - is down, etc.  
         self.inPos = Calibration(name="Algae Wrist Barge Position", default = 80, units="deg")
@@ -38,7 +38,7 @@ class AlgaeWristControl(metaclass=Singleton):
         self.curPosCmdDeg = self.stowPos.get()
         self.pos = AlgaeWristState.NOTHING
 
-        #addLog("Algae Wrist Desired Angle",lambda: self.curPosCmdDeg, "deg")
+        addLog("Algae Wrist Desired Angle",lambda: self.curPosCmdDeg, "deg")
         addLog("Algae Wrist Actual Angle", lambda: rad2Deg(self.getAngleRad()), "deg")
 
     def setDesPos(self, desState : AlgaeWristState):
