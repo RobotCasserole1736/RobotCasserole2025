@@ -19,7 +19,7 @@ ACTIVE_CMD_THRESH_ROT_RADPERS = deg2Rad(10)
 
 class AutoSteer(metaclass=Singleton):
     def __init__(self):
-        self.reefAlignActive = False
+        self.isActiveCmd = False
         self.alignToProcessor = False
         self.returnDriveTrainCommand = DrivetrainCommand()
         self.rotKp = Calibration("Auto Align Rotation Kp",5)
@@ -44,6 +44,11 @@ class AutoSteer(metaclass=Singleton):
 
         self.curTargetRot = Rotation2d()
 
+    def setInhibited(self):
+        # If we want to flip states one-shot back to inactive, call this
+        # Should happen at teleop init to prevent motion without driver command
+        self.manualCmdInhibit = True
+
     def _updateManualCmdInhibit(self, curCmd:DrivetrainCommand)->None:
         incomingRotCmdRaw = abs(curCmd.velT) > ACTIVE_CMD_THRESH_ROT_RADPERS
         incomingTransCmdRaw = abs(math.hypot(curCmd.velX, curCmd.velY)) > ACTIVE_CMD_THRESH_TRANS_MPS
@@ -61,7 +66,7 @@ class AutoSteer(metaclass=Singleton):
             pass
 
     def setAutoSteerActiveCmd(self, shouldAutoAlign: bool):
-        self.reefAlignActive = shouldAutoAlign
+        self.isActiveCmd = shouldAutoAlign
 
     def setAlignToProcessor(self, alignToProcessor: bool):
         self.alignToProcessor = alignToProcessor
@@ -79,7 +84,7 @@ class AutoSteer(metaclass=Singleton):
 
         self._updateManualCmdInhibit(cmdIn)
 
-        if self.reefAlignActive and not self.manualCmdInhibit:
+        if self.isActiveCmd and not self.manualCmdInhibit:
             self.isActive = True
             return self._calcAutoSteerDrivetrainCommand(curPose, cmdIn)
         else:
