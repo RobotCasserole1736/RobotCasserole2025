@@ -142,6 +142,9 @@ class MyRobot(wpilib.TimedRobot):
 
     def autonomousPeriodic(self):
 
+        # Do not run autosteer in autonomous
+        self.autosteer.setAutoSteerActiveCmd(False)
+
         self.autoSequencer.update()
 
         # Operators cannot control in autonomous
@@ -156,7 +159,7 @@ class MyRobot(wpilib.TimedRobot):
         # clear existing telemetry trajectory
         self.driveTrain.poseEst._telemetry.setCurAutoTrajectory(None)
         # Ensure auto-steer starts disabled, no motion without driver command
-        AutoSteer().setInhibited()
+        self.autosteer.setInhibited()
 
 
     def teleopPeriodic(self):
