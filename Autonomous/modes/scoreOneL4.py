@@ -18,8 +18,8 @@ class ScoreOneL4(Mode):
         self.pathCmd = DrivePathCommand("scoreOneL4")
         self.elev = ElevatorHeightCommand(ElevatorLevelCmd.L4)
         self.eject = EjectCoralCommand()
-        self.elevReturn = ElevatorHeightCommand(ElevatorLevelCmd.L1)
-        self.cmdGroup = SequentialCommandGroup([self.pathCmd, self.elev, self.eject, self.elevReturn ])
+        self.cmdGroup = SequentialCommandGroup([self.pathCmd, self.elev, self.eject])
+        
     def getCmdGroup(self):
         # Just return the path command normally, since we're only doing one path. 
         # When changing to the return self.pathCmd, get rid of the pass
