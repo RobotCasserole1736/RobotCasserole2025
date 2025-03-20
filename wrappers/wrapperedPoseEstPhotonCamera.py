@@ -65,9 +65,10 @@ class WrapperedPoseEstPhotonCamera:
             return
         
         # Periodically trigger a photo capture
-        if( (startTime - self.lastCaptureTime) > self.CAP_PERIOD_SEC):
-            self.lastCaptureTime = startTime
-            self.cam.takeOutputSnapshot()
+        if(wpilib.DriverStation.isEnabled()):
+            if( (startTime - self.lastCaptureTime) > self.CAP_PERIOD_SEC):
+                self.lastCaptureTime = startTime
+                self.cam.takeOutputSnapshot()
         
 
         # Grab whatever the camera last reported for observations in all camera frames
