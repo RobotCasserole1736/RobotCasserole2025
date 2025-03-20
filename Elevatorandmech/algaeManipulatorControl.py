@@ -100,7 +100,7 @@ class AlgeaIntakeControl(metaclass=Singleton):
         self.intakeCommandState = False
         self.ejectCommandState = False
        
-        self.algaeMotor = WrapperedSparkMax(ALGAE_INT_CANID, "AlgaeIntakeMotor", brakeMode=True, currentLimitA=10)
+        self.algaeMotor = WrapperedSparkMax(ALGAE_INT_CANID, "AlgaeIntakeMotor", brakeMode=True, currentLimitA=30)
 
         self.intakeVoltageCal = Calibration("Algae Manipulator IntakeVoltage", 12, "V")
         self.ejectVoltageCal = Calibration("Algae Manipulator EjectVoltage", -12, "V")

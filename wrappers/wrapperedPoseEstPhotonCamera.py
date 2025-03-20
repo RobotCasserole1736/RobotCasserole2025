@@ -45,6 +45,10 @@ class WrapperedPoseEstPhotonCamera:
         self.prevTimestampSec = 0.0
         self.singleTagModeTagList = None #not currently used
 
+
+        self.lastCaptureTime = wpilib.Timer.getFPGATimestamp()
+        self.CAP_PERIOD_SEC = 2.0
+
     def setSingleTagMode(self, tag:list[int]|None):
         self.singleTagModeTagList = tag
 
@@ -59,6 +63,12 @@ class WrapperedPoseEstPhotonCamera:
             # Faulted - no estimates, just return.
             self.disconFault.setFaulted()
             return
+        
+        # Periodically trigger a photo capture
+        if( (startTime - self.lastCaptureTime) > self.CAP_PERIOD_SEC):
+            self.lastCaptureTime = startTime
+            self.cam.takeOutputSnapshot()
+        
 
         # Grab whatever the camera last reported for observations in all camera frames
         res = self.cam.getLatestResult()
