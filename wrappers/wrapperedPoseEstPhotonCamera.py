@@ -109,7 +109,7 @@ class WrapperedPoseEstPhotonCamera:
                             matchesSingleTag = (self.singleTagModeTagList is None or tgtID in self.singleTagModeTagList)
 
                             # Discard the bad tags on our practice field at least
-                            isHorrible = tgtID in HUMAN_STATION_TAG_IDS
+                            isHorrible = tgtID in HUMAN_STATION_TAG_IDS or tgtID in BARGE_TAG_IDS
 
                             # is on field
                             onField = self._poseIsOnField(poseCandidate)
