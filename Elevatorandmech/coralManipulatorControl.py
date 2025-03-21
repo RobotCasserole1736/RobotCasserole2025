@@ -20,7 +20,8 @@ class CoralManipulatorControl(metaclass=Singleton):
         self.motorIntakeFastVoltage =  Calibration("MotorIntakeFast", 10.0, "V")
         self.motorIntakeSlowVoltage = Calibration("MotorIntakeSlow", 3.0, "V")
         self.motorEjectVoltage =  Calibration("MotorEject", 12.0, "V")
-        self.RMotorEjectVoltageL1 = Calibration("MotorEjectRForL1", 5.0, "V")
+        self.RMotorEjectVoltageL1 = Calibration("MotorEjectRForL1", 4.0, "V")
+        self.LMotorEjectVoltageL1 = Calibration("MotorEjectLForL1", 10.0, "V")
         self.atL1 = False
 
         addLog("Coral Enum", lambda:self.coralCurState.value, "state")
@@ -30,11 +31,13 @@ class CoralManipulatorControl(metaclass=Singleton):
         # Eject if we want to eject
         if self.coralCurState == CoralManState.EJECTING:
             EVoltage = self.motorEjectVoltage.get()
-            self.coralMotorL.setVoltage(EVoltage)
             if self.atL1:
                 self.coralMotorR.setVoltage(self.RMotorEjectVoltageL1.get())
+                self.coralMotorL.setVoltage(self.LMotorEjectVoltageL1.get())
             else:
                 self.coralMotorR.setVoltage(EVoltage)
+                self.coralMotorL.setVoltage(EVoltage)
+
         #Next, if we have a game piece, we don't want to do anything
         elif self.getCheckGamePiece():
             self.coralCurState = CoralManState.HOLDING
