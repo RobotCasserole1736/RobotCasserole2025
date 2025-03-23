@@ -20,8 +20,8 @@ class CoralManipulatorControl(metaclass=Singleton):
         self.motorIntakeFastVoltage =  Calibration("MotorIntakeFast", 10.0, "V")
         self.motorIntakeSlowVoltage = Calibration("MotorIntakeSlow", 3.0, "V")
         self.motorEjectVoltage =  Calibration("MotorEject", 12.0, "V")
-        self.RMotorEjectVoltageL1 = Calibration("MotorEjectRForL1", 4.0, "V")
-        self.LMotorEjectVoltageL1 = Calibration("MotorEjectLForL1", 10.0, "V")
+        self.RMotorEjectVoltageL1 = Calibration("MotorEjectRForL1", 3.0, "V")
+        self.LMotorEjectVoltageL1 = Calibration("MotorEjectLForL1", 9.0, "V")
         self.atL1 = False
 
         addLog("Coral Enum", lambda:self.coralCurState.value, "state")
