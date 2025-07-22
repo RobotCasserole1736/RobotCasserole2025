@@ -20,12 +20,8 @@ redReefLocation = Translation2d(FIELD_X_M - _REEF_LOC_X_M, _REEF_LOC_Y_M)
 #######################################################################################
 ## CAN ID'S
 #######################################################################################
-
 # Reserved_CANID = 0
-# Reserved_CANID = 1
-
-# Reserved_CANID = 0
-# Reserved_CANID = 1
+CORAL_IN_CANID = 1
 DT_FR_WHEEL_CANID = 2
 DT_FR_AZMTH_CANID = 3
 DT_FL_WHEEL_CANID = 4
@@ -37,8 +33,8 @@ DT_BL_AZMTH_CANID = 9
 ELEV_RM_CANID = 10
 ELEV_LM_CANID = 11
 ELEV_TOF_CANID = 12
-CORAL_L_CANID = 14
 CORAL_R_CANID = 13
+CORAL_L_CANID = 14
 ALGAE_INT_CANID = 15
 ALGAE_WRIST_CANID = 16
 CLIMB_CANID = 19

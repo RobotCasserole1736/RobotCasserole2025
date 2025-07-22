@@ -1,6 +1,6 @@
 from Elevatorandmech.ElevatorandMechConstants import CoralManState
 from utils.calibration import Calibration
-from utils.constants import CORAL_L_CANID, CORAL_R_CANID, CORAL_GAME_PIECE_B_PORT, CORAL_GAME_PIECE_F_PORT
+from utils.constants import CORAL_IN_CANID, CORAL_L_CANID, CORAL_R_CANID, CORAL_GAME_PIECE_B_PORT, CORAL_GAME_PIECE_F_PORT
 from utils.singleton import Singleton
 from utils.signalLogging import addLog
 from wpilib import DigitalInput
@@ -10,6 +10,7 @@ class CoralManipulatorControl(metaclass=Singleton):
 
     def __init__(self) -> None:
         self.coralCurState = CoralManState.DISABLED
+        self.coralMotorIn = WrapperedSparkMax(CORAL_IN_CANID, "CoralMotorIn", True, 10)
         self.coralMotorL = WrapperedSparkMax(CORAL_L_CANID, "CoralMotorL", True, 10)
         self.coralMotorR = WrapperedSparkMax(CORAL_R_CANID, "CoralMotorR", True, 10)
         self.coralMotorR.setInverted(True)
@@ -50,11 +51,13 @@ class CoralManipulatorControl(metaclass=Singleton):
         #if we are trying to intake and don't have a game piece on front and back, we want to intake at full speed
         elif self.coralCurState == CoralManState.INTAKING:
             self.coralMotorL.setVoltage(self.motorIntakeFastVoltage.get())
-            self.coralMotorR.setVoltage(self.motorIntakeFastVoltage.get())    
+            self.coralMotorR.setVoltage(self.motorIntakeFastVoltage.get())
+            self.coralMotorIn.setVoltage(self.motorIntakeFastVoltage.get())    
         else:
             # Disable otherwise
             self.coralMotorL.setVoltage(0)
             self.coralMotorR.setVoltage(0)
+            self.coralMotorIn.setVoltage(0)
 
     def getCheckGamePiece(self) -> bool:
         """We think the back sensor (the one the coral hits first) needs to be clear to have a game piece.
