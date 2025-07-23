@@ -32,9 +32,11 @@ class CoralManipulatorControl(metaclass=Singleton):
         # Eject if we want to eject
         if self.coralCurState == CoralManState.EJECTING:
             EVoltage = self.motorEjectVoltage.get()
+            self.coralMotorIn.setVoltage(-self.motorIntakeSlowVoltage.get())
             if self.atL1:
                 self.coralMotorR.setVoltage(self.RMotorEjectVoltageL1.get())
                 self.coralMotorL.setVoltage(self.LMotorEjectVoltageL1.get())
+                
             else:
                 self.coralMotorR.setVoltage(EVoltage)
                 self.coralMotorL.setVoltage(EVoltage)
@@ -44,15 +46,17 @@ class CoralManipulatorControl(metaclass=Singleton):
             self.coralCurState = CoralManState.HOLDING
             self.coralMotorL.setVoltage(self.motorHoldingVoltage.get())
             self.coralMotorR.setVoltage(self.motorHoldingVoltage.get())
+            self.coralMotorIn.setVoltage(0)
         #if we are close to being in the right position but aren't for any reason, we want to intake slowly
         elif self._frontSeesCoral() and self._backSeesCoral():
             self.coralMotorL.setVoltage(self.motorIntakeSlowVoltage.get())
             self.coralMotorR.setVoltage(self.motorIntakeSlowVoltage.get())
+            self.coralMotorIn.setVoltage(0)
         #if we are trying to intake and don't have a game piece on front and back, we want to intake at full speed
         elif self.coralCurState == CoralManState.INTAKING:
             self.coralMotorL.setVoltage(self.motorIntakeFastVoltage.get())
             self.coralMotorR.setVoltage(self.motorIntakeFastVoltage.get())
-            self.coralMotorIn.setVoltage(self.motorIntakeFastVoltage.get())    
+            self.coralMotorIn.setVoltage(self.motorIntakeSlowVoltage.get())
         else:
             # Disable otherwise
             self.coralMotorL.setVoltage(0)
