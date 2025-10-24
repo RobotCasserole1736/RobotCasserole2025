@@ -8,6 +8,7 @@ from wpimath import applyDeadband
 from wpimath.filter import SlewRateLimiter
 from wpilib import XboxController
 from wpilib import DriverStation
+from utils.calibration import Calibration
 
 class DriverInterface:
     """Class to gather input from the driver of the robot"""
@@ -22,6 +23,8 @@ class DriverInterface:
         self.velXCmd = 0
         self.velYCmd = 0
         self.velTCmd = 0
+
+        self.robotRelativeSlowdown = Calibration(name="Robot Relative Slowdown", default=.5, units="%")
 
         # Driver motion rate limiters - enforce smoother driving
         self.velXSlewRateLimiter = SlewRateLimiter(rateLimit=MAX_TRANSLATE_ACCEL_MPS2)
@@ -82,9 +85,9 @@ class DriverInterface:
             velCmdRotRaw = vRotJoyWithDeadband * MAX_ROTATE_SPEED_RAD_PER_SEC * 0.8
 
             if self.robotRelative:
-                velCmdXRaw *= .5
-                velCmdYRaw *= .5
-                velCmdRotRaw *= .5
+                velCmdXRaw *= self.robotRelativeSlowdown.get()
+                velCmdYRaw *= self.robotRelativeSlowdown.get()
+                velCmdRotRaw *= self.robotRelativeSlowdown.get()
 
             # Slew rate limiter
             self.velXCmd = self.velXSlewRateLimiter.calculate(velCmdXRaw)
