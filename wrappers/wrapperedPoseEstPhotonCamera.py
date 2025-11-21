@@ -47,7 +47,9 @@ class WrapperedPoseEstPhotonCamera:
 
 
         self.lastCaptureTime = wpilib.Timer.getFPGATimestamp()
-        self.CAP_PERIOD_SEC = 2.0
+        self.CAP_PERIOD_SEC = 0.025
+        #addLog("Camera Only Position", self.poseEstimates)
+        #addLog("FPGA Timestamp", wpilib.Timer.getFPGATimestamp(), "sec")
 
     def setSingleTagMode(self, tag:list[int]|None):
         self.singleTagModeTagList = tag
